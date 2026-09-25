@@ -58,6 +58,7 @@ erDiagram
         enum sexo
         enum categoria
         enum status
+        enum statusReprodutivo
         enum origem
         date dataNascimento
         uuid racaId FK
@@ -147,7 +148,8 @@ A entidade central do sistema — **única para bezerro, novilha, matriz e touro
 | `brinco` | string | único **dentro da fazenda** (constraint composta `fazendaId + brinco`) |
 | `sexo` | enum `M` \| `F` | |
 | `categoria` | enum `BEZERRO` \| `NOVILHA` \| `MATRIZ` \| `TOURO` | alterada manualmente pelo produtor |
-| `status` | enum `ATIVO` \| `VENDIDO` \| `MORTO` \| `DESCARTADO` | nunca é excluído, só muda de status |
+| `status` | enum `ATIVO` \| `VENDIDO` \| `MORTO` \| `DESCARTADO` | situação de vida/comercial do animal; nunca é excluído, só muda de status |
+| `statusReprodutivo` | enum `PRENHE` \| `LACTANTE` \| `VAZIA` (nullable) | só se aplica a fêmeas (matriz/novilha); independente do `status` acima — uma matriz `ATIVA` pode estar `PRENHE`, `LACTANTE` ou `VAZIA` |
 | `origem` | enum `NASCIDO_FAZENDA` \| `COMPRADO` | define se `maeId`/`partoId` são obrigatórios |
 | `dataNascimento` | date | aproximada, quando não há parto registrado |
 | `racaId` | UUID (FK → Raca, nullable) | |
@@ -246,6 +248,15 @@ Ambos são **eventos que se repetem** ao longo da vida do animal (uma matriz tem
 
 Porque o QR code pode existir **antes** do animal ser cadastrado (geração em lote). Se fosse um campo do `Animal`, não teria onde morar até o cadastro acontecer. Como entidade própria, o código nasce com `status = DISPONIVEL` e `animalId = null`, e só se vincula depois.
 
+### 5.5 Por que `status` e `statusReprodutivo` são campos separados
+
+O enunciado original (seção 5, item 2) listava "prenhe, lactante, vazia, descartada" como um único `status` de matriz. Na modelagem, isso precisa virar **dois campos independentes**, porque são coisas que mudam em momentos diferentes e por motivos diferentes:
+
+- `status` — situação de vida/comercial (ativo, vendido, morto, descartado). Muda raramente, e quando muda para `MORTO`/`VENDIDO`/`DESCARTADO` é definitivo.
+- `statusReprodutivo` — fase do ciclo reprodutivo (prenhe, lactante, vazia). Só se aplica enquanto o animal está `ATIVO`, muda várias vezes ao longo da vida da matriz, e só faz sentido para fêmeas em categoria `MATRIZ` ou `NOVILHA`.
+
+"Descartada" ficou só no `status` de vida, porque uma matriz descartada deixa de ser acompanhada reprodutivamente, independente de estar prenhe ou vazia no momento do descarte.
+
 ## 6. Exemplo de classes TypeScript (Entities)
 
 Usando decorators no estilo TypeORM (bem parecido com JPA/Hibernate, o que deve ajudar na transição):
@@ -270,6 +281,9 @@ export class Animal {
 
   @Column({ type: 'enum', enum: StatusAnimal, default: StatusAnimal.ATIVO })
   status: StatusAnimal;
+
+  @Column({ type: 'enum', enum: StatusReprodutivo, nullable: true })
+  statusReprodutivo?: StatusReprodutivo;
 
   @Column({ type: 'enum', enum: OrigemAnimal })
   origem: OrigemAnimal;
@@ -314,6 +328,7 @@ export class Animal {
 export enum Sexo { M = 'M', F = 'F' }
 export enum CategoriaAnimal { BEZERRO = 'BEZERRO', NOVILHA = 'NOVILHA', MATRIZ = 'MATRIZ', TOURO = 'TOURO' }
 export enum StatusAnimal { ATIVO = 'ATIVO', VENDIDO = 'VENDIDO', MORTO = 'MORTO', DESCARTADO = 'DESCARTADO' }
+export enum StatusReprodutivo { PRENHE = 'PRENHE', LACTANTE = 'LACTANTE', VAZIA = 'VAZIA' }
 export enum OrigemAnimal { NASCIDO_FAZENDA = 'NASCIDO_FAZENDA', COMPRADO = 'COMPRADO' }
 ```
 
