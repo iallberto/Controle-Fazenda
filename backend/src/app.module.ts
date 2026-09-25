@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { FazendaModule } from './fazenda/fazenda.module';
+import { UsuarioModule } from './usuario/usuario.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { FazendaModule } from './fazenda/fazenda.module';
       }),
     }),
     FazendaModule,
+    UsuarioModule,
   ],
   controllers: [AppController],
   providers: [AppService],
