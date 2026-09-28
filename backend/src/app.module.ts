@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { FazendaModule } from './fazenda/fazenda.module';
 import { UsuarioModule } from './usuario/usuario.module';
 import { PastoModule } from './pasto/pasto.module';
+import { RacaModule } from './raca/raca.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { PastoModule } from './pasto/pasto.module';
     FazendaModule,
     UsuarioModule,
     PastoModule,
+    RacaModule,
   ],
   controllers: [AppController],
   providers: [AppService],
