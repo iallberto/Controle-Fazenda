@@ -5,6 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { FazendaModule } from './fazenda/fazenda.module';
 import { UsuarioModule } from './usuario/usuario.module';
+import { PastoModule } from './pasto/pasto.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { UsuarioModule } from './usuario/usuario.module';
     }),
     FazendaModule,
     UsuarioModule,
+    PastoModule,
   ],
   controllers: [AppController],
   providers: [AppService],

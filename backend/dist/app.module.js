@@ -14,6 +14,7 @@ const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
 const fazenda_module_1 = require("./fazenda/fazenda.module");
 const usuario_module_1 = require("./usuario/usuario.module");
+const pasto_module_1 = require("./pasto/pasto.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -38,6 +39,7 @@ exports.AppModule = AppModule = __decorate([
             }),
             fazenda_module_1.FazendaModule,
             usuario_module_1.UsuarioModule,
+            pasto_module_1.PastoModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],
