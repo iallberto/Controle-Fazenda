@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException,ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Parto, ResultadoParto } from './entities/parto.entity';
@@ -15,10 +15,13 @@ export class PartoService {
     private readonly animalRepository: Repository<Animal>,
   ) {}
 
-  async create(dto: CreatePartoDto) {
+    async create(fazendaId: string, dto: CreatePartoDto) {
     const mae = await this.animalRepository.findOneBy({ id: dto.maeId });
     if (!mae) {
       throw new NotFoundException('Matriz (mãe) não encontrada');
+    }
+    if (mae.fazendaId !== fazendaId) {
+      throw new ForbiddenException('Esta matriz não pertence à sua fazenda');
     }
 
     if (dto.resultado === ResultadoParto.VIVO) {
@@ -69,26 +72,27 @@ export class PartoService {
     });
   }
 
-  findAll(maeId?: string) {
-    if (!maeId) {
-      return this.partoRepository.find({ relations: { crias: true } });
-    }
-    return this.partoRepository.find({ where: { maeId }, relations: { crias: true } });
+  findAll(fazendaId: string, maeId?: string) {
+    const where = maeId ? { maeId, mae: { fazendaId } } : { mae: { fazendaId } };
+    return this.partoRepository.find({ where, relations: { crias: true } });
   }
 
-  async findOne(id: string) {
+  async findOne(fazendaId: string, id: string) {
     const parto = await this.partoRepository.findOne({
       where: { id },
-      relations: { crias: true },
+      relations: { crias: true, mae: true },
     });
     if (!parto) {
       throw new NotFoundException(`Parto ${id} não encontrado`);
     }
+    if (parto.mae.fazendaId !== fazendaId) {
+      throw new ForbiddenException('Este parto não pertence à sua fazenda');
+    }
     return parto;
   }
 
-  async update(id: string, dto: UpdatePartoDto) {
-    const parto = await this.findOne(id);
+  async update(fazendaId: string, id: string, dto: UpdatePartoDto) {
+    const parto = await this.findOne(fazendaId, id);
     Object.assign(parto, dto);
     return this.partoRepository.save(parto);
   }
