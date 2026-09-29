@@ -9,6 +9,7 @@ import {
 import { Fazenda } from '../../fazenda/entities/fazenda.entity';
 import { Raca } from '../../raca/entities/raca.entity';
 import { Pasto } from '../../pasto/entities/pasto.entity';
+import { Parto } from '../../parto/entities/parto.entity';
 
 export enum Sexo {
   M = 'M',
@@ -52,6 +53,13 @@ export class Animal {
 
   @Column({ name: 'fazenda_id' })
   fazendaId: string;
+
+  @ManyToOne(() => Parto, { nullable: true })
+  @JoinColumn({ name: 'parto_id' })
+  parto?: Parto;
+
+  @Column({ name: 'parto_id', type: 'uuid', nullable: true })
+  partoId: string | null;
 
   @Column()
   brinco: string;

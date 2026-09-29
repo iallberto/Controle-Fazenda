@@ -8,6 +8,7 @@ import { UsuarioModule } from './usuario/usuario.module';
 import { PastoModule } from './pasto/pasto.module';
 import { RacaModule } from './raca/raca.module';
 import { AnimalModule } from './animal/animal.module';
+import { PartoModule } from './parto/parto.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { AnimalModule } from './animal/animal.module';
     PastoModule,
     RacaModule,
     AnimalModule,
+    PartoModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -17,6 +17,7 @@ const usuario_module_1 = require("./usuario/usuario.module");
 const pasto_module_1 = require("./pasto/pasto.module");
 const raca_module_1 = require("./raca/raca.module");
 const animal_module_1 = require("./animal/animal.module");
+const parto_module_1 = require("./parto/parto.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -44,6 +45,7 @@ exports.AppModule = AppModule = __decorate([
             pasto_module_1.PastoModule,
             raca_module_1.RacaModule,
             animal_module_1.AnimalModule,
+            parto_module_1.PartoModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],
