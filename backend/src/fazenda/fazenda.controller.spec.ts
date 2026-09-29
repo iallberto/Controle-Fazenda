@@ -5,10 +5,17 @@ import { FazendaService } from './fazenda.service';
 describe('FazendaController', () => {
   let controller: FazendaController;
 
+  const mockFazendaService = {
+    create: jest.fn(),
+    findAll: jest.fn(),
+    findOne: jest.fn(),
+    update: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [FazendaController],
-      providers: [FazendaService],
+      providers: [{ provide: FazendaService, useValue: mockFazendaService }],
     }).compile();
 
     controller = module.get<FazendaController>(FazendaController);

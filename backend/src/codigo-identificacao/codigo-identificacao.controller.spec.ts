@@ -5,10 +5,17 @@ import { CodigoIdentificacaoService } from './codigo-identificacao.service';
 describe('CodigoIdentificacaoController', () => {
   let controller: CodigoIdentificacaoController;
 
+  const mockCodigoService = {
+    gerarLote: jest.fn(),
+    buscarPorCodigo: jest.fn(),
+    vincular: jest.fn(),
+    reemitir: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [CodigoIdentificacaoController],
-      providers: [CodigoIdentificacaoService],
+      providers: [{ provide: CodigoIdentificacaoService, useValue: mockCodigoService }],
     }).compile();
 
     controller = module.get<CodigoIdentificacaoController>(CodigoIdentificacaoController);
