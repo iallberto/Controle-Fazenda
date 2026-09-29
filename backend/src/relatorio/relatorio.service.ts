@@ -5,6 +5,7 @@ import { Animal, StatusAnimal } from '../animal/entities/animal.entity';
 import { Parto, ResultadoParto } from '../parto/entities/parto.entity';
 import { Tratamento } from '../tratamento/entities/tratamento.entity';
 
+
 @Injectable()
 export class RelatorioService {
   constructor(
@@ -56,5 +57,47 @@ export class RelatorioService {
       .getCount();
 
     return { porCategoria, porPasto, nascimentosNoMes, obitosNoMes };
+  }
+
+  async nascimentosPorPeriodo(fazendaId: string, inicio: string, fim: string) {
+    return this.partoRepository
+      .createQueryBuilder('parto')
+      .innerJoin('parto.mae', 'mae')
+      .leftJoinAndSelect('parto.crias', 'crias')
+      .where('mae.fazendaId = :fazendaId', { fazendaId })
+      .andWhere('parto.resultado = :resultado', { resultado: ResultadoParto.VIVO })
+      .andWhere('parto.data BETWEEN :inicio AND :fim', { inicio, fim })
+      .getMany();
+  }
+
+  async natimortos(fazendaId: string, inicio: string, fim: string) {
+    return this.partoRepository
+      .createQueryBuilder('parto')
+      .innerJoin('parto.mae', 'mae')
+      .where('mae.fazendaId = :fazendaId', { fazendaId })
+      .andWhere('parto.resultado = :resultado', { resultado: ResultadoParto.NATIMORTO })
+      .andWhere('parto.data BETWEEN :inicio AND :fim', { inicio, fim })
+      .getMany();
+  }
+
+  async obitosPorCausa(fazendaId: string, inicio: string, fim: string) {
+    return this.animalRepository
+      .createQueryBuilder('animal')
+      .select('animal.motivoStatus', 'motivo')
+      .addSelect('COUNT(*)', 'total')
+      .where('animal.fazendaId = :fazendaId', { fazendaId })
+      .andWhere('animal.status = :status', { status: StatusAnimal.MORTO })
+      .andWhere('animal.dataStatus BETWEEN :inicio AND :fim', { inicio, fim })
+      .groupBy('animal.motivoStatus')
+      .getRawMany();
+  }
+
+  async tratamentosPorPeriodo(fazendaId: string, inicio: string, fim: string) {
+    return this.tratamentoRepository
+      .createQueryBuilder('tratamento')
+      .innerJoin('tratamento.animal', 'animal')
+      .where('animal.fazendaId = :fazendaId', { fazendaId })
+      .andWhere('tratamento.data BETWEEN :inicio AND :fim', { inicio, fim })
+      .getMany();
   }
 }

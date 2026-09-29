@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Animal, OrigemAnimal, StatusAnimal } from './entities/animal.entity';
+import { Animal, CategoriaAnimal, OrigemAnimal, StatusAnimal } from './entities/animal.entity';
 import { CreateAnimalDto } from './dto/create-animal.dto';
 import { UpdateAnimalDto } from './dto/update-animal.dto';
 
@@ -36,8 +36,9 @@ export class AnimalService {
     return this.animalRepository.save(animal);
   }
 
-  findAll(fazendaId: string) {
-    return this.animalRepository.find({ where: { fazendaId } });
+ findAll(fazendaId: string, categoria?: CategoriaAnimal) {
+    const where = categoria ? { fazendaId, categoria } : { fazendaId };
+    return this.animalRepository.find({ where });
   }
 
   async findOne(fazendaId: string, id: string) {

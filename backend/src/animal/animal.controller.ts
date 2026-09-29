@@ -1,10 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Query } from '@nestjs/common';
 import { AnimalService } from './animal.service';
 import { CreateAnimalDto } from './dto/create-animal.dto';
 import { UpdateAnimalDto } from './dto/update-animal.dto';
 import { AlterarStatusAnimalDto } from './dto/alterar-status-animal.dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { JwtPayload } from '../auth/auth.service';
+import { CategoriaAnimal } from './entities/animal.entity';
+
 
 @Controller('animal')
 export class AnimalController {
@@ -15,9 +17,9 @@ export class AnimalController {
     return this.animalService.create(user.fazendaId, dto);
   }
 
-  @Get()
-  findAll(@CurrentUser() user: JwtPayload) {
-    return this.animalService.findAll(user.fazendaId);
+ @Get()
+  findAll(@CurrentUser() user: JwtPayload, @Query('categoria') categoria?: CategoriaAnimal) {
+    return this.animalService.findAll(user.fazendaId, categoria);
   }
 
   @Get(':id')
