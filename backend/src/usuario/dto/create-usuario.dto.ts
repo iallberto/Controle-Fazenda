@@ -2,8 +2,6 @@ import { IsEmail, IsEnum, IsNotEmpty, IsString, IsUUID, MinLength } from 'class-
 import { PapelUsuario } from '../entities/usuario.entity';
 
 export class CreateUsuarioDto {
-  @IsUUID()
-  fazendaId: string;
 
   @IsString()
   @IsNotEmpty()
