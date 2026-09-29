@@ -9,6 +9,7 @@ import { PastoModule } from './pasto/pasto.module';
 import { RacaModule } from './raca/raca.module';
 import { AnimalModule } from './animal/animal.module';
 import { PartoModule } from './parto/parto.module';
+import { TratamentoModule } from './tratamento/tratamento.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { PartoModule } from './parto/parto.module';
     RacaModule,
     AnimalModule,
     PartoModule,
+    TratamentoModule,
   ],
   controllers: [AppController],
   providers: [AppService],
