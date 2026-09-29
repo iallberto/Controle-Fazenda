@@ -39,37 +39,37 @@ export class RacaService implements OnModuleInit {
     }
   }
 
-  async create(dto: CreateRacaDto) {
-    await this.garantirNomeDisponivel(dto.fazendaId, dto.nome);
-    const raca = this.racaRepository.create(dto);
+    async create(fazendaId: string, dto: CreateRacaDto) {
+    await this.garantirNomeDisponivel(fazendaId, dto.nome);
+    const raca = this.racaRepository.create({ ...dto, fazendaId });
     return this.racaRepository.save(raca);
   }
 
-  findAll(fazendaId?: string) {
-    if (!fazendaId) {
-      return this.racaRepository.findBy({ fazendaId: IsNull() });
-    }
+  findAll(fazendaId: string) {
     return this.racaRepository.find({
       where: [{ fazendaId: IsNull() }, { fazendaId }],
       order: { nome: 'ASC' },
     });
   }
 
-  async findOne(id: string) {
+  async findOne(fazendaId: string, id: string) {
     const raca = await this.racaRepository.findOneBy({ id });
     if (!raca) {
       throw new NotFoundException(`Raça ${id} não encontrada`);
     }
+    if (raca.fazendaId !== null && raca.fazendaId !== fazendaId) {
+      throw new ForbiddenException('Esta raça não pertence à sua fazenda');
+    }
     return raca;
   }
 
-  async update(id: string, dto: UpdateRacaDto) {
-    const raca = await this.findOne(id);
+  async update(fazendaId: string, id: string, dto: UpdateRacaDto) {
+    const raca = await this.findOne(fazendaId, id);
     if (raca.fazendaId === null) {
       throw new ForbiddenException('Raças padrão do sistema não podem ser alteradas');
     }
     if (dto.nome && dto.nome !== raca.nome) {
-      await this.garantirNomeDisponivel(raca.fazendaId, dto.nome);
+      await this.garantirNomeDisponivel(fazendaId, dto.nome);
     }
     Object.assign(raca, dto);
     return this.racaRepository.save(raca);

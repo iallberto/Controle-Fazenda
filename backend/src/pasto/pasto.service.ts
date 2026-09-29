@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Pasto } from './entities/pasto.entity';
@@ -12,28 +12,31 @@ export class PastoService {
     private readonly pastoRepository: Repository<Pasto>,
   ) {}
 
-  async create(dto: CreatePastoDto) {
-    await this.garantirNomeDisponivel(dto.fazendaId, dto.nome);
-    const pasto = this.pastoRepository.create(dto);
+  async create(fazendaId: string, dto: CreatePastoDto) {
+    await this.garantirNomeDisponivel(fazendaId, dto.nome);
+    const pasto = this.pastoRepository.create({ ...dto, fazendaId });
     return this.pastoRepository.save(pasto);
   }
 
-  findAll() {
-    return this.pastoRepository.find();
+  findAll(fazendaId: string) {
+    return this.pastoRepository.find({ where: { fazendaId } });
   }
 
-  async findOne(id: string) {
+  async findOne(fazendaId: string, id: string) {
     const pasto = await this.pastoRepository.findOneBy({ id });
     if (!pasto) {
       throw new NotFoundException(`Pasto ${id} não encontrado`);
     }
+    if (pasto.fazendaId !== fazendaId) {
+      throw new ForbiddenException('Este pasto não pertence à sua fazenda');
+    }
     return pasto;
   }
 
-  async update(id: string, dto: UpdatePastoDto) {
-    const pasto = await this.findOne(id);
+  async update(fazendaId: string, id: string, dto: UpdatePastoDto) {
+    const pasto = await this.findOne(fazendaId, id);
     if (dto.nome && dto.nome !== pasto.nome) {
-      await this.garantirNomeDisponivel(pasto.fazendaId, dto.nome);
+      await this.garantirNomeDisponivel(fazendaId, dto.nome);
     }
     Object.assign(pasto, dto);
     return this.pastoRepository.save(pasto);

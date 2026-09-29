@@ -1,9 +1,6 @@
-import { IsInt, IsNotEmpty, IsString, IsUUID, Max, Min } from 'class-validator';
+import { IsInt, IsNotEmpty, IsString, Max, Min } from 'class-validator';
 
 export class CreateRacaDto {
-  @IsUUID()
-  fazendaId: string;
-
   @IsString()
   @IsNotEmpty()
   nome: string;
