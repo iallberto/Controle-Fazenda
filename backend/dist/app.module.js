@@ -25,6 +25,7 @@ const jwt_auth_guard_1 = require("./auth/guards/jwt-auth.guard");
 const core_1 = require("@nestjs/core");
 const roles_guard_1 = require("./auth/guards/roles.guard");
 const movimentacao_pasto_module_1 = require("./movimentacao-pasto/movimentacao-pasto.module");
+const configuracao_module_1 = require("./configuracao/configuracao.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -57,6 +58,7 @@ exports.AppModule = AppModule = __decorate([
             codigo_identificacao_module_1.CodigoIdentificacaoModule,
             auth_module_1.AuthModule,
             movimentacao_pasto_module_1.MovimentacaoPastoModule,
+            configuracao_module_1.ConfiguracaoModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [
