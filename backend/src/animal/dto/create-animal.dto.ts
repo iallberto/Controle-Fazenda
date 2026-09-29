@@ -15,8 +15,6 @@ import {
 } from '../entities/animal.entity';
 
 export class CreateAnimalDto {
-  @IsUUID()
-  fazendaId: string;
 
   @IsString()
   @IsNotEmpty()

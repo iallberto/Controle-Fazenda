@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ConflictException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -17,54 +18,56 @@ export class AnimalService {
     private readonly animalRepository: Repository<Animal>,
   ) {}
 
-  async create(dto: CreateAnimalDto) {
-    await this.garantirBrincoDisponivel(dto.fazendaId, dto.brinco);
+    async create(fazendaId: string, dto: CreateAnimalDto) {
+    await this.garantirBrincoDisponivel(fazendaId, dto.brinco);
 
     if (dto.maeId) {
-      await this.garantirParenteDaMesmaFazenda(dto.fazendaId, dto.maeId, 'mãe');
+      await this.garantirParenteDaMesmaFazenda(fazendaId, dto.maeId, 'mãe');
     }
     if (dto.paiId) {
-      await this.garantirParenteDaMesmaFazenda(dto.fazendaId, dto.paiId, 'pai');
+      await this.garantirParenteDaMesmaFazenda(fazendaId, dto.paiId, 'pai');
     }
 
     const animal = this.animalRepository.create({
       ...dto,
+      fazendaId,
       status: StatusAnimal.ATIVO,
     });
     return this.animalRepository.save(animal);
   }
 
-  findAll(fazendaId?: string) {
-    if (!fazendaId) {
-      return this.animalRepository.find();
-    }
+  findAll(fazendaId: string) {
     return this.animalRepository.find({ where: { fazendaId } });
   }
 
-  async findOne(id: string) {
+  async findOne(fazendaId: string, id: string) {
     const animal = await this.animalRepository.findOneBy({ id });
     if (!animal) {
       throw new NotFoundException(`Animal ${id} não encontrado`);
     }
+    if (animal.fazendaId !== fazendaId) {
+      throw new ForbiddenException('Este animal não pertence à sua fazenda');
+    }
     return animal;
   }
 
-  async update(id: string, dto: UpdateAnimalDto) {
-    const animal = await this.findOne(id);
+  async update(fazendaId: string, id: string, dto: UpdateAnimalDto) {
+    const animal = await this.findOne(fazendaId, id);
     if (dto.brinco && dto.brinco !== animal.brinco) {
-      await this.garantirBrincoDisponivel(animal.fazendaId, dto.brinco);
+      await this.garantirBrincoDisponivel(fazendaId, dto.brinco);
     }
     Object.assign(animal, dto);
     return this.animalRepository.save(animal);
   }
 
   async alterarStatus(
+    fazendaId: string,
     id: string,
     novoStatus: StatusAnimal,
     motivo: string,
     data: string,
   ) {
-    const animal = await this.findOne(id);
+    const animal = await this.findOne(fazendaId, id);
     animal.status = novoStatus;
     animal.motivoStatus = motivo;
     animal.dataStatus = data;

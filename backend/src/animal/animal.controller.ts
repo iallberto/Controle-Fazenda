@@ -1,35 +1,45 @@
-import { Controller, Get, Post, Body, Patch, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param } from '@nestjs/common';
 import { AnimalService } from './animal.service';
 import { CreateAnimalDto } from './dto/create-animal.dto';
 import { UpdateAnimalDto } from './dto/update-animal.dto';
 import { AlterarStatusAnimalDto } from './dto/alterar-status-animal.dto';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import type { JwtPayload } from '../auth/auth.service';
 
 @Controller('animal')
 export class AnimalController {
   constructor(private readonly animalService: AnimalService) {}
 
   @Post()
-  create(@Body() createAnimalDto: CreateAnimalDto) {
-    return this.animalService.create(createAnimalDto);
+  create(@CurrentUser() user: JwtPayload, @Body() dto: CreateAnimalDto) {
+    return this.animalService.create(user.fazendaId, dto);
   }
 
   @Get()
-  findAll(@Query('fazendaId') fazendaId?: string) {
-    return this.animalService.findAll(fazendaId);
+  findAll(@CurrentUser() user: JwtPayload) {
+    return this.animalService.findAll(user.fazendaId);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.animalService.findOne(id);
+  findOne(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+    return this.animalService.findOne(user.fazendaId, id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAnimalDto: UpdateAnimalDto) {
-    return this.animalService.update(id, updateAnimalDto);
+  update(
+    @CurrentUser() user: JwtPayload,
+    @Param('id') id: string,
+    @Body() dto: UpdateAnimalDto,
+  ) {
+    return this.animalService.update(user.fazendaId, id, dto);
   }
 
   @Patch(':id/status')
-  alterarStatus(@Param('id') id: string, @Body() dto: AlterarStatusAnimalDto) {
-    return this.animalService.alterarStatus(id, dto.status, dto.motivo, dto.data);
+  alterarStatus(
+    @CurrentUser() user: JwtPayload,
+    @Param('id') id: string,
+    @Body() dto: AlterarStatusAnimalDto,
+  ) {
+    return this.animalService.alterarStatus(user.fazendaId, id, dto.status, dto.motivo, dto.data);
   }
 }
