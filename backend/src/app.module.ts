@@ -15,6 +15,7 @@ import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './auth/guards/roles.guard';
+import { MovimentacaoPastoModule } from './movimentacao-pasto/movimentacao-pasto.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { RolesGuard } from './auth/guards/roles.guard';
     TratamentoModule,
     CodigoIdentificacaoModule,
     AuthModule,
+    MovimentacaoPastoModule,
   ],
   controllers: [AppController],
   providers: [
