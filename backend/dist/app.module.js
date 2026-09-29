@@ -19,6 +19,7 @@ const raca_module_1 = require("./raca/raca.module");
 const animal_module_1 = require("./animal/animal.module");
 const parto_module_1 = require("./parto/parto.module");
 const tratamento_module_1 = require("./tratamento/tratamento.module");
+const codigo_identificacao_module_1 = require("./codigo-identificacao/codigo-identificacao.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -48,6 +49,7 @@ exports.AppModule = AppModule = __decorate([
             animal_module_1.AnimalModule,
             parto_module_1.PartoModule,
             tratamento_module_1.TratamentoModule,
+            codigo_identificacao_module_1.CodigoIdentificacaoModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

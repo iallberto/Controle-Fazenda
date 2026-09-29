@@ -10,6 +10,7 @@ import { RacaModule } from './raca/raca.module';
 import { AnimalModule } from './animal/animal.module';
 import { PartoModule } from './parto/parto.module';
 import { TratamentoModule } from './tratamento/tratamento.module';
+import { CodigoIdentificacaoModule } from './codigo-identificacao/codigo-identificacao.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { TratamentoModule } from './tratamento/tratamento.module';
     AnimalModule,
     PartoModule,
     TratamentoModule,
+    CodigoIdentificacaoModule,
   ],
   controllers: [AppController],
   providers: [AppService],
