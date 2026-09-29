@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ConflictException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -22,13 +23,13 @@ export class CodigoIdentificacaoService {
     private readonly animalRepository: Repository<Animal>,
   ) {}
 
-  async gerarLote(dto: GerarLoteDto) {
+  async gerarLote(fazendaId: string, dto: GerarLoteDto) {
     const codigosGerados: CodigoIdentificacao[] = [];
 
     for (let i = 0; i < dto.quantidade; i++) {
       const codigo = await this.gerarCodigoUnico();
       const entidade = this.codigoRepository.create({
-        fazendaId: dto.fazendaId,
+        fazendaId,
         codigo,
         status: StatusCodigo.DISPONIVEL,
       });
@@ -38,7 +39,7 @@ export class CodigoIdentificacaoService {
     return codigosGerados;
   }
 
-  async buscarPorCodigo(codigo: string) {
+  async buscarPorCodigo(fazendaId: string, codigo: string) {
     const registro = await this.codigoRepository.findOne({
       where: { codigo },
       relations: { animal: true },
@@ -46,6 +47,9 @@ export class CodigoIdentificacaoService {
 
     if (!registro) {
       throw new NotFoundException('Código não encontrado');
+    }
+    if (registro.fazendaId !== fazendaId) {
+      throw new ForbiddenException('Este código não pertence à sua fazenda');
     }
 
     if (registro.status === StatusCodigo.DISPONIVEL) {
@@ -55,17 +59,20 @@ export class CodigoIdentificacaoService {
     return registro;
   }
 
-  async vincular(codigo: string, dto: VincularCodigoDto) {
+  async vincular(fazendaId: string, codigo: string, dto: VincularCodigoDto) {
     const registro = await this.codigoRepository.findOneBy({ codigo });
     if (!registro) {
       throw new NotFoundException('Código não encontrado');
+    }
+    if (registro.fazendaId !== fazendaId) {
+      throw new ForbiddenException('Este código não pertence à sua fazenda');
     }
     if (registro.status !== StatusCodigo.DISPONIVEL) {
       throw new ConflictException('Este código já está vinculado ou foi desativado');
     }
 
     const animal = await this.animalRepository.findOneBy({ id: dto.animalId });
-    if (!animal) {
+    if (!animal || animal.fazendaId !== fazendaId) {
       throw new NotFoundException('Animal não encontrado');
     }
 
@@ -75,9 +82,9 @@ export class CodigoIdentificacaoService {
     return this.codigoRepository.save(registro);
   }
 
-  async reemitir(dto: ReemitirCodigoDto) {
+  async reemitir(fazendaId: string, dto: ReemitirCodigoDto) {
     const animal = await this.animalRepository.findOneBy({ id: dto.animalId });
-    if (!animal) {
+    if (!animal || animal.fazendaId !== fazendaId) {
       throw new NotFoundException('Animal não encontrado');
     }
 
@@ -92,7 +99,7 @@ export class CodigoIdentificacaoService {
 
       const novoCodigo = await this.gerarCodigoUnico();
       const novoRegistro = manager.create(CodigoIdentificacao, {
-        fazendaId: dto.fazendaId,
+        fazendaId,
         codigo: novoCodigo,
         status: StatusCodigo.VINCULADO,
         animalId: animal.id,
