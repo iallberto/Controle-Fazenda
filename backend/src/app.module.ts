@@ -17,6 +17,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './auth/guards/roles.guard';
 import { MovimentacaoPastoModule } from './movimentacao-pasto/movimentacao-pasto.module';
 import { ConfiguracaoModule } from './configuracao/configuracao.module';
+import { RelatorioModule } from './relatorio/relatorio.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { ConfiguracaoModule } from './configuracao/configuracao.module';
     AuthModule,
     MovimentacaoPastoModule,
     ConfiguracaoModule,
+    RelatorioModule,
   ],
   controllers: [AppController],
   providers: [
