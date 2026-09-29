@@ -20,6 +20,9 @@ const animal_module_1 = require("./animal/animal.module");
 const parto_module_1 = require("./parto/parto.module");
 const tratamento_module_1 = require("./tratamento/tratamento.module");
 const codigo_identificacao_module_1 = require("./codigo-identificacao/codigo-identificacao.module");
+const auth_module_1 = require("./auth/auth.module");
+const jwt_auth_guard_1 = require("./auth/guards/jwt-auth.guard");
+const core_1 = require("@nestjs/core");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -50,9 +53,16 @@ exports.AppModule = AppModule = __decorate([
             parto_module_1.PartoModule,
             tratamento_module_1.TratamentoModule,
             codigo_identificacao_module_1.CodigoIdentificacaoModule,
+            auth_module_1.AuthModule,
         ],
         controllers: [app_controller_1.AppController],
-        providers: [app_service_1.AppService],
+        providers: [
+            app_service_1.AppService,
+            {
+                provide: core_1.APP_GUARD,
+                useClass: jwt_auth_guard_1.JwtAuthGuard,
+            },
+        ],
     })
 ], AppModule);
 //# sourceMappingURL=app.module.js.map

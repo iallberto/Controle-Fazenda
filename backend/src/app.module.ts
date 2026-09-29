@@ -11,6 +11,9 @@ import { AnimalModule } from './animal/animal.module';
 import { PartoModule } from './parto/parto.module';
 import { TratamentoModule } from './tratamento/tratamento.module';
 import { CodigoIdentificacaoModule } from './codigo-identificacao/codigo-identificacao.module';
+import { AuthModule } from './auth/auth.module';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -38,8 +41,15 @@ import { CodigoIdentificacaoModule } from './codigo-identificacao/codigo-identif
     PartoModule,
     TratamentoModule,
     CodigoIdentificacaoModule,
+    AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AppModule {}
