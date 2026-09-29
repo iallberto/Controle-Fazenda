@@ -2,28 +2,34 @@ import { Controller, Get, Post, Body, Patch, Param, Query } from '@nestjs/common
 import { TratamentoService } from './tratamento.service';
 import { CreateTratamentoDto } from './dto/create-tratamento.dto';
 import { UpdateTratamentoDto } from './dto/update-tratamento.dto';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import type { JwtPayload } from '../auth/auth.service';
 
 @Controller('tratamento')
 export class TratamentoController {
   constructor(private readonly tratamentoService: TratamentoService) {}
 
   @Post()
-  create(@Body() createTratamentoDto: CreateTratamentoDto) {
-    return this.tratamentoService.create(createTratamentoDto);
+  create(@CurrentUser() user: JwtPayload, @Body() dto: CreateTratamentoDto) {
+    return this.tratamentoService.create(user.fazendaId, dto);
   }
 
   @Get()
-  findAll(@Query('animalId') animalId?: string) {
-    return this.tratamentoService.findAll(animalId);
+  findAll(@CurrentUser() user: JwtPayload, @Query('animalId') animalId?: string) {
+    return this.tratamentoService.findAll(user.fazendaId, animalId);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.tratamentoService.findOne(id);
+  findOne(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+    return this.tratamentoService.findOne(user.fazendaId, id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTratamentoDto: UpdateTratamentoDto) {
-    return this.tratamentoService.update(id, updateTratamentoDto);
+  update(
+    @CurrentUser() user: JwtPayload,
+    @Param('id') id: string,
+    @Body() dto: UpdateTratamentoDto,
+  ) {
+    return this.tratamentoService.update(user.fazendaId, id, dto);
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException,ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Tratamento } from './entities/tratamento.entity';
@@ -15,10 +15,13 @@ export class TratamentoService {
     private readonly animalRepository: Repository<Animal>,
   ) {}
 
-  async create(dto: CreateTratamentoDto) {
+  async create(fazendaId: string, dto: CreateTratamentoDto) {
     const animal = await this.animalRepository.findOneBy({ id: dto.animalId });
     if (!animal) {
       throw new NotFoundException('Animal não encontrado');
+    }
+    if (animal.fazendaId !== fazendaId) {
+      throw new ForbiddenException('Este animal não pertence à sua fazenda');
     }
 
     const tratamento = this.tratamentoRepository.create({
@@ -32,23 +35,29 @@ export class TratamentoService {
     return this.tratamentoRepository.save(tratamento);
   }
 
-  findAll(animalId?: string) {
-    if (!animalId) {
-      return this.tratamentoRepository.find();
-    }
-    return this.tratamentoRepository.find({ where: { animalId } });
+    findAll(fazendaId: string, animalId?: string) {
+    const where = animalId
+      ? { animalId, animal: { fazendaId } }
+      : { animal: { fazendaId } };
+    return this.tratamentoRepository.find({ where });
   }
 
-  async findOne(id: string) {
-    const tratamento = await this.tratamentoRepository.findOneBy({ id });
+  async findOne(fazendaId: string, id: string) {
+    const tratamento = await this.tratamentoRepository.findOne({
+      where: { id },
+      relations: { animal: true },
+    });
     if (!tratamento) {
       throw new NotFoundException(`Tratamento ${id} não encontrado`);
+    }
+    if (tratamento.animal.fazendaId !== fazendaId) {
+      throw new ForbiddenException('Este tratamento não pertence à sua fazenda');
     }
     return tratamento;
   }
 
-  async update(id: string, dto: UpdateTratamentoDto) {
-    const tratamento = await this.findOne(id);
+  async update(fazendaId: string, id: string, dto: UpdateTratamentoDto) {
+    const tratamento = await this.findOne(fazendaId, id);
     Object.assign(tratamento, dto);
 
     const novaData = dto.data ?? tratamento.data;
