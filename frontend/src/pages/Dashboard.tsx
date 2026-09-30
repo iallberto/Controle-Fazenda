@@ -22,6 +22,7 @@ export function Dashboard() {
         <Link to="/animais">Ver animais</Link><br></br>
         <Link to="/pastos">Ver pastos</Link><br></br>
         <Link to="/configuracao">Configurações</Link><br></br>
+        {usuario?.papel === 'DONO' && <Link to="/usuarios">Usuários</Link>}<br></br>
         <button onClick={logout}>Sair</button>
       </header>
 

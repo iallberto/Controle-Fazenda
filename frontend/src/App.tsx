@@ -10,6 +10,7 @@ import { Pastos } from './pages/Pastos';
 import { MoverAnimal } from './pages/MoverAnimal';
 import { QrCodes } from './pages/QrCodes';
 import { Configuracao } from './pages/Configuracao';
+import { Usuarios } from './pages/Usuarios';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
         <Route path="/animais/mover" element={<MoverAnimal />} />
         <Route path="/qrcodes" element={<QrCodes />} />
         <Route path="/configuracao" element={<Configuracao />} />
+        <Route path="/usuarios" element={<Usuarios />} />
       </Route>
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
