@@ -1,8 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Query } from '@nestjs/common';
 import { FazendaService } from './fazenda.service';
 import { CreateFazendaDto } from './dto/create-fazenda.dto';
 import { UpdateFazendaDto } from './dto/update-fazenda.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('fazenda')
+@ApiBearerAuth()
 @Controller('fazenda')
 export class FazendaController {
   constructor(private readonly fazendaService: FazendaService) {}

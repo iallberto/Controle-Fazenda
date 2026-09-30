@@ -4,7 +4,10 @@ import { CreatePartoDto } from './dto/create-parto.dto';
 import { UpdatePartoDto } from './dto/update-parto.dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { JwtPayload } from '../auth/auth.service';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('parto')
+@ApiBearerAuth()
 @Controller('parto')
 export class PartoController {
   constructor(private readonly partoService: PartoService) {}

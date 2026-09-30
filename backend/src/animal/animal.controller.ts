@@ -6,9 +6,12 @@ import { AlterarStatusAnimalDto } from './dto/alterar-status-animal.dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { JwtPayload } from '../auth/auth.service';
 import { CategoriaAnimal } from './entities/animal.entity';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 
 @Controller('animal')
+@ApiTags('animal')
+@ApiBearerAuth()
 export class AnimalController {
   constructor(private readonly animalService: AnimalService) {}
 

@@ -4,7 +4,10 @@ import { CreateTratamentoDto } from './dto/create-tratamento.dto';
 import { UpdateTratamentoDto } from './dto/update-tratamento.dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { JwtPayload } from '../auth/auth.service';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('tratamento')
+@ApiBearerAuth()
 @Controller('tratamento')
 export class TratamentoController {
   constructor(private readonly tratamentoService: TratamentoService) {}

@@ -1,11 +1,14 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Query } from '@nestjs/common';
 import { CodigoIdentificacaoService } from './codigo-identificacao.service';
 import { GerarLoteDto } from './dto/gerar-lote.dto';
 import { VincularCodigoDto } from './dto/vincular-codigo.dto';
 import { ReemitirCodigoDto } from './dto/reemitir-codigo.dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { JwtPayload } from '../auth/auth.service';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('codigo')
+@ApiBearerAuth()
 @Controller('codigo')
 export class CodigoIdentificacaoController {
   constructor(private readonly codigoService: CodigoIdentificacaoService) {}

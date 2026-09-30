@@ -1,10 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Query } from '@nestjs/common';
 import { PastoService } from './pasto.service';
 import { CreatePastoDto } from './dto/create-pasto.dto';
 import { UpdatePastoDto } from './dto/update-pasto.dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { JwtPayload } from '../auth/auth.service';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('pasto')
+@ApiBearerAuth()
 @Controller('pasto')
 export class PastoController {
   constructor(private readonly pastoService: PastoService) {}

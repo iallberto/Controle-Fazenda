@@ -1,9 +1,12 @@
-import { Controller, Post, Get, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Query } from '@nestjs/common';
 import { MovimentacaoPastoService } from './movimentacao-pasto.service';
 import { MoverAnimalDto } from './dto/mover-animal.dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { JwtPayload } from '../auth/auth.service';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('movimentacao-pasto')
+@ApiBearerAuth()
 @Controller('movimentacao-pasto')
 export class MovimentacaoPastoController {
   constructor(private readonly movimentacaoPastoService: MovimentacaoPastoService) {}

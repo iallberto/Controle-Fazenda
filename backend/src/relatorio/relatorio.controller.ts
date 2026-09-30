@@ -1,9 +1,12 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Query } from '@nestjs/common';
 import { RelatorioService } from './relatorio.service';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { JwtPayload } from '../auth/auth.service';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 
+@ApiTags('relatorio')
+@ApiBearerAuth()
 @Controller('relatorio')
 export class RelatorioController {
   constructor(private readonly relatorioService: RelatorioService) {}
