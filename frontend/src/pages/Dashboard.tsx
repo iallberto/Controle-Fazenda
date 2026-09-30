@@ -19,8 +19,9 @@ export function Dashboard() {
       <header>
         <h1>Controle Fazenda</h1>
         <p>Olá, {usuario?.nome}</p>
-        <Link to="/animais">Ver animais</Link>
-        <Link to="/pastos">Ver pastos</Link>
+        <Link to="/animais">Ver animais</Link><br></br>
+        <Link to="/pastos">Ver pastos</Link><br></br>
+        <Link to="/configuracao">Configurações</Link><br></br>
         <button onClick={logout}>Sair</button>
       </header>
 
