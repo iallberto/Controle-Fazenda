@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/useAuth';
 import { buscarPainelInicial, type PainelInicial } from '../api/relatorios';
+import { Link } from 'react-router-dom';
 
 export function Dashboard() {
   const { usuario, logout } = useAuth();
@@ -18,6 +19,7 @@ export function Dashboard() {
       <header>
         <h1>Controle Fazenda</h1>
         <p>Olá, {usuario?.nome}</p>
+        <Link to="/animais">Ver animais</Link>
         <button onClick={logout}>Sair</button>
       </header>
 
