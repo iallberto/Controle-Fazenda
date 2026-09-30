@@ -19,6 +19,7 @@ export function Animais() {
         <Link to="/animais/novo">Cadastrar animal</Link>
         <Link to="/partos/novo">Registrar parto</Link>
         <Link to="/tratamentos/novo">Registrar tratamento</Link>
+        <Link to="/animais/mover">Mover animal</Link>
         <Link to="/">Voltar ao painel</Link>
       </header>
 

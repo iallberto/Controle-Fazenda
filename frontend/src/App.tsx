@@ -7,6 +7,7 @@ import { NovoAnimal } from './pages/NovoAnimal';
 import { NovoParto } from './pages/NovoParto';
 import { NovoTratamento } from './pages/NovoTratamento';
 import { Pastos } from './pages/Pastos';
+import { MoverAnimal } from './pages/MoverAnimal';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/partos/novo" element={<NovoParto />} />
         <Route path="/tratamentos/novo" element={<NovoTratamento />} />
         <Route path="/pastos" element={<Pastos />} />
+        <Route path="/animais/mover" element={<MoverAnimal />} />
       </Route>
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
