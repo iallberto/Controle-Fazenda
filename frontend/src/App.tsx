@@ -8,6 +8,7 @@ import { NovoParto } from './pages/NovoParto';
 import { NovoTratamento } from './pages/NovoTratamento';
 import { Pastos } from './pages/Pastos';
 import { MoverAnimal } from './pages/MoverAnimal';
+import { QrCodes } from './pages/QrCodes';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/tratamentos/novo" element={<NovoTratamento />} />
         <Route path="/pastos" element={<Pastos />} />
         <Route path="/animais/mover" element={<MoverAnimal />} />
+        <Route path="/qrcodes" element={<QrCodes />} />
       </Route>
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>

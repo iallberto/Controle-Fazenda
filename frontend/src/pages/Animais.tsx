@@ -16,10 +16,11 @@ export function Animais() {
     <div>
       <header>
         <h1>Animais</h1>
-        <Link to="/animais/novo">Cadastrar animal</Link>
-        <Link to="/partos/novo">Registrar parto</Link>
-        <Link to="/tratamentos/novo">Registrar tratamento</Link>
-        <Link to="/animais/mover">Mover animal</Link>
+        <Link to="/animais/novo">Cadastrar animal</Link><br></br>
+        <Link to="/partos/novo">Registrar parto</Link><br></br>
+        <Link to="/tratamentos/novo">Registrar tratamento</Link><br></br>
+        <Link to="/animais/mover">Mover animal</Link><br></br>
+        <Link to="/qrcodes">QR Codes</Link><br></br>
         <Link to="/">Voltar ao painel</Link>
       </header>
 
