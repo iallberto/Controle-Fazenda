@@ -1,10 +1,12 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
-import { Usuario } from '../usuario/entities/usuario.entity';
+import { Usuario, PapelUsuario } from '../usuario/entities/usuario.entity';
+import { Fazenda } from '../fazenda/entities/fazenda.entity';
 import { LoginDto } from './dto/login.dto';
+import { RegistrarFazendaDto } from './dto/registrar-fazenda.dto';
 
 export interface JwtPayload {
   sub: string;
@@ -18,6 +20,7 @@ export class AuthService {
     @InjectRepository(Usuario)
     private readonly usuarioRepository: Repository<Usuario>,
     private readonly jwtService: JwtService,
+    private readonly dataSource: DataSource,
   ) {}
 
   async login(dto: LoginDto) {
@@ -45,6 +48,48 @@ export class AuthService {
         email: usuario.email,
         papel: usuario.papel,
         fazendaId: usuario.fazendaId,
+      },
+    };
+  }
+
+  async registrarFazenda(dto: RegistrarFazendaDto) {
+    const emailExistente = await this.usuarioRepository.findOneBy({ email: dto.email });
+    if (emailExistente) {
+      throw new ConflictException('Já existe um usuário com este e-mail');
+    }
+
+    const senhaHash = await bcrypt.hash(dto.senha, 10);
+
+    const { fazenda, usuario } = await this.dataSource.transaction(async (manager) => {
+      const fazenda = await manager.save(
+        manager.create(Fazenda, { nome: dto.nomeFazenda }),
+      );
+      const usuario = await manager.save(
+        manager.create(Usuario, {
+          fazendaId: fazenda.id,
+          nome: dto.nome,
+          email: dto.email,
+          senhaHash,
+          papel: PapelUsuario.DONO,
+        }),
+      );
+      return { fazenda, usuario };
+    });
+
+    const payload: JwtPayload = {
+      sub: usuario.id,
+      fazendaId: fazenda.id,
+      papel: usuario.papel,
+    };
+
+    return {
+      accessToken: this.jwtService.sign(payload),
+      usuario: {
+        id: usuario.id,
+        nome: usuario.nome,
+        email: usuario.email,
+        papel: usuario.papel,
+        fazendaId: fazenda.id,
       },
     };
   }

@@ -1,5 +1,6 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useState, type ReactNode } from 'react';
 import { apiClient } from '../api/client';
+
 
 interface Usuario {
   id: string;
@@ -16,7 +17,8 @@ interface AuthContextType {
   logout: () => void;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// eslint-disable-next-line react-refresh/only-export-components
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
@@ -49,10 +51,3 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth precisa ser usado dentro de um AuthProvider');
-  }
-  return context;
-}
