@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Login } from './pages/Login';
+import { Dashboard } from './pages/Dashboard';
 import { useAuth } from './contexts/useAuth';
 
 function App() {
@@ -8,10 +9,7 @@ function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
-      <Route
-        path="/"
-        element={token ? <div>Área logada (em construção)</div> : <Navigate to="/login" />}
-      />
+      <Route path="/" element={token ? <Dashboard /> : <Navigate to="/login" />} />
     </Routes>
   );
 }
