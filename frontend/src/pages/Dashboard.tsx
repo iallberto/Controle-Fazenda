@@ -20,6 +20,7 @@ export function Dashboard() {
         <h1>Controle Fazenda</h1>
         <p>Olá, {usuario?.nome}</p>
         <Link to="/animais">Ver animais</Link>
+        <Link to="/pastos">Ver pastos</Link>
         <button onClick={logout}>Sair</button>
       </header>
 

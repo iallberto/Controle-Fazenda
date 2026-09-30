@@ -5,6 +5,8 @@ import { Animais } from './pages/Animais';
 import { RotaProtegida } from './components/RotaProtegida';
 import { NovoAnimal } from './pages/NovoAnimal';
 import { NovoParto } from './pages/NovoParto';
+import { NovoTratamento } from './pages/NovoTratamento';
+import { Pastos } from './pages/Pastos';
 
 function App() {
   return (
@@ -15,7 +17,8 @@ function App() {
         <Route path="/animais" element={<Animais />} />
         <Route path="/animais/novo" element={<NovoAnimal />} />
         <Route path="/partos/novo" element={<NovoParto />} />
-        
+        <Route path="/tratamentos/novo" element={<NovoTratamento />} />
+        <Route path="/pastos" element={<Pastos />} />
       </Route>
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
