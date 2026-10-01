@@ -32,3 +32,8 @@ export async function criarAnimal(dto: CriarAnimalDto): Promise<Animal> {
   const resposta = await apiClient.post<Animal>('/animal', dto);
   return resposta.data;
 }
+
+export async function buscarAnimal(id: string): Promise<Animal> {
+  const resposta = await apiClient.get<Animal>(`/animal/${id}`);
+  return resposta.data;
+}

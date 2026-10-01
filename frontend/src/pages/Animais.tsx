@@ -42,7 +42,9 @@ export function Animais() {
           <tbody>
             {animais.map((animal) => (
               <tr key={animal.id}>
-                <td>{animal.brinco}</td>
+                <td>
+                  <Link to={`/animais/${animal.id}`}>{animal.brinco}</Link>
+                </td>
                 <td>{animal.sexo}</td>
                 <td>{animal.categoria}</td>
                 <td>{animal.status}</td>

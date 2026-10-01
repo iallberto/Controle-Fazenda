@@ -12,6 +12,7 @@ import { QrCodes } from './pages/QrCodes';
 import { Configuracao } from './pages/Configuracao';
 import { Usuarios } from './pages/Usuarios';
 import { Relatorios } from './pages/Relatorios';
+import { AnimalDetalhe } from './pages/AnimalDetalhe';
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
         <Route path="/configuracao" element={<Configuracao />} />
         <Route path="/usuarios" element={<Usuarios />} />
         <Route path="/relatorios" element={<Relatorios />} />
+        <Route path="/animais/:id" element={<AnimalDetalhe />} />
       </Route>
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
