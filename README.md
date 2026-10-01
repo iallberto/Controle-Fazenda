@@ -2,7 +2,7 @@
 
 Aplicação web para controle do ciclo reprodutivo de um rebanho de gado de corte (fazenda de cria), desenvolvida como projeto de estudo e portfólio em Node.js, TypeScript e React.
 
-Avaliação pós-Versão 1: [docs/pos-v1/MELHORIAS_POS_V1.md](docs/pos-v1/MELHORIAS_POS_V1.md)
+Avaliação pós-Versão 1: [docs/pos-v1/Melhorias pos v1.md](docs/pos-v1/Melhorias pos v1.md)
 
 📄 Documentação completa: [enunciado do projeto](docs/enunciado-controle-fazenda.md) e [modelagem do sistema](docs/modelagem-controle-fazenda.md).
 
