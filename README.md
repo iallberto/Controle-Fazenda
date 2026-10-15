@@ -4,6 +4,8 @@ Aplicação web para controle do ciclo reprodutivo de um rebanho de gado de cort
 
 Avaliação pós-Versão 1: [docs/pos-v1/Melhorias-pos-v1.md](docs/pos-v1/Melhorias-pos-v1.md)]
 
+Complementos pós avaliação da Versão 1: [docs/pos-v1/Melhorias-pos-v1.md](docs/pos-v1/Melhorias-pos-v1-complemento.md)]
+
 📄 Documentação completa: [enunciado do projeto](docs/enunciado-controle-fazenda.md) e [modelagem do sistema](docs/modelagem-controle-fazenda.md).
 
 ## Stack
