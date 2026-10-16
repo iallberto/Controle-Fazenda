@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Animal, CategoriaAnimal, OrigemAnimal, StatusAnimal } from './entities/animal.entity';
+import { Animal, CategoriaAnimal, OrigemAnimal, StatusAnimal, Sexo } from './entities/animal.entity';
 import { CreateAnimalDto } from './dto/create-animal.dto';
 import { UpdateAnimalDto } from './dto/update-animal.dto';
 
@@ -20,6 +20,7 @@ export class AnimalService {
 
     async create(fazendaId: string, dto: CreateAnimalDto) {
     await this.garantirBrincoDisponivel(fazendaId, dto.brinco);
+    this.validarSexoCategoria(dto.sexo, dto.categoria);
 
     if (dto.maeId) {
       await this.garantirParenteDaMesmaFazenda(fazendaId, dto.maeId, 'mãe');
@@ -42,7 +43,10 @@ export class AnimalService {
   }
 
   async findOne(fazendaId: string, id: string) {
-    const animal = await this.animalRepository.findOneBy({ id });
+    const animal = await this.animalRepository.findOne({
+      where: { id },
+      relations: { mae: true },
+    });
     if (!animal) {
       throw new NotFoundException(`Animal ${id} não encontrado`);
     }
@@ -56,6 +60,11 @@ export class AnimalService {
     const animal = await this.findOne(fazendaId, id);
     if (dto.brinco && dto.brinco !== animal.brinco) {
       await this.garantirBrincoDisponivel(fazendaId, dto.brinco);
+    }
+    if (dto.sexo || dto.categoria) {
+      const sexoEfetivo = dto.sexo ?? animal.sexo;
+      const categoriaEfetiva = dto.categoria ?? animal.categoria;
+      this.validarSexoCategoria(sexoEfetivo, categoriaEfetiva);
     }
     Object.assign(animal, dto);
     return this.animalRepository.save(animal);
@@ -93,6 +102,24 @@ export class AnimalService {
     }
     if (parente.fazendaId !== fazendaId) {
       throw new BadRequestException(`O animal indicado como ${papel} pertence a outra fazenda`);
+    }
+  }
+
+  private validarSexoCategoria(sexo: Sexo, categoria: CategoriaAnimal) {
+    const categoriasPorSexo: Record<Sexo, CategoriaAnimal[]> = {
+      [Sexo.F]: [CategoriaAnimal.NOVILHA, CategoriaAnimal.MATRIZ],
+      [Sexo.M]: [
+        CategoriaAnimal.BEZERRO,
+        CategoriaAnimal.GARROTE,
+        CategoriaAnimal.BOI,
+        CategoriaAnimal.TOURO,
+      ],
+    };
+
+    if (!categoriasPorSexo[sexo].includes(categoria)) {
+      throw new BadRequestException(
+        `Categoria ${categoria} não é válida para o sexo ${sexo}`,
+      );
     }
   }
 }

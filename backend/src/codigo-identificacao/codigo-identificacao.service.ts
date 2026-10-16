@@ -24,19 +24,35 @@ export class CodigoIdentificacaoService {
   ) {}
 
   async gerarLote(fazendaId: string, dto: GerarLoteDto) {
-    const codigosGerados: CodigoIdentificacao[] = [];
-
-    for (let i = 0; i < dto.quantidade; i++) {
-      const codigo = await this.gerarCodigoUnico();
-      const entidade = this.codigoRepository.create({
-        fazendaId,
-        codigo,
-        status: StatusCodigo.DISPONIVEL,
+    return this.codigoRepository.manager.transaction(async (manager) => {
+      const ultimo = await manager.findOne(CodigoIdentificacao, {
+        where: { fazendaId },
+        order: { numero: 'DESC' },
       });
-      codigosGerados.push(await this.codigoRepository.save(entidade));
-    }
+      let proximoNumero = (ultimo?.numero ?? 0) + 1;
 
-    return codigosGerados;
+      const codigosGerados: CodigoIdentificacao[] = [];
+      for (let i = 0; i < dto.quantidade; i++) {
+        const codigo = await this.gerarCodigoUnico();
+        const entidade = manager.create(CodigoIdentificacao, {
+          fazendaId,
+          codigo,
+          numero: proximoNumero,
+          status: StatusCodigo.DISPONIVEL,
+        });
+        codigosGerados.push(await manager.save(entidade));
+        proximoNumero++;
+      }
+
+      return codigosGerados;
+    });
+  }
+  
+  async listarDisponiveis(fazendaId: string) {
+    return this.codigoRepository.find({
+      where: { fazendaId, status: StatusCodigo.DISPONIVEL },
+      order: { numero: 'ASC' },
+    });
   }
 
   async buscarPorCodigo(fazendaId: string, codigo: string) {

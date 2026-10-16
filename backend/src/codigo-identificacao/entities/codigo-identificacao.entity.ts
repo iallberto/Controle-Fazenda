@@ -24,6 +24,9 @@ export class CodigoIdentificacao {
   @JoinColumn({ name: 'fazenda_id' })
   fazenda: Fazenda;
 
+  @Column({ type: 'int' })
+  numero: number;
+
   @Column({ name: 'fazenda_id' })
   fazendaId: string;
 

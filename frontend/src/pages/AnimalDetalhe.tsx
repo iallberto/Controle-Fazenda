@@ -62,7 +62,13 @@ export function AnimalDetalhe() {
         <p>Categoria: {animal.categoria}</p>
         <p>Status: {animal.status}</p>
         <p>Nascimento: {animal.dataNascimento}</p>
-      </section>
+        <p>Origem: {animal.origem === 'COMPRADO' ? 'Comprado' : 'Nascido na fazenda'}</p>
+        {animal.mae && (
+      <p>
+        Mãe: <Link to={`/animais/${animal.mae.id}`}>{animal.mae.brinco}</Link>
+      </p>
+  )}
+</section>
 
       {animal.categoria === 'MATRIZ' && (
         <section>

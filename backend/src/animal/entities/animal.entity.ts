@@ -20,6 +20,8 @@ export enum CategoriaAnimal {
   BEZERRO = 'BEZERRO',
   NOVILHA = 'NOVILHA',
   MATRIZ = 'MATRIZ',
+  GARROTE = 'GARROTE',
+  BOI = 'BOI',
   TOURO = 'TOURO',
 }
 

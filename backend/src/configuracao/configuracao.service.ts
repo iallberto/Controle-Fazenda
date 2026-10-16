@@ -13,6 +13,8 @@ const VALORES_ARROBA_PADRAO: Record<CategoriaAnimal, number> = {
   [CategoriaAnimal.BEZERRO]: 12,
   [CategoriaAnimal.NOVILHA]: 13,
   [CategoriaAnimal.MATRIZ]: 15,
+  [CategoriaAnimal.GARROTE]: 13,
+  [CategoriaAnimal.BOI]: 15,
   [CategoriaAnimal.TOURO]: 15,
 };
 

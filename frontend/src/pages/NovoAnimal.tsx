@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { criarAnimal } from '../api/animais';
 import { listarAnimais, type Animal } from '../api/animais';
 import { listarRacas, type Raca } from '../api/racas';
+import axios from 'axios';
 
 export function NovoAnimal() {
   const navigate = useNavigate();
@@ -10,7 +11,8 @@ export function NovoAnimal() {
 
   const [brinco, setBrinco] = useState('');
   const [sexo, setSexo] = useState<'M' | 'F'>('F');
-  const [categoria, setCategoria] = useState<'BEZERRO' | 'NOVILHA' | 'MATRIZ' | 'TOURO'>('BEZERRO');
+  const [categoria, setCategoria] = useState<
+  'BEZERRO' | 'NOVILHA' | 'MATRIZ' | 'GARROTE' | 'BOI' | 'TOURO' >('BEZERRO');
   const [origem, setOrigem] = useState<'NASCIDO_FAZENDA' | 'COMPRADO'>('NASCIDO_FAZENDA');
   const [dataNascimento, setDataNascimento] = useState('');
   const [racaId, setRacaId] = useState('');
@@ -21,10 +23,26 @@ export function NovoAnimal() {
   const [matrizes, setMatrizes] = useState<Animal[]>([]);
   const [racas, setRacas] = useState<Raca[]>([]);
 
+  const opcoesCategoria =
+  sexo === 'F'
+    ? [
+        { valor: 'NOVILHA', rotulo: 'Novilha' },
+        { valor: 'MATRIZ', rotulo: 'Matriz' },
+      ]
+    : [
+        { valor: 'BEZERRO', rotulo: 'Bezerro' },
+        { valor: 'GARROTE', rotulo: 'Garrote' },
+        { valor: 'BOI', rotulo: 'Boi' },
+        { valor: 'TOURO', rotulo: 'Touro' },
+      ];
+
   useEffect(() => {
     listarAnimais('MATRIZ').then(setMatrizes);
     listarRacas().then(setRacas);
   }, []);
+  useEffect(() => {
+  setCategoria(sexo === 'F' ? 'NOVILHA' : 'BEZERRO');
+  }, [sexo]);
 
   async function handleSubmit(evento: FormEvent) {
     evento.preventDefault();
@@ -43,8 +61,11 @@ export function NovoAnimal() {
         procedencia: origem === 'COMPRADO' ? procedencia || undefined : undefined,
       });
       navigate('/animais');
-    } catch {
-      setErro('Não foi possível cadastrar o animal. Confira os dados.');
+    } catch (erroRequisicao) {
+        const mensagem =
+          axios.isAxiosError(erroRequisicao) && erroRequisicao.response?.data?.message ? erroRequisicao.response.data.message
+          : 'Não foi possível cadastrar o animal. Confira os dados.';
+          setErro(Array.isArray(mensagem) ? mensagem.join(', ') : mensagem);
     }
   }
 
@@ -72,14 +93,14 @@ export function NovoAnimal() {
         <div>
           <label htmlFor="categoria">Categoria</label>
           <select
-            id="categoria"
-            value={categoria}
-            onChange={(e) => setCategoria(e.target.value as typeof categoria)}
-          >
-            <option value="BEZERRO">Bezerro</option>
-            <option value="NOVILHA">Novilha</option>
-            <option value="MATRIZ">Matriz</option>
-            <option value="TOURO">Touro</option>
+              id="categoria"
+              value={categoria}
+              onChange={(e) => setCategoria(e.target.value as typeof categoria)}>
+            {opcoesCategoria.map((opcao) => (
+              <option key={opcao.valor} value={opcao.valor}>
+                {opcao.rotulo}
+              </option>
+            ))}
           </select>
         </div>
 

@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, BadRequestException,ForbiddenException }
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Parto, ResultadoParto } from './entities/parto.entity';
-import { Animal, CategoriaAnimal, OrigemAnimal } from '../animal/entities/animal.entity';
+import { Animal, CategoriaAnimal, OrigemAnimal, Sexo } from '../animal/entities/animal.entity';
 import { CreatePartoDto } from './dto/create-parto.dto';
 import { UpdatePartoDto } from './dto/update-parto.dto';
 
@@ -22,6 +22,9 @@ export class PartoService {
     }
     if (mae.fazendaId !== fazendaId) {
       throw new ForbiddenException('Esta matriz não pertence à sua fazenda');
+    }
+    if (mae.categoria !== CategoriaAnimal.MATRIZ) {
+      throw new BadRequestException('Somente matrizes podem ter partos registrados');
     }
 
     if (dto.resultado === ResultadoParto.VIVO) {
@@ -51,16 +54,16 @@ export class PartoService {
       if (dto.resultado === ResultadoParto.VIVO) {
         for (const cria of dto.crias ?? []) {
           const animal = manager.create(Animal, {
-            fazendaId: mae.fazendaId,
-            brinco: cria.brinco,
-            sexo: cria.sexo,
-            categoria: CategoriaAnimal.BEZERRO,
-            origem: OrigemAnimal.NASCIDO_FAZENDA,
-            dataNascimento: dto.data,
-            racaId: cria.racaId ?? mae.racaId,
-            maeId: mae.id,
-            partoId: partoSalvo.id,
-          });
+          fazendaId: mae.fazendaId,
+          brinco: cria.brinco,
+          sexo: cria.sexo,
+          categoria: cria.sexo === Sexo.F ? CategoriaAnimal.NOVILHA : CategoriaAnimal.BEZERRO,
+          origem: OrigemAnimal.NASCIDO_FAZENDA,
+          dataNascimento: dto.data,
+          racaId: cria.racaId ?? mae.racaId,
+          maeId: mae.id,
+          partoId: partoSalvo.id,
+        });
           await manager.save(animal);
         }
       }
