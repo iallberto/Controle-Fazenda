@@ -51,7 +51,7 @@ describe('CodigoIdentificacaoService', () => {
       mockManager.findOne.mockResolvedValue({ numero: 5 }); // maior numero ja existente
 
       mockManager.create.mockImplementation((_entidade: any, entrada: any) => entrada);
-      mockManager.save.mockImplementation((_entidade: any, entrada: any) =>
+      mockManager.save.mockImplementation(( entrada: any) =>
         Promise.resolve({ id: `id-${entrada.numero}`, ...entrada }),
       );
 
@@ -65,7 +65,7 @@ describe('CodigoIdentificacaoService', () => {
       mockManager.findOne.mockResolvedValue(null);
 
       mockManager.create.mockImplementation((_entidade: any, entrada: any) => entrada);
-      mockManager.save.mockImplementation((_entidade: any, entrada: any) =>
+      mockManager.save.mockImplementation(( entrada: any) =>
         Promise.resolve({ id: `id-${entrada.numero}`, ...entrada }),
       );
 
