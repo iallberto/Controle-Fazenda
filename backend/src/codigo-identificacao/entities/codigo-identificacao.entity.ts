@@ -5,6 +5,7 @@ import {
   ManyToOne,
   JoinColumn,
   CreateDateColumn,
+  Unique,
 } from 'typeorm';
 import { Fazenda } from '../../fazenda/entities/fazenda.entity';
 import { Animal } from '../../animal/entities/animal.entity';
@@ -15,6 +16,7 @@ export enum StatusCodigo {
   DESATIVADO = 'DESATIVADO',
 }
 
+@Unique(['fazendaId', 'numero'])
 @Entity('codigos_identificacao')
 export class CodigoIdentificacao {
   @PrimaryGeneratedColumn('uuid')

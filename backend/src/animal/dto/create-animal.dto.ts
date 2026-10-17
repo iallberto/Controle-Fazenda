@@ -15,10 +15,8 @@ import {
 } from '../entities/animal.entity';
 
 export class CreateAnimalDto {
-
-  @IsString()
-  @IsNotEmpty()
-  brinco: string;
+  @IsUUID()
+  codigoId: string;
 
   @IsEnum(Sexo)
   sexo: Sexo;
