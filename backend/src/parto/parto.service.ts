@@ -1,9 +1,13 @@
-import { Injectable, NotFoundException, BadRequestException,ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Parto, ResultadoParto } from './entities/parto.entity';
 import { Animal, CategoriaAnimal, OrigemAnimal, Sexo } from '../animal/entities/animal.entity';
-import { CreatePartoDto } from './dto/create-parto.dto';
+import {
+  CodigoIdentificacao,
+  StatusCodigo,
+} from '../codigo-identificacao/entities/codigo-identificacao.entity';
+import { CreateCriaDto, CreatePartoDto } from './dto/create-parto.dto';
 import { UpdatePartoDto } from './dto/update-parto.dto';
 
 @Injectable()
@@ -13,9 +17,11 @@ export class PartoService {
     private readonly partoRepository: Repository<Parto>,
     @InjectRepository(Animal)
     private readonly animalRepository: Repository<Animal>,
+    @InjectRepository(CodigoIdentificacao)
+    private readonly codigoRepository: Repository<CodigoIdentificacao>,
   ) {}
 
-    async create(fazendaId: string, dto: CreatePartoDto) {
+  async create(fazendaId: string, dto: CreatePartoDto) {
     const mae = await this.animalRepository.findOneBy({ id: dto.maeId });
     if (!mae) {
       throw new NotFoundException('Matriz (mãe) não encontrada');
@@ -27,17 +33,25 @@ export class PartoService {
       throw new BadRequestException('Somente matrizes podem ter partos registrados');
     }
 
+    const codigosPorCria = new Map<string, CodigoIdentificacao>();
     if (dto.resultado === ResultadoParto.VIVO) {
+      const idsInformados = (dto.crias ?? []).map((cria) => cria.codigoId);
+      const idsRepetidos = idsInformados.filter(
+        (id, indice) => idsInformados.indexOf(id) !== indice,
+      );
+      if (idsRepetidos.length > 0) {
+        throw new BadRequestException('O mesmo código não pode ser usado em duas crias do mesmo parto');
+      }
+
       for (const cria of dto.crias ?? []) {
-        const brincoExistente = await this.animalRepository.findOneBy({
-          fazendaId: mae.fazendaId,
-          brinco: cria.brinco,
-        });
-        if (brincoExistente) {
-          throw new BadRequestException(
-            `Já existe um animal com o brinco ${cria.brinco} nesta fazenda`,
-          );
+        const codigo = await this.codigoRepository.findOneBy({ id: cria.codigoId });
+        if (!codigo || codigo.fazendaId !== fazendaId) {
+          throw new NotFoundException('Código não encontrado');
         }
+        if (codigo.status !== StatusCodigo.DISPONIVEL) {
+          throw new ConflictException('Um dos códigos informados já está vinculado ou foi desativado');
+        }
+        codigosPorCria.set(cria.codigoId, codigo);
       }
     }
 
@@ -53,18 +67,25 @@ export class PartoService {
 
       if (dto.resultado === ResultadoParto.VIVO) {
         for (const cria of dto.crias ?? []) {
+          const codigo = codigosPorCria.get(cria.codigoId)!;
+
           const animal = manager.create(Animal, {
-          fazendaId: mae.fazendaId,
-          brinco: cria.brinco,
-          sexo: cria.sexo,
-          categoria: cria.sexo === Sexo.F ? CategoriaAnimal.NOVILHA : CategoriaAnimal.BEZERRO,
-          origem: OrigemAnimal.NASCIDO_FAZENDA,
-          dataNascimento: dto.data,
-          racaId: cria.racaId ?? mae.racaId,
-          maeId: mae.id,
-          partoId: partoSalvo.id,
-        });
-          await manager.save(animal);
+            fazendaId: mae.fazendaId,
+            brinco: String(codigo.numero),
+            sexo: cria.sexo,
+            categoria: cria.sexo === Sexo.F ? CategoriaAnimal.NOVILHA : CategoriaAnimal.BEZERRO,
+            origem: OrigemAnimal.NASCIDO_FAZENDA,
+            dataNascimento: dto.data,
+            racaId: cria.racaId ?? mae.racaId,
+            maeId: mae.id,
+            partoId: partoSalvo.id,
+          });
+          const animalSalvo = await manager.save(animal);
+
+          codigo.status = StatusCodigo.VINCULADO;
+          codigo.animalId = animalSalvo.id;
+          codigo.vinculadoEm = new Date();
+          await manager.save(codigo);
         }
       }
 

@@ -1,9 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { PartoService } from './parto.service';
 import { Parto, ResultadoParto, TipoParto } from './entities/parto.entity';
 import { Animal, CategoriaAnimal, Sexo } from '../animal/entities/animal.entity';
+import {
+  CodigoIdentificacao,
+  StatusCodigo,
+} from '../codigo-identificacao/entities/codigo-identificacao.entity';
 
 describe('PartoService', () => {
   let service: PartoService;
@@ -30,6 +34,10 @@ describe('PartoService', () => {
     save: jest.fn(),
   };
 
+  const mockCodigoRepository = {
+    findOneBy: jest.fn(),
+  };
+
   beforeEach(async () => {
     jest.clearAllMocks();
     mockPartoRepository.manager.transaction = jest.fn((cb: any) => cb(mockManager));
@@ -39,6 +47,7 @@ describe('PartoService', () => {
         PartoService,
         { provide: getRepositoryToken(Parto), useValue: mockPartoRepository },
         { provide: getRepositoryToken(Animal), useValue: mockAnimalRepository },
+        { provide: getRepositoryToken(CodigoIdentificacao), useValue: mockCodigoRepository },
       ],
     }).compile();
 
@@ -57,6 +66,12 @@ describe('PartoService', () => {
       categoria: CategoriaAnimal.MATRIZ,
       racaId: 'raca-1',
     };
+    const codigoDisponivel = (id: string, numero: number) => ({
+      id,
+      fazendaId,
+      numero,
+      status: StatusCodigo.DISPONIVEL,
+    });
 
     it('rejeita parto se a mae nao for MATRIZ', async () => {
       mockAnimalRepository.findOneBy.mockResolvedValue({
@@ -69,7 +84,7 @@ describe('PartoService', () => {
         data: '2026-01-01',
         tipo: TipoParto.NORMAL,
         resultado: ResultadoParto.VIVO,
-        crias: [{ brinco: '1', sexo: Sexo.F }],
+        crias: [{ codigoId: 'codigo-1', sexo: Sexo.F }],
       };
 
       await expect(service.create(fazendaId, dto as any)).rejects.toThrow(BadRequestException);
@@ -88,39 +103,52 @@ describe('PartoService', () => {
       await expect(service.create(fazendaId, dto as any)).rejects.toThrow(NotFoundException);
     });
 
-    it('cria a cria femea como NOVILHA', async () => {
-      mockAnimalRepository.findOneBy.mockImplementation((criterio: any) =>
-      criterio.id === matriz.id ? Promise.resolve(matriz) : Promise.resolve(null),
-      );
-      mockManager.create.mockImplementation((_entidade: any, entrada: any) => entrada);
-      mockManager.save.mockImplementation((_entidade: any, entrada: any) =>
-        Promise.resolve({ id: 'novo-id', ...entrada }),
-      );
-      mockManager.findOne.mockResolvedValue({ id: 'parto-1', crias: [] });
+    it('rejeita se um codigo de cria nao estiver disponivel', async () => {
+      mockAnimalRepository.findOneBy.mockResolvedValue(matriz);
+      mockCodigoRepository.findOneBy.mockResolvedValue({
+        ...codigoDisponivel('codigo-1', 1),
+        status: StatusCodigo.VINCULADO,
+      });
 
       const dto = {
         maeId: 'matriz-1',
         data: '2026-01-01',
         tipo: TipoParto.NORMAL,
         resultado: ResultadoParto.VIVO,
-        crias: [{ brinco: '1', sexo: Sexo.F }],
+        crias: [{ codigoId: 'codigo-1', sexo: Sexo.F }],
       };
 
-      await service.create(fazendaId, dto as any);
-
-      const chamadasDeAnimal = mockManager.create.mock.calls.filter(
-        (chamada) => chamada[0] === Animal,
-      );
-      expect(chamadasDeAnimal[0][1].categoria).toBe(CategoriaAnimal.NOVILHA);
+      await expect(service.create(fazendaId, dto as any)).rejects.toThrow(ConflictException);
     });
 
-    it('cria a cria macho como BEZERRO', async () => {
-      mockAnimalRepository.findOneBy.mockImplementation((criterio: any) =>
-      criterio.id === matriz.id ? Promise.resolve(matriz) : Promise.resolve(null),
-      );
+    it('rejeita se o mesmo codigo for usado em duas crias do mesmo parto', async () => {
+      mockAnimalRepository.findOneBy.mockResolvedValue(matriz);
+      mockCodigoRepository.findOneBy.mockResolvedValue(codigoDisponivel('codigo-1', 1));
+
+      const dto = {
+        maeId: 'matriz-1',
+        data: '2026-01-01',
+        tipo: TipoParto.NORMAL,
+        resultado: ResultadoParto.VIVO,
+        crias: [
+          { codigoId: 'codigo-1', sexo: Sexo.F },
+          { codigoId: 'codigo-1', sexo: Sexo.M },
+        ],
+      };
+
+      await expect(service.create(fazendaId, dto as any)).rejects.toThrow(BadRequestException);
+    });
+
+    it('usa o numero do codigo como brinco e categoria conforme o sexo', async () => {
+      mockAnimalRepository.findOneBy.mockResolvedValue(matriz);
+      mockCodigoRepository.findOneBy.mockImplementation((criterio: any) => {
+        if (criterio.id === 'codigo-1') return Promise.resolve(codigoDisponivel('codigo-1', 10));
+        if (criterio.id === 'codigo-2') return Promise.resolve(codigoDisponivel('codigo-2', 11));
+        return Promise.resolve(null);
+      });
       mockManager.create.mockImplementation((_entidade: any, entrada: any) => entrada);
-      mockManager.save.mockImplementation((_entidade: any, entrada: any) =>
-        Promise.resolve({ id: 'novo-id', ...entrada }),
+      mockManager.save.mockImplementation((entrada: any) =>
+        Promise.resolve({ id: `id-${entrada.brinco ?? entrada.numero ?? 'parto'}`, ...entrada }),
       );
       mockManager.findOne.mockResolvedValue({ id: 'parto-1', crias: [] });
 
@@ -129,7 +157,10 @@ describe('PartoService', () => {
         data: '2026-01-01',
         tipo: TipoParto.NORMAL,
         resultado: ResultadoParto.VIVO,
-        crias: [{ brinco: '2', sexo: Sexo.M }],
+        crias: [
+          { codigoId: 'codigo-1', sexo: Sexo.F },
+          { codigoId: 'codigo-2', sexo: Sexo.M },
+        ],
       };
 
       await service.create(fazendaId, dto as any);
@@ -137,7 +168,10 @@ describe('PartoService', () => {
       const chamadasDeAnimal = mockManager.create.mock.calls.filter(
         (chamada) => chamada[0] === Animal,
       );
-      expect(chamadasDeAnimal[0][1].categoria).toBe(CategoriaAnimal.BEZERRO);
+      expect(chamadasDeAnimal[0][1].brinco).toBe('10');
+      expect(chamadasDeAnimal[0][1].categoria).toBe(CategoriaAnimal.NOVILHA);
+      expect(chamadasDeAnimal[1][1].brinco).toBe('11');
+      expect(chamadasDeAnimal[1][1].categoria).toBe(CategoriaAnimal.BEZERRO);
     });
   });
 });

@@ -14,8 +14,8 @@ import { ResultadoParto, TipoParto } from '../entities/parto.entity';
 import { Sexo } from '../../animal/entities/animal.entity';
 
 export class CreateCriaDto {
-  @IsString()
-  brinco: string;
+  @IsUUID()
+  codigoId: string;
 
   @IsEnum(Sexo)
   sexo: Sexo;
