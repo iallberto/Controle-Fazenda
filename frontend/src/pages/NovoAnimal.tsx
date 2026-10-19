@@ -1,18 +1,19 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { criarAnimal } from '../api/animais';
-import { listarAnimais, type Animal } from '../api/animais';
-import { listarRacas, type Raca } from '../api/racas';
 import axios from 'axios';
+import { criarAnimal, listarAnimais, type Animal } from '../api/animais';
+import { listarRacas, type Raca } from '../api/racas';
+import { listarDisponiveis, type Codigo } from '../api/codigos';
 
 export function NovoAnimal() {
   const navigate = useNavigate();
   const [erro, setErro] = useState('');
 
-  const [brinco, setBrinco] = useState('');
+  const [codigoId, setCodigoId] = useState('');
   const [sexo, setSexo] = useState<'M' | 'F'>('F');
   const [categoria, setCategoria] = useState<
-  'BEZERRO' | 'NOVILHA' | 'MATRIZ' | 'GARROTE' | 'BOI' | 'TOURO' >('BEZERRO');
+    'BEZERRO' | 'NOVILHA' | 'MATRIZ' | 'GARROTE' | 'BOI' | 'TOURO'
+  >('NOVILHA');
   const [origem, setOrigem] = useState<'NASCIDO_FAZENDA' | 'COMPRADO'>('NASCIDO_FAZENDA');
   const [dataNascimento, setDataNascimento] = useState('');
   const [racaId, setRacaId] = useState('');
@@ -20,29 +21,32 @@ export function NovoAnimal() {
   const [dataCompra, setDataCompra] = useState('');
   const [procedencia, setProcedencia] = useState('');
 
+  const [codigosDisponiveis, setCodigosDisponiveis] = useState<Codigo[]>([]);
   const [matrizes, setMatrizes] = useState<Animal[]>([]);
   const [racas, setRacas] = useState<Raca[]>([]);
-
-  const opcoesCategoria =
-  sexo === 'F'
-    ? [
-        { valor: 'NOVILHA', rotulo: 'Novilha' },
-        { valor: 'MATRIZ', rotulo: 'Matriz' },
-      ]
-    : [
-        { valor: 'BEZERRO', rotulo: 'Bezerro' },
-        { valor: 'GARROTE', rotulo: 'Garrote' },
-        { valor: 'BOI', rotulo: 'Boi' },
-        { valor: 'TOURO', rotulo: 'Touro' },
-      ];
 
   useEffect(() => {
     listarAnimais('MATRIZ').then(setMatrizes);
     listarRacas().then(setRacas);
+    listarDisponiveis().then(setCodigosDisponiveis);
   }, []);
+
   useEffect(() => {
-  setCategoria(sexo === 'F' ? 'NOVILHA' : 'BEZERRO');
+    setCategoria(sexo === 'F' ? 'NOVILHA' : 'BEZERRO');
   }, [sexo]);
+
+  const opcoesCategoria =
+    sexo === 'F'
+      ? [
+          { valor: 'NOVILHA', rotulo: 'Novilha' },
+          { valor: 'MATRIZ', rotulo: 'Matriz' },
+        ]
+      : [
+          { valor: 'BEZERRO', rotulo: 'Bezerro' },
+          { valor: 'GARROTE', rotulo: 'Garrote' },
+          { valor: 'BOI', rotulo: 'Boi' },
+          { valor: 'TOURO', rotulo: 'Touro' },
+        ];
 
   async function handleSubmit(evento: FormEvent) {
     evento.preventDefault();
@@ -50,7 +54,7 @@ export function NovoAnimal() {
 
     try {
       await criarAnimal({
-        brinco,
+        codigoId,
         sexo,
         categoria,
         origem,
@@ -62,10 +66,11 @@ export function NovoAnimal() {
       });
       navigate('/animais');
     } catch (erroRequisicao) {
-        const mensagem =
-          axios.isAxiosError(erroRequisicao) && erroRequisicao.response?.data?.message ? erroRequisicao.response.data.message
+      const mensagem =
+        axios.isAxiosError(erroRequisicao) && erroRequisicao.response?.data?.message
+          ? erroRequisicao.response.data.message
           : 'Não foi possível cadastrar o animal. Confira os dados.';
-          setErro(Array.isArray(mensagem) ? mensagem.join(', ') : mensagem);
+      setErro(Array.isArray(mensagem) ? mensagem.join(', ') : mensagem);
     }
   }
 
@@ -76,10 +81,29 @@ export function NovoAnimal() {
         <Link to="/animais">Voltar</Link>
       </header>
 
+      {codigosDisponiveis.length === 0 && (
+        <p>
+          Nenhum código disponível. <Link to="/qrcodes">Gere um lote de códigos</Link> antes de
+          cadastrar.
+        </p>
+      )}
+
       <form onSubmit={handleSubmit}>
         <div>
-          <label htmlFor="brinco">Brinco</label>
-          <input id="brinco" value={brinco} onChange={(e) => setBrinco(e.target.value)} required />
+          <label htmlFor="codigo">Código (brinco)</label>
+          <select
+            id="codigo"
+            value={codigoId}
+            onChange={(e) => setCodigoId(e.target.value)}
+            required
+          >
+            <option value="">Selecione o código</option>
+            {codigosDisponiveis.map((c) => (
+              <option key={c.id} value={c.id}>
+                #{String(c.numero).padStart(4, '0')}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div>
@@ -93,9 +117,10 @@ export function NovoAnimal() {
         <div>
           <label htmlFor="categoria">Categoria</label>
           <select
-              id="categoria"
-              value={categoria}
-              onChange={(e) => setCategoria(e.target.value as typeof categoria)}>
+            id="categoria"
+            value={categoria}
+            onChange={(e) => setCategoria(e.target.value as typeof categoria)}
+          >
             {opcoesCategoria.map((opcao) => (
               <option key={opcao.valor} value={opcao.valor}>
                 {opcao.rotulo}

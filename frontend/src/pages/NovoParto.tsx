@@ -1,7 +1,9 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import axios from 'axios';
 import { criarParto, type Cria } from '../api/partos';
 import { listarAnimais, type Animal } from '../api/animais';
+import { listarDisponiveis, type Codigo } from '../api/codigos';
 
 export function NovoParto() {
   const navigate = useNavigate();
@@ -12,16 +14,18 @@ export function NovoParto() {
   const [tipo, setTipo] = useState<'NORMAL' | 'ASSISTIDO'>('NORMAL');
   const [resultado, setResultado] = useState<'VIVO' | 'NATIMORTO'>('VIVO');
   const [observacoes, setObservacoes] = useState('');
-  const [crias, setCrias] = useState<Cria[]>([{ brinco: '', sexo: 'F' }]);
+  const [crias, setCrias] = useState<Cria[]>([{ codigoId: '', sexo: 'F' }]);
 
   const [matrizes, setMatrizes] = useState<Animal[]>([]);
+  const [codigosDisponiveis, setCodigosDisponiveis] = useState<Codigo[]>([]);
 
   useEffect(() => {
     listarAnimais('MATRIZ').then(setMatrizes);
+    listarDisponiveis().then(setCodigosDisponiveis);
   }, []);
 
   function adicionarCria() {
-    setCrias([...crias, { brinco: '', sexo: 'F' }]);
+    setCrias([...crias, { codigoId: '', sexo: 'F' }]);
   }
 
   function removerCria(indice: number) {
@@ -29,9 +33,14 @@ export function NovoParto() {
   }
 
   function atualizarCria(indice: number, campo: keyof Cria, valor: string) {
-    setCrias(
-      crias.map((cria, i) => (i === indice ? { ...cria, [campo]: valor } : cria)),
-    );
+    setCrias(crias.map((cria, i) => (i === indice ? { ...cria, [campo]: valor } : cria)));
+  }
+
+  function opcoesParaLinha(indiceAtual: number) {
+    const idsUsadosEmOutrasLinhas = crias
+      .filter((_, i) => i !== indiceAtual)
+      .map((c) => c.codigoId);
+    return codigosDisponiveis.filter((c) => !idsUsadosEmOutrasLinhas.includes(c.id));
   }
 
   async function handleSubmit(evento: FormEvent) {
@@ -48,8 +57,12 @@ export function NovoParto() {
         crias: resultado === 'VIVO' ? crias : undefined,
       });
       navigate('/animais');
-    } catch {
-      setErro('Não foi possível registrar o parto. Confira os dados.');
+    } catch (erroRequisicao) {
+      const mensagem =
+        axios.isAxiosError(erroRequisicao) && erroRequisicao.response?.data?.message
+          ? erroRequisicao.response.data.message
+          : 'Não foi possível registrar o parto. Confira os dados.';
+      setErro(Array.isArray(mensagem) ? mensagem.join(', ') : mensagem);
     }
   }
 
@@ -59,6 +72,13 @@ export function NovoParto() {
         <h1>Registrar parto</h1>
         <Link to="/animais">Voltar</Link>
       </header>
+
+      {resultado === 'VIVO' && codigosDisponiveis.length === 0 && (
+        <p>
+          Nenhum código disponível. <Link to="/qrcodes">Gere um lote de códigos</Link> antes de
+          registrar um parto com crias vivas.
+        </p>
+      )}
 
       <form onSubmit={handleSubmit}>
         <div>
@@ -112,12 +132,18 @@ export function NovoParto() {
             <legend>Crias</legend>
             {crias.map((cria, indice) => (
               <div key={indice}>
-                <input
-                  placeholder="Brinco"
-                  value={cria.brinco}
-                  onChange={(e) => atualizarCria(indice, 'brinco', e.target.value)}
+                <select
+                  value={cria.codigoId}
+                  onChange={(e) => atualizarCria(indice, 'codigoId', e.target.value)}
                   required
-                />
+                >
+                  <option value="">Selecione o código</option>
+                  {opcoesParaLinha(indice).map((c) => (
+                    <option key={c.id} value={c.id}>
+                      #{String(c.numero).padStart(4, '0')}
+                    </option>
+                  ))}
+                </select>
                 <select
                   value={cria.sexo}
                   onChange={(e) => atualizarCria(indice, 'sexo', e.target.value)}

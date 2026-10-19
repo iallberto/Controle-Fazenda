@@ -194,3 +194,20 @@ a {
 a:hover {
   text-decoration: underline;
 }
+
+@media print {
+  .nao-imprimir {
+    display: none !important;
+  }
+
+  body {
+    background: white;
+  }
+
+  ul li {
+    border: 1px solid #000;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-align: center;
+  }
+}

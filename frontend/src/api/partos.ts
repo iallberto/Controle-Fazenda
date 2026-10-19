@@ -1,7 +1,7 @@
 import { apiClient } from './client';
 
 export interface Cria {
-  brinco: string;
+  codigoId: string;
   sexo: 'M' | 'F';
 }
 

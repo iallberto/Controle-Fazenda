@@ -3,7 +3,13 @@ import { apiClient } from './client';
 export interface Codigo {
   id: string;
   codigo: string;
+  numero: number;
   status: 'DISPONIVEL' | 'VINCULADO' | 'DESATIVADO';
+}
+
+export async function listarDisponiveis(): Promise<Codigo[]> {
+  const resposta = await apiClient.get<Codigo[]>('/codigo/disponiveis');
+  return resposta.data;
 }
 
 export async function gerarLote(quantidade: number): Promise<Codigo[]> {

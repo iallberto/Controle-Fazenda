@@ -13,7 +13,7 @@ export interface Animal {
 }
 
 export interface CriarAnimalDto {
-  brinco: string;
+  codigoId: string;
   sexo: 'M' | 'F';
   categoria: 'BEZERRO' | 'NOVILHA' | 'MATRIZ' | 'GARROTE' | 'BOI' | 'TOURO';
   origem: 'NASCIDO_FAZENDA' | 'COMPRADO';

@@ -1,121 +1,78 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { gerarLote, vincularCodigo, type Codigo } from '../api/codigos';
-import { listarAnimais, type Animal } from '../api/animais';
+import { gerarLote, listarDisponiveis, type Codigo } from '../api/codigos';
 
 export function QrCodes() {
+  const [codigosDisponiveis, setCodigosDisponiveis] = useState<Codigo[]>([]);
+  const [carregando, setCarregando] = useState(true);
   const [quantidade, setQuantidade] = useState('10');
-  const [loteGerado, setLoteGerado] = useState<Codigo[]>([]);
-  const [erroLote, setErroLote] = useState('');
+  const [erro, setErro] = useState('');
 
-  const [codigoParaVincular, setCodigoParaVincular] = useState('');
-  const [animalId, setAnimalId] = useState('');
-  const [mensagemVinculo, setMensagemVinculo] = useState('');
-  const [erroVinculo, setErroVinculo] = useState('');
-  const [animais, setAnimais] = useState<Animal[]>([]);
+  function carregar() {
+    listarDisponiveis().then((codigos) => {
+      setCodigosDisponiveis(codigos);
+      setCarregando(false);
+    });
+  }
 
   useEffect(() => {
-    listarAnimais().then(setAnimais);
+    carregar();
   }, []);
 
   async function handleGerarLote(evento: FormEvent) {
     evento.preventDefault();
-    setErroLote('');
+    setErro('');
 
     try {
-      const codigos = await gerarLote(Number(quantidade));
-      setLoteGerado(codigos);
+      await gerarLote(Number(quantidade));
+      carregar();
     } catch {
-      setErroLote('Não foi possível gerar o lote. Verifique a quantidade (máximo 150).');
-    }
-  }
-
-  async function handleVincular(evento: FormEvent) {
-    evento.preventDefault();
-    setErroVinculo('');
-    setMensagemVinculo('');
-
-    try {
-      await vincularCodigo(codigoParaVincular, animalId);
-      setMensagemVinculo('Código vinculado com sucesso!');
-      setCodigoParaVincular('');
-      setAnimalId('');
-    } catch {
-      setErroVinculo('Não foi possível vincular. Verifique se o código está correto e disponível.');
+      setErro('Não foi possível gerar o lote. Verifique a quantidade (máximo 150).');
     }
   }
 
   return (
     <div>
-      <header>
+      <header className="nao-imprimir">
         <h1>QR Codes</h1>
         <Link to="/animais">Voltar</Link>
       </header>
 
-      <section>
-        <h2>Gerar novo lote</h2>
-        <form onSubmit={handleGerarLote}>
-          <label htmlFor="quantidade">Quantidade</label>
-          <input
-            id="quantidade"
-            type="number"
-            min="1"
-            max="150"
-            value={quantidade}
-            onChange={(e) => setQuantidade(e.target.value)}
-          />
-          <button type="submit">Gerar</button>
-          {erroLote && <p style={{ color: 'red' }}>{erroLote}</p>}
-        </form>
+      {!carregando && (
+        <p className="nao-imprimir">
+          Você possui <strong>{codigosDisponiveis.length}</strong> código(s) disponível(is).
+        </p>
+      )}
 
-        {loteGerado.length > 0 && (
-          <>
-            <p>
-              {loteGerado.length} código(s) gerado(s). Anote-os para vincular aos animais no
-              manejo:
-            </p>
-            <ul>
-              {loteGerado.map((codigo) => (
-                <li key={codigo.id}>{codigo.codigo}</li>
-              ))}
-            </ul>
-          </>
-        )}
-      </section>
+      <form onSubmit={handleGerarLote} className="nao-imprimir">
+        <label htmlFor="quantidade">Gerar mais códigos</label>
+        <input
+          id="quantidade"
+          type="number"
+          min="1"
+          max="150"
+          value={quantidade}
+          onChange={(e) => setQuantidade(e.target.value)}
+        />
+        <button type="submit">Gerar</button>
+        {erro && <p style={{ color: 'red' }}>{erro}</p>}
+      </form>
 
-      <section>
-        <h2>Vincular código a um animal</h2>
-        <form onSubmit={handleVincular}>
-          <div>
-            <label htmlFor="codigo">Código</label>
-            <input
-              id="codigo"
-              value={codigoParaVincular}
-              onChange={(e) => setCodigoParaVincular(e.target.value)}
-              required
-            />
+      {codigosDisponiveis.length > 0 && (
+        <section>
+          <div className="nao-imprimir" style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <h2>Códigos disponíveis para impressão</h2>
+            <button type="button" onClick={() => window.print()}>
+              Imprimir
+            </button>
           </div>
-          <div>
-            <label htmlFor="animalVinculo">Animal</label>
-            <select
-              id="animalVinculo"
-              value={animalId}
-              onChange={(e) => setAnimalId(e.target.value)}
-              required
-            >
-              <option value="">Selecione o animal</option>
-              {animais.map((animal) => (
-                <option key={animal.id} value={animal.id}>
-                  {animal.brinco}
-                </option>
-              ))}
-            </select>
-          </div>
-          <button type="submit">Vincular</button>
-          {erroVinculo && <p style={{ color: 'red' }}>{erroVinculo}</p>}
-          {mensagemVinculo && <p style={{ color: 'green' }}>{mensagemVinculo}</p>}
-        </form>
-      </section>
+          <ul>
+            {codigosDisponiveis.map((codigo) => (
+              <li key={codigo.id}>#{String(codigo.numero).padStart(4, '0')}</li>
+            ))}
+          </ul>
+        </section>
+      )}
     </div>
   );
 }
