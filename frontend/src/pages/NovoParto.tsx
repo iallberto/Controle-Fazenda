@@ -4,6 +4,7 @@ import axios from 'axios';
 import { criarParto, type Cria } from '../api/partos';
 import { listarAnimais, type Animal } from '../api/animais';
 import { listarDisponiveis, type Codigo } from '../api/codigos';
+import { listarPastos, type Pasto } from '../api/pastos';
 
 export function NovoParto() {
   const navigate = useNavigate();
@@ -18,10 +19,13 @@ export function NovoParto() {
 
   const [matrizes, setMatrizes] = useState<Animal[]>([]);
   const [codigosDisponiveis, setCodigosDisponiveis] = useState<Codigo[]>([]);
+  const [pastoAtualId, setPastoAtualId] = useState('');
+  const [pastos, setPastos] = useState<Pasto[]>([]);
 
   useEffect(() => {
     listarAnimais('MATRIZ').then(setMatrizes);
     listarDisponiveis().then(setCodigosDisponiveis);
+    listarPastos().then(setPastos);
   }, []);
 
   function adicionarCria() {
@@ -44,6 +48,7 @@ export function NovoParto() {
   }
 
   async function handleSubmit(evento: FormEvent) {
+    pastoAtualId: pastoAtualId || undefined,
     evento.preventDefault();
     setErro('');
 
@@ -116,6 +121,17 @@ export function NovoParto() {
             <option value="VIVO">Vivo</option>
             <option value="NATIMORTO">Natimorto</option>
           </select>
+        </div>
+        <div>
+          <label htmlFor="pasto">Pasto</label>
+           <select id="pasto" value={pastoAtualId} onChange={(e) => setPastoAtualId(e.target.value)}>
+            <option value="">Não definido</option>
+              {pastos.map((pasto) => (
+            <option key={pasto.id} value={pasto.id}>
+               {pasto.nome}
+           </option>
+            ))}
+           </select>
         </div>
 
         <div>

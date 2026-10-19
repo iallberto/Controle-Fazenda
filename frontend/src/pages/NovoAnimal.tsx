@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { criarAnimal, listarAnimais, type Animal } from '../api/animais';
 import { listarRacas, type Raca } from '../api/racas';
+import { listarPastos, type Pasto } from '../api/pastos';
 import { listarDisponiveis, type Codigo } from '../api/codigos';
 
 export function NovoAnimal() {
@@ -24,11 +25,14 @@ export function NovoAnimal() {
   const [codigosDisponiveis, setCodigosDisponiveis] = useState<Codigo[]>([]);
   const [matrizes, setMatrizes] = useState<Animal[]>([]);
   const [racas, setRacas] = useState<Raca[]>([]);
+  const [pastoAtualId, setPastoAtualId] = useState('');
+  const [pastos, setPastos] = useState<Pasto[]>([]);
 
   useEffect(() => {
     listarAnimais('MATRIZ').then(setMatrizes);
     listarRacas().then(setRacas);
     listarDisponiveis().then(setCodigosDisponiveis);
+    listarPastos().then(setPastos);
   }, []);
 
   useEffect(() => {
@@ -49,6 +53,7 @@ export function NovoAnimal() {
         ];
 
   async function handleSubmit(evento: FormEvent) {
+    pastoAtualId: pastoAtualId || undefined,
     evento.preventDefault();
     setErro('');
 
@@ -161,6 +166,17 @@ export function NovoAnimal() {
                 {raca.nome}
               </option>
             ))}
+          </select>
+        </div>
+        <div>
+            <label htmlFor="pasto">Pasto</label>
+            <select id="pasto" value={pastoAtualId} onChange={(e) => setPastoAtualId(e.target.value)}>
+              <option value="">Não definido</option>
+              {pastos.map((pasto) => (
+              <option key={pasto.id} value={pasto.id}>
+               {pasto.nome}
+            </option>
+          ))}
           </select>
         </div>
 
