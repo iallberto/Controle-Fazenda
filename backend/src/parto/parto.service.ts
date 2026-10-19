@@ -7,6 +7,7 @@ import {
   CodigoIdentificacao,
   StatusCodigo,
 } from '../codigo-identificacao/entities/codigo-identificacao.entity';
+import { MovimentacaoPasto } from '../movimentacao-pasto/entities/movimentacao-pasto.entity';
 import { CreateCriaDto, CreatePartoDto } from './dto/create-parto.dto';
 import { UpdatePartoDto } from './dto/update-parto.dto';
 
@@ -79,6 +80,7 @@ export class PartoService {
             racaId: cria.racaId ?? mae.racaId,
             maeId: mae.id,
             partoId: partoSalvo.id,
+            pastoAtualId: dto.pastoId ?? null,
           });
           const animalSalvo = await manager.save(animal);
 
@@ -86,6 +88,16 @@ export class PartoService {
           codigo.animalId = animalSalvo.id;
           codigo.vinculadoEm = new Date();
           await manager.save(codigo);
+
+          if (dto.pastoId) {
+            const movimentacao = manager.create(MovimentacaoPasto, {
+              animalId: animalSalvo.id,
+              pastoId: dto.pastoId,
+              dataEntrada: dto.data,
+              dataSaida: null,
+            });
+            await manager.save(movimentacao);
+          }
         }
       }
 

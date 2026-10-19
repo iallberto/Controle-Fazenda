@@ -42,6 +42,10 @@ export class CreatePartoDto {
   @IsString()
   observacoes?: string;
 
+  @IsOptional()
+  @IsUUID()
+  pastoId?: string;
+
   @ValidateIf((dto) => dto.resultado === ResultadoParto.VIVO)
   @IsArray()
   @ArrayMinSize(1)

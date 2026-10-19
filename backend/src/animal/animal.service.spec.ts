@@ -56,15 +56,15 @@ describe('AnimalService', () => {
       dataCompra: '2024-02-01',
       codigoId: 'codigo-1',
     };
-    const codigoDisponivel = {
+    const codigoDisponivel = () => ({
       id: 'codigo-1',
       fazendaId,
       numero: 7,
       status: StatusCodigo.DISPONIVEL,
-    };
+    });
 
     it('usa o numero do codigo como brinco do animal', async () => {
-      mockCodigoRepository.findOneBy.mockResolvedValue(codigoDisponivel);
+      mockCodigoRepository.findOneBy.mockResolvedValue(codigoDisponivel());
       mockManager.create.mockImplementation((_entidade: any, entrada: any) => entrada);
       mockManager.save.mockImplementation((entrada: any) => Promise.resolve({ id: 'animal-1', ...entrada }));
 
@@ -87,14 +87,14 @@ describe('AnimalService', () => {
 
     it('rejeita quando o codigo ja esta vinculado', async () => {
       mockCodigoRepository.findOneBy.mockResolvedValue({
-        ...codigoDisponivel,
+        ...codigoDisponivel(),
         status: StatusCodigo.VINCULADO,
       });
 
       await expect(service.create(fazendaId, baseDto as any)).rejects.toThrow(ConflictException);
     });
      it('cria a movimentacao inicial de pasto quando pastoAtualId e informado', async () => {
-      mockCodigoRepository.findOneBy.mockResolvedValue(codigoDisponivel);
+      mockCodigoRepository.findOneBy.mockResolvedValue(codigoDisponivel());
       mockManager.create.mockImplementation((_entidade: any, entrada: any) => entrada);
       mockManager.save.mockImplementation((entrada: any) => Promise.resolve({ id: 'novo-id', ...entrada }));
 
@@ -111,7 +111,7 @@ describe('AnimalService', () => {
     });
 
     it('nao cria movimentacao quando pastoAtualId nao e informado', async () => {
-      mockCodigoRepository.findOneBy.mockResolvedValue(codigoDisponivel);
+      mockCodigoRepository.findOneBy.mockResolvedValue(codigoDisponivel());
       mockManager.create.mockImplementation((_entidade: any, entrada: any) => entrada);
       mockManager.save.mockImplementation((entrada: any) => Promise.resolve({ id: 'novo-id', ...entrada }));
 

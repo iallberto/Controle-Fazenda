@@ -3,6 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { PartoService } from './parto.service';
 import { Parto, ResultadoParto, TipoParto } from './entities/parto.entity';
+import { MovimentacaoPasto } from '../movimentacao-pasto/entities/movimentacao-pasto.entity';
 import { Animal, CategoriaAnimal, Sexo } from '../animal/entities/animal.entity';
 import {
   CodigoIdentificacao,
@@ -172,6 +173,35 @@ describe('PartoService', () => {
       expect(chamadasDeAnimal[0][1].categoria).toBe(CategoriaAnimal.NOVILHA);
       expect(chamadasDeAnimal[1][1].brinco).toBe('11');
       expect(chamadasDeAnimal[1][1].categoria).toBe(CategoriaAnimal.BEZERRO);
+    });
+        it('cria a movimentacao inicial de pasto para as crias quando pastoId e informado', async () => {
+      mockAnimalRepository.findOneBy.mockResolvedValue(matriz);
+      mockCodigoRepository.findOneBy.mockResolvedValue(codigoDisponivel('codigo-1', 10));
+      mockManager.create.mockImplementation((_entidade: any, entrada: any) => entrada);
+      mockManager.save.mockImplementation((entrada: any) =>
+        Promise.resolve({ id: `id-${entrada.brinco ?? entrada.numero ?? 'parto'}`, ...entrada }),
+      );
+      mockManager.findOne.mockResolvedValue({ id: 'parto-1', crias: [] });
+
+      const dto = {
+        maeId: 'matriz-1',
+        data: '2026-01-01',
+        tipo: TipoParto.NORMAL,
+        resultado: ResultadoParto.VIVO,
+        pastoId: 'pasto-1',
+        crias: [{ codigoId: 'codigo-1', sexo: Sexo.F }],
+      };
+
+      await service.create(fazendaId, dto as any);
+
+      const chamadasDeMovimentacao = mockManager.create.mock.calls.filter(
+        (chamada) => chamada[0] === MovimentacaoPasto,
+      );
+      expect(chamadasDeMovimentacao).toHaveLength(1);
+      expect(chamadasDeMovimentacao[0][1]).toMatchObject({
+        pastoId: 'pasto-1',
+        dataEntrada: dto.data,
+      });
     });
   });
 });
