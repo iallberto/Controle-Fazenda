@@ -4,6 +4,7 @@ import { BadRequestException, ConflictException, NotFoundException } from '@nest
 import { AnimalService } from './animal.service';
 import { Animal, CategoriaAnimal, OrigemAnimal, Sexo } from './entities/animal.entity';
 import { CodigoIdentificacao, StatusCodigo } from '../codigo-identificacao/entities/codigo-identificacao.entity';
+import { MovimentacaoPasto } from '../movimentacao-pasto/entities/movimentacao-pasto.entity';
 
 describe('AnimalService', () => {
   let service: AnimalService;
@@ -91,6 +92,35 @@ describe('AnimalService', () => {
       });
 
       await expect(service.create(fazendaId, baseDto as any)).rejects.toThrow(ConflictException);
+    });
+     it('cria a movimentacao inicial de pasto quando pastoAtualId e informado', async () => {
+      mockCodigoRepository.findOneBy.mockResolvedValue(codigoDisponivel);
+      mockManager.create.mockImplementation((_entidade: any, entrada: any) => entrada);
+      mockManager.save.mockImplementation((entrada: any) => Promise.resolve({ id: 'novo-id', ...entrada }));
+
+      await service.create(fazendaId, { ...baseDto, pastoAtualId: 'pasto-1' } as any);
+
+      const chamadasDeMovimentacao = mockManager.create.mock.calls.filter(
+        (chamada) => chamada[0] === MovimentacaoPasto,
+      );
+      expect(chamadasDeMovimentacao).toHaveLength(1);
+      expect(chamadasDeMovimentacao[0][1]).toMatchObject({
+        pastoId: 'pasto-1',
+        dataEntrada: baseDto.dataNascimento,
+      });
+    });
+
+    it('nao cria movimentacao quando pastoAtualId nao e informado', async () => {
+      mockCodigoRepository.findOneBy.mockResolvedValue(codigoDisponivel);
+      mockManager.create.mockImplementation((_entidade: any, entrada: any) => entrada);
+      mockManager.save.mockImplementation((entrada: any) => Promise.resolve({ id: 'novo-id', ...entrada }));
+
+      await service.create(fazendaId, baseDto as any);
+
+      const chamadasDeMovimentacao = mockManager.create.mock.calls.filter(
+        (chamada) => chamada[0] === MovimentacaoPasto,
+      );
+      expect(chamadasDeMovimentacao).toHaveLength(0);
     });
   });
 

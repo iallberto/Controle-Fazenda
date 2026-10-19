@@ -12,6 +12,7 @@ import {
   CodigoIdentificacao,
   StatusCodigo,
 } from '../codigo-identificacao/entities/codigo-identificacao.entity';
+import { MovimentacaoPasto } from '../movimentacao-pasto/entities/movimentacao-pasto.entity';
 import { CreateAnimalDto } from './dto/create-animal.dto';
 import { UpdateAnimalDto } from './dto/update-animal.dto';
 
@@ -66,6 +67,16 @@ export class AnimalService {
       codigo.animalId = animalSalvo.id;
       codigo.vinculadoEm = new Date();
       await manager.save(codigo);
+
+      if (dto.pastoAtualId) {
+        const movimentacao = manager.create(MovimentacaoPasto, {
+          animalId: animalSalvo.id,
+          pastoId: dto.pastoAtualId,
+          dataEntrada: dto.dataNascimento,
+          dataSaida: null,
+        });
+        await manager.save(movimentacao);
+      }
 
       return animalSalvo;
     });
