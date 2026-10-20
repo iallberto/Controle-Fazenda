@@ -18,6 +18,7 @@ import { RolesGuard } from './auth/guards/roles.guard';
 import { MovimentacaoPastoModule } from './movimentacao-pasto/movimentacao-pasto.module';
 import { ConfiguracaoModule } from './configuracao/configuracao.module';
 import { RelatorioModule } from './relatorio/relatorio.module';
+import { VeterinarioModule } from './veterinario/veterinario.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { RelatorioModule } from './relatorio/relatorio.module';
     MovimentacaoPastoModule,
     ConfiguracaoModule,
     RelatorioModule,
+    VeterinarioModule,
   ],
   controllers: [AppController],
   providers: [
