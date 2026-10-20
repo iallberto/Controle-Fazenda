@@ -1,4 +1,15 @@
-import { IsDateString, IsInt, IsNotEmpty, IsOptional, IsPositive, IsString, IsUUID } from 'class-validator';
+import {
+  IsDateString,
+  IsEnum,
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsPositive,
+  IsString,
+  IsUUID,
+  ValidateIf,
+} from 'class-validator';
+import { AplicadoPorTipo } from '../entities/tratamento.entity';
 
 export class CreateTratamentoDto {
   @IsUUID()
@@ -11,12 +22,19 @@ export class CreateTratamentoDto {
   @IsDateString()
   data: string;
 
-  @IsString()
-  @IsNotEmpty()
-  responsavel: string;
-
   @IsOptional()
   @IsInt()
   @IsPositive()
   recorrenciaDias?: number;
+
+  @IsEnum(AplicadoPorTipo)
+  aplicadoPorTipo: AplicadoPorTipo;
+
+  @ValidateIf((dto) => dto.aplicadoPorTipo === AplicadoPorTipo.USUARIO)
+  @IsUUID()
+  aplicadoPorUsuarioId?: string;
+
+  @ValidateIf((dto) => dto.aplicadoPorTipo === AplicadoPorTipo.VETERINARIO)
+  @IsUUID()
+  aplicadoPorVeterinarioId?: string;
 }
