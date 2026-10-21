@@ -14,7 +14,7 @@ export class PartoController {
 
   @Post()
   create(@CurrentUser() user: JwtPayload, @Body() dto: CreatePartoDto) {
-    return this.partoService.create(user.fazendaId, dto);
+    return this.partoService.create(user.fazendaId, user.sub, dto);
   }
 
   @Get()

@@ -22,7 +22,7 @@ export class PartoService {
     private readonly codigoRepository: Repository<CodigoIdentificacao>,
   ) {}
 
-  async create(fazendaId: string, dto: CreatePartoDto) {
+  async create(fazendaId: string, usuarioLogadoId: string, dto: CreatePartoDto) {
     const mae = await this.animalRepository.findOneBy({ id: dto.maeId });
     if (!mae) {
       throw new NotFoundException('Matriz (mãe) não encontrada');
@@ -63,6 +63,7 @@ export class PartoService {
         tipo: dto.tipo,
         resultado: dto.resultado,
         observacoes: dto.observacoes ?? null,
+        criadoPorId: usuarioLogadoId,
       });
       const partoSalvo = await manager.save(parto);
 
@@ -81,6 +82,7 @@ export class PartoService {
             maeId: mae.id,
             partoId: partoSalvo.id,
             pastoAtualId: dto.pastoId ?? null,
+            criadoPorId: usuarioLogadoId,
           });
           const animalSalvo = await manager.save(animal);
 

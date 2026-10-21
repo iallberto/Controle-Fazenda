@@ -4,6 +4,7 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
+  CreateDateColumn,
 } from 'typeorm';
 import { Animal } from '../../animal/entities/animal.entity';
 import { Usuario } from '../../usuario/entities/usuario.entity';
@@ -61,4 +62,7 @@ export class Tratamento {
 
   @Column({ name: 'lancado_por' })
   lancadoPorId: string;
+
+  @CreateDateColumn({ name: 'criado_em' })
+  criadoEm: Date;
 }

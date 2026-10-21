@@ -3,12 +3,12 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { PartoService } from './parto.service';
 import { Parto, ResultadoParto, TipoParto } from './entities/parto.entity';
-import { MovimentacaoPasto } from '../movimentacao-pasto/entities/movimentacao-pasto.entity';
 import { Animal, CategoriaAnimal, Sexo } from '../animal/entities/animal.entity';
 import {
   CodigoIdentificacao,
   StatusCodigo,
 } from '../codigo-identificacao/entities/codigo-identificacao.entity';
+import { MovimentacaoPasto } from '../movimentacao-pasto/entities/movimentacao-pasto.entity';
 
 describe('PartoService', () => {
   let service: PartoService;
@@ -61,6 +61,7 @@ describe('PartoService', () => {
 
   describe('create', () => {
     const fazendaId = 'fazenda-1';
+    const usuarioLogadoId = 'usuario-logado-1';
     const matriz = {
       id: 'matriz-1',
       fazendaId,
@@ -88,7 +89,7 @@ describe('PartoService', () => {
         crias: [{ codigoId: 'codigo-1', sexo: Sexo.F }],
       };
 
-      await expect(service.create(fazendaId, dto as any)).rejects.toThrow(BadRequestException);
+      await expect(service.create(fazendaId, usuarioLogadoId, dto as any)).rejects.toThrow(BadRequestException);
     });
 
     it('rejeita parto se a mae nao existir', async () => {
@@ -101,7 +102,7 @@ describe('PartoService', () => {
         resultado: ResultadoParto.NATIMORTO,
       };
 
-      await expect(service.create(fazendaId, dto as any)).rejects.toThrow(NotFoundException);
+      await expect(service.create(fazendaId, usuarioLogadoId, dto as any)).rejects.toThrow(NotFoundException);
     });
 
     it('rejeita se um codigo de cria nao estiver disponivel', async () => {
@@ -119,7 +120,7 @@ describe('PartoService', () => {
         crias: [{ codigoId: 'codigo-1', sexo: Sexo.F }],
       };
 
-      await expect(service.create(fazendaId, dto as any)).rejects.toThrow(ConflictException);
+      await expect(service.create(fazendaId, usuarioLogadoId, dto as any)).rejects.toThrow(ConflictException);
     });
 
     it('rejeita se o mesmo codigo for usado em duas crias do mesmo parto', async () => {
@@ -137,10 +138,10 @@ describe('PartoService', () => {
         ],
       };
 
-      await expect(service.create(fazendaId, dto as any)).rejects.toThrow(BadRequestException);
+      await expect(service.create(fazendaId, usuarioLogadoId, dto as any)).rejects.toThrow(BadRequestException);
     });
 
-    it('usa o numero do codigo como brinco e categoria conforme o sexo', async () => {
+    it('registra quem criou o parto e usa o numero do codigo como brinco e categoria conforme o sexo', async () => {
       mockAnimalRepository.findOneBy.mockResolvedValue(matriz);
       mockCodigoRepository.findOneBy.mockImplementation((criterio: any) => {
         if (criterio.id === 'codigo-1') return Promise.resolve(codigoDisponivel('codigo-1', 10));
@@ -164,7 +165,12 @@ describe('PartoService', () => {
         ],
       };
 
-      await service.create(fazendaId, dto as any);
+      await service.create(fazendaId, usuarioLogadoId, dto as any);
+
+      const chamadasDePartoSalvo = mockManager.create.mock.calls.filter(
+        (chamada) => chamada[0] === Parto,
+      );
+      expect(chamadasDePartoSalvo[0][1].criadoPorId).toBe(usuarioLogadoId);
 
       const chamadasDeAnimal = mockManager.create.mock.calls.filter(
         (chamada) => chamada[0] === Animal,
@@ -174,7 +180,8 @@ describe('PartoService', () => {
       expect(chamadasDeAnimal[1][1].brinco).toBe('11');
       expect(chamadasDeAnimal[1][1].categoria).toBe(CategoriaAnimal.BEZERRO);
     });
-        it('cria a movimentacao inicial de pasto para as crias quando pastoId e informado', async () => {
+
+    it('cria a movimentacao inicial de pasto para as crias quando pastoId e informado', async () => {
       mockAnimalRepository.findOneBy.mockResolvedValue(matriz);
       mockCodigoRepository.findOneBy.mockResolvedValue(codigoDisponivel('codigo-1', 10));
       mockManager.create.mockImplementation((_entidade: any, entrada: any) => entrada);
@@ -192,7 +199,7 @@ describe('PartoService', () => {
         crias: [{ codigoId: 'codigo-1', sexo: Sexo.F }],
       };
 
-      await service.create(fazendaId, dto as any);
+      await service.create(fazendaId, usuarioLogadoId, dto as any);
 
       const chamadasDeMovimentacao = mockManager.create.mock.calls.filter(
         (chamada) => chamada[0] === MovimentacaoPasto,
