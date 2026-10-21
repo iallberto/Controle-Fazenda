@@ -4,8 +4,10 @@ export interface CriarTratamentoDto {
   animalId: string;
   produto: string;
   data: string;
-  responsavel: string;
   recorrenciaDias?: number;
+  aplicadoPorTipo: 'USUARIO' | 'VETERINARIO';
+  aplicadoPorUsuarioId?: string;
+  aplicadoPorVeterinarioId?: string;
 }
 
 export async function criarTratamento(dto: CriarTratamentoDto) {
