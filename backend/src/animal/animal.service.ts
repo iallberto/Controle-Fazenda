@@ -25,7 +25,7 @@ export class AnimalService {
     private readonly codigoRepository: Repository<CodigoIdentificacao>,
   ) {}
 
-  async create(fazendaId: string, dto: CreateAnimalDto) {
+  async create(fazendaId: string, usuarioLogadoId: string, dto: CreateAnimalDto) {
     this.validarSexoCategoria(dto.sexo, dto.categoria);
 
     const codigo = await this.codigoRepository.findOneBy({ id: dto.codigoId });
@@ -60,6 +60,7 @@ export class AnimalService {
         dataCompra: dto.dataCompra,
         procedencia: dto.procedencia,
         status: StatusAnimal.ATIVO,
+        criadoPorId: usuarioLogadoId,
       });
       const animalSalvo = await manager.save(animal);
 

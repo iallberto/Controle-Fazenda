@@ -5,11 +5,13 @@ import {
   ManyToOne,
   JoinColumn,
   Unique,
+  CreateDateColumn,
 } from 'typeorm';
 import { Fazenda } from '../../fazenda/entities/fazenda.entity';
 import { Raca } from '../../raca/entities/raca.entity';
 import { Pasto } from '../../pasto/entities/pasto.entity';
 import { Parto } from '../../parto/entities/parto.entity';
+import { Usuario } from '../../usuario/entities/usuario.entity';
 
 export enum Sexo {
   M = 'M',
@@ -131,4 +133,14 @@ export class Animal {
 
   @Column({ name: 'data_status', type: 'date', nullable: true })
   dataStatus: string | null;
+
+  @ManyToOne(() => Usuario)
+  @JoinColumn({ name: 'criado_por' })
+  criadoPor: Usuario;
+
+  @Column({ name: 'criado_por' })
+  criadoPorId: string;
+
+  @CreateDateColumn({ name: 'criado_em' })
+  criadoEm: Date;
 }

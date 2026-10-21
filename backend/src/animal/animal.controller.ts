@@ -15,9 +15,9 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 export class AnimalController {
   constructor(private readonly animalService: AnimalService) {}
 
-  @Post()
+@Post()
   create(@CurrentUser() user: JwtPayload, @Body() dto: CreateAnimalDto) {
-    return this.animalService.create(user.fazendaId, dto);
+    return this.animalService.create(user.fazendaId, user.sub, dto);
   }
 
  @Get()

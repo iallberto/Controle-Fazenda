@@ -48,6 +48,7 @@ describe('AnimalService', () => {
 
   describe('create', () => {
     const fazendaId = 'fazenda-1';
+    const usuarioLogadoId = 'usuario-logado-1';
     const baseDto = {
       sexo: Sexo.F,
       categoria: CategoriaAnimal.NOVILHA,
@@ -63,26 +64,27 @@ describe('AnimalService', () => {
       status: StatusCodigo.DISPONIVEL,
     });
 
-    it('usa o numero do codigo como brinco do animal', async () => {
+    it('usa o numero do codigo como brinco do animal e registra quem criou', async () => {
       mockCodigoRepository.findOneBy.mockResolvedValue(codigoDisponivel());
       mockManager.create.mockImplementation((_entidade: any, entrada: any) => entrada);
       mockManager.save.mockImplementation((entrada: any) => Promise.resolve({ id: 'animal-1', ...entrada }));
 
-      const resultado = await service.create(fazendaId, baseDto as any);
+      const resultado = await service.create(fazendaId, usuarioLogadoId, baseDto as any);
 
       expect(resultado.brinco).toBe('7');
+      expect(resultado.criadoPorId).toBe(usuarioLogadoId);
     });
 
     it('rejeita quando o codigo nao existe', async () => {
       mockCodigoRepository.findOneBy.mockResolvedValue(null);
 
-      await expect(service.create(fazendaId, baseDto as any)).rejects.toThrow(NotFoundException);
+      await expect(service.create(fazendaId, usuarioLogadoId, baseDto as any)).rejects.toThrow(NotFoundException);
     });
 
     it('rejeita quando o codigo pertence a outra fazenda', async () => {
-      mockCodigoRepository.findOneBy.mockResolvedValue({ ...codigoDisponivel, fazendaId: 'outra-fazenda' });
+      mockCodigoRepository.findOneBy.mockResolvedValue({ ...codigoDisponivel(), fazendaId: 'outra-fazenda' });
 
-      await expect(service.create(fazendaId, baseDto as any)).rejects.toThrow(NotFoundException);
+      await expect(service.create(fazendaId, usuarioLogadoId, baseDto as any)).rejects.toThrow(NotFoundException);
     });
 
     it('rejeita quando o codigo ja esta vinculado', async () => {
@@ -91,14 +93,15 @@ describe('AnimalService', () => {
         status: StatusCodigo.VINCULADO,
       });
 
-      await expect(service.create(fazendaId, baseDto as any)).rejects.toThrow(ConflictException);
+      await expect(service.create(fazendaId, usuarioLogadoId, baseDto as any)).rejects.toThrow(ConflictException);
     });
-     it('cria a movimentacao inicial de pasto quando pastoAtualId e informado', async () => {
+
+    it('cria a movimentacao inicial de pasto quando pastoAtualId e informado', async () => {
       mockCodigoRepository.findOneBy.mockResolvedValue(codigoDisponivel());
       mockManager.create.mockImplementation((_entidade: any, entrada: any) => entrada);
       mockManager.save.mockImplementation((entrada: any) => Promise.resolve({ id: 'novo-id', ...entrada }));
 
-      await service.create(fazendaId, { ...baseDto, pastoAtualId: 'pasto-1' } as any);
+      await service.create(fazendaId, usuarioLogadoId, { ...baseDto, pastoAtualId: 'pasto-1' } as any);
 
       const chamadasDeMovimentacao = mockManager.create.mock.calls.filter(
         (chamada) => chamada[0] === MovimentacaoPasto,
@@ -115,7 +118,7 @@ describe('AnimalService', () => {
       mockManager.create.mockImplementation((_entidade: any, entrada: any) => entrada);
       mockManager.save.mockImplementation((entrada: any) => Promise.resolve({ id: 'novo-id', ...entrada }));
 
-      await service.create(fazendaId, baseDto as any);
+      await service.create(fazendaId, usuarioLogadoId, baseDto as any);
 
       const chamadasDeMovimentacao = mockManager.create.mock.calls.filter(
         (chamada) => chamada[0] === MovimentacaoPasto,
