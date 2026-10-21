@@ -5,8 +5,10 @@ import {
   ManyToOne,
   JoinColumn,
   OneToMany,
+  CreateDateColumn,
 } from 'typeorm';
 import { Animal } from '../../animal/entities/animal.entity';
+import { Usuario } from '../../usuario/entities/usuario.entity';
 
 export enum ResultadoParto {
   VIVO = 'VIVO',
@@ -44,4 +46,14 @@ export class Parto {
 
   @OneToMany(() => Animal, (animal) => animal.parto)
   crias: Animal[];
+
+  @ManyToOne(() => Usuario)
+  @JoinColumn({ name: 'criado_por' })
+  criadoPor: Usuario;
+
+  @Column({ name: 'criado_por' })
+  criadoPorId: string;
+
+  @CreateDateColumn({ name: 'criado_em' })
+  criadoEm: Date;
 }
