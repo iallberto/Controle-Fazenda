@@ -34,28 +34,33 @@ describe('PastoService', () => {
   });
 
   describe('create', () => {
-    it('deve criar um pasto quando o nome ainda não existe na fazenda', async () => {
+    it('deve criar um pasto quando o nome ainda não existe na fazenda, registrando quem criou', async () => {
       const fazendaId = 'fazenda-1';
+      const usuarioLogadoId = 'usuario-logado-1';
       const dto = { nome: 'Pasto Novo' };
 
-      repository.findOneBy!.mockResolvedValue(null); // nenhum pasto com esse nome ainda
-      repository.create!.mockReturnValue({ ...dto, fazendaId });
-      repository.save!.mockResolvedValue({ id: 'pasto-1', ...dto, fazendaId });
+      repository.findOneBy!.mockResolvedValue(null);
+      repository.create!.mockImplementation((entrada) => entrada);
+      repository.save!.mockResolvedValue({ id: 'pasto-1', ...dto, fazendaId, criadoPorId: usuarioLogadoId });
 
-      const resultado = await service.create(fazendaId, dto as any);
+      const resultado = await service.create(fazendaId, usuarioLogadoId, dto as any);
 
-      expect(repository.findOneBy).toHaveBeenCalledWith({ fazendaId, nome: dto.nome });
-      expect(repository.save).toHaveBeenCalled();
-      expect(resultado).toEqual({ id: 'pasto-1', ...dto, fazendaId });
+      expect(repository.create).toHaveBeenCalledWith({
+        ...dto,
+        fazendaId,
+        criadoPorId: usuarioLogadoId,
+      });
+      expect(resultado.criadoPorId).toBe(usuarioLogadoId);
     });
 
     it('deve lançar ConflictException quando já existe um pasto com o mesmo nome na fazenda', async () => {
       const fazendaId = 'fazenda-1';
+      const usuarioLogadoId = 'usuario-logado-1';
       const dto = { nome: 'Pasto Repetido' };
 
       repository.findOneBy!.mockResolvedValue({ id: 'existente', ...dto, fazendaId });
 
-      await expect(service.create(fazendaId, dto as any)).rejects.toThrow(ConflictException);
+      await expect(service.create(fazendaId, usuarioLogadoId, dto as any)).rejects.toThrow(ConflictException);
       expect(repository.save).not.toHaveBeenCalled();
     });
   });

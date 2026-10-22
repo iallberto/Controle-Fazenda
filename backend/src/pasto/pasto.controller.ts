@@ -14,7 +14,7 @@ export class PastoController {
 
   @Post()
   create(@CurrentUser() user: JwtPayload, @Body() dto: CreatePastoDto) {
-    return this.pastoService.create(user.fazendaId, dto);
+    return this.pastoService.create(user.fazendaId, user.sub, dto);
   }
 
   @Get()

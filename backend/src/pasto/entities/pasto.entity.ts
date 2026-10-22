@@ -5,8 +5,10 @@ import {
   ManyToOne,
   JoinColumn,
   Unique,
+  CreateDateColumn,
 } from 'typeorm';
 import { Fazenda } from '../../fazenda/entities/fazenda.entity';
+import { Usuario } from '../../usuario/entities/usuario.entity';
 
 @Entity('pastos')
 @Unique(['fazendaId', 'nome'])
@@ -23,4 +25,14 @@ export class Pasto {
 
   @Column()
   nome: string;
+
+  @ManyToOne(() => Usuario)
+  @JoinColumn({ name: 'criado_por' })
+  criadoPor: Usuario;
+
+  @Column({ name: 'criado_por' })
+  criadoPorId: string;
+
+  @CreateDateColumn({ name: 'criado_em' })
+  criadoEm: Date;
 }

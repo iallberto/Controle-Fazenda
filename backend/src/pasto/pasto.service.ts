@@ -12,9 +12,9 @@ export class PastoService {
     private readonly pastoRepository: Repository<Pasto>,
   ) {}
 
-  async create(fazendaId: string, dto: CreatePastoDto) {
+  async create(fazendaId: string, usuarioLogadoId: string, dto: CreatePastoDto) {
     await this.garantirNomeDisponivel(fazendaId, dto.nome);
-    const pasto = this.pastoRepository.create({ ...dto, fazendaId });
+    const pasto = this.pastoRepository.create({ ...dto, fazendaId, criadoPorId: usuarioLogadoId });
     return this.pastoRepository.save(pasto);
   }
 
