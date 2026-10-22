@@ -75,6 +75,7 @@ export class AnimalService {
           pastoId: dto.pastoAtualId,
           dataEntrada: dto.dataNascimento,
           dataSaida: null,
+          criadoPorId: usuarioLogadoId,
         });
         await manager.save(movimentacao);
       }

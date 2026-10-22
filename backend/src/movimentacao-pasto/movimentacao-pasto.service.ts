@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Repository } from 'typeorm';
 import { MovimentacaoPasto } from './entities/movimentacao-pasto.entity';
@@ -17,7 +17,7 @@ export class MovimentacaoPastoService {
     private readonly pastoRepository: Repository<Pasto>,
   ) {}
 
-  async mover(fazendaId: string, dto: MoverAnimalDto) {
+  async mover(fazendaId: string, usuarioLogadoId: string, dto: MoverAnimalDto) {
     const animal = await this.animalRepository.findOneBy({ id: dto.animalId });
     if (!animal || animal.fazendaId !== fazendaId) {
       throw new NotFoundException('Animal não encontrado');
@@ -44,13 +44,9 @@ export class MovimentacaoPastoService {
         pastoId: pasto.id,
         dataEntrada: data,
         dataSaida: null,
+        criadoPorId: usuarioLogadoId,
       });
-      await manager.save(novaMovimentacao);
-
-      animal.pastoAtualId = pasto.id;
-      await manager.save(animal);
-
-      return novaMovimentacao;
+      return manager.save(novaMovimentacao);
     });
   }
 

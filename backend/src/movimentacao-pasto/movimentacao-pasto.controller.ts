@@ -13,7 +13,7 @@ export class MovimentacaoPastoController {
 
   @Post()
   mover(@CurrentUser() user: JwtPayload, @Body() dto: MoverAnimalDto) {
-    return this.movimentacaoPastoService.mover(user.fazendaId, dto);
+    return this.movimentacaoPastoService.mover(user.fazendaId, user.sub, dto);
   }
 
   @Get('animal/:animalId')

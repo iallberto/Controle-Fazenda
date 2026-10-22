@@ -97,6 +97,7 @@ export class PartoService {
               pastoId: dto.pastoId,
               dataEntrada: dto.data,
               dataSaida: null,
+              criadoPorId: usuarioLogadoId,
             });
             await manager.save(movimentacao);
           }
