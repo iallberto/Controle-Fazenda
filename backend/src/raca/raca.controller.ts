@@ -14,8 +14,8 @@ export class RacaController {
 
   @Post()
   create(@CurrentUser() user: JwtPayload, @Body() dto: CreateRacaDto) {
-    return this.racaService.create(user.fazendaId, dto);
-  }
+    return this.racaService.create(user.fazendaId, user.sub, dto);
+  } 
 
   @Get()
   findAll(@CurrentUser() user: JwtPayload) {

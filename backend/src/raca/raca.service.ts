@@ -33,15 +33,15 @@ export class RacaService implements OnModuleInit {
       });
       if (!existe) {
         await this.racaRepository.save(
-          this.racaRepository.create({ ...padrao, fazendaId: null }),
+          this.racaRepository.create({ ...padrao, fazendaId: null, criadoPorId: null }),
         );
       }
     }
   }
 
-    async create(fazendaId: string, dto: CreateRacaDto) {
+  async create(fazendaId: string, usuarioLogadoId: string, dto: CreateRacaDto) {
     await this.garantirNomeDisponivel(fazendaId, dto.nome);
-    const raca = this.racaRepository.create({ ...dto, fazendaId });
+    const raca = this.racaRepository.create({ ...dto, fazendaId, criadoPorId: usuarioLogadoId });
     return this.racaRepository.save(raca);
   }
 

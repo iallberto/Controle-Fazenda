@@ -4,8 +4,10 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
+  CreateDateColumn,
 } from 'typeorm';
 import { Fazenda } from '../../fazenda/entities/fazenda.entity';
+import { Usuario } from '../../usuario/entities/usuario.entity';
 
 @Entity('racas')
 export class Raca {
@@ -24,4 +26,14 @@ export class Raca {
 
   @Column({ name: 'gestacao_media_dias', type: 'int' })
   gestacaoMediaDias: number;
+
+  @ManyToOne(() => Usuario, { nullable: true })
+  @JoinColumn({ name: 'criado_por' })
+  criadoPor?: Usuario;
+
+  @Column({ name: 'criado_por', type: 'uuid', nullable: true })
+  criadoPorId: string | null;
+
+  @CreateDateColumn({ name: 'criado_em' })
+  criadoEm: Date;
 }
