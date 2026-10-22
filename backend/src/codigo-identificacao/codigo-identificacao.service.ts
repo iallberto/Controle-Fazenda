@@ -2,8 +2,6 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
-  BadRequestException,
-  ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -23,7 +21,7 @@ export class CodigoIdentificacaoService {
     private readonly animalRepository: Repository<Animal>,
   ) {}
 
-  async gerarLote(fazendaId: string, dto: GerarLoteDto) {
+  async gerarLote(fazendaId: string, usuarioLogadoId: string, dto: GerarLoteDto) {
     return this.codigoRepository.manager.transaction(async (manager) => {
       const ultimo = await manager.findOne(CodigoIdentificacao, {
         where: { fazendaId },
@@ -39,6 +37,7 @@ export class CodigoIdentificacaoService {
           codigo,
           numero: proximoNumero,
           status: StatusCodigo.DISPONIVEL,
+          criadoPorId: usuarioLogadoId,
         });
         codigosGerados.push(await manager.save(entidade));
         proximoNumero++;
@@ -47,7 +46,7 @@ export class CodigoIdentificacaoService {
       return codigosGerados;
     });
   }
-  
+
   async listarDisponiveis(fazendaId: string) {
     return this.codigoRepository.find({
       where: { fazendaId, status: StatusCodigo.DISPONIVEL },
@@ -65,7 +64,7 @@ export class CodigoIdentificacaoService {
       throw new NotFoundException('Código não encontrado');
     }
     if (registro.fazendaId !== fazendaId) {
-      throw new ForbiddenException('Este código não pertence à sua fazenda');
+      throw new NotFoundException('Código não encontrado');
     }
 
     if (registro.status === StatusCodigo.DISPONIVEL) {
@@ -77,11 +76,8 @@ export class CodigoIdentificacaoService {
 
   async vincular(fazendaId: string, codigo: string, dto: VincularCodigoDto) {
     const registro = await this.codigoRepository.findOneBy({ codigo });
-    if (!registro) {
+    if (!registro || registro.fazendaId !== fazendaId) {
       throw new NotFoundException('Código não encontrado');
-    }
-    if (registro.fazendaId !== fazendaId) {
-      throw new ForbiddenException('Este código não pertence à sua fazenda');
     }
     if (registro.status !== StatusCodigo.DISPONIVEL) {
       throw new ConflictException('Este código já está vinculado ou foi desativado');
@@ -98,7 +94,7 @@ export class CodigoIdentificacaoService {
     return this.codigoRepository.save(registro);
   }
 
-  async reemitir(fazendaId: string, dto: ReemitirCodigoDto) {
+  async reemitir(fazendaId: string, usuarioLogadoId: string, dto: ReemitirCodigoDto) {
     const animal = await this.animalRepository.findOneBy({ id: dto.animalId });
     if (!animal || animal.fazendaId !== fazendaId) {
       throw new NotFoundException('Animal não encontrado');
@@ -113,13 +109,21 @@ export class CodigoIdentificacaoService {
         await manager.save(codigoAntigo);
       }
 
+      const ultimo = await manager.findOne(CodigoIdentificacao, {
+        where: { fazendaId },
+        order: { numero: 'DESC' },
+      });
+      const proximoNumero = (ultimo?.numero ?? 0) + 1;
+
       const novoCodigo = await this.gerarCodigoUnico();
       const novoRegistro = manager.create(CodigoIdentificacao, {
         fazendaId,
         codigo: novoCodigo,
+        numero: proximoNumero,
         status: StatusCodigo.VINCULADO,
         animalId: animal.id,
         vinculadoEm: new Date(),
+        criadoPorId: usuarioLogadoId,
       });
       return manager.save(novoRegistro);
     });

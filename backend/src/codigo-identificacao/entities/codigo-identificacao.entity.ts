@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { Fazenda } from '../../fazenda/entities/fazenda.entity';
 import { Animal } from '../../animal/entities/animal.entity';
+import { Usuario } from '../../usuario/entities/usuario.entity';
 
 export enum StatusCodigo {
   DISPONIVEL = 'DISPONIVEL',
@@ -26,14 +27,14 @@ export class CodigoIdentificacao {
   @JoinColumn({ name: 'fazenda_id' })
   fazenda: Fazenda;
 
-  @Column({ type: 'int' })
-  numero: number;
-
   @Column({ name: 'fazenda_id' })
   fazendaId: string;
 
   @Column({ unique: true })
   codigo: string;
+
+  @Column({ type: 'int' })
+  numero: number;
 
   @Column({ type: 'enum', enum: StatusCodigo, default: StatusCodigo.DISPONIVEL })
   status: StatusCodigo;
@@ -44,6 +45,13 @@ export class CodigoIdentificacao {
 
   @Column({ name: 'animal_id', type: 'uuid', nullable: true })
   animalId: string | null;
+
+  @ManyToOne(() => Usuario)
+  @JoinColumn({ name: 'criado_por' })
+  criadoPor: Usuario;
+
+  @Column({ name: 'criado_por' })
+  criadoPorId: string;
 
   @CreateDateColumn({ name: 'gerado_em' })
   geradoEm: Date;

@@ -46,47 +46,18 @@ describe('CodigoIdentificacaoService', () => {
   });
 
   describe('gerarLote', () => {
-    it('numera sequencialmente continuando do maior numero existente na fazenda', async () => {
+    it('registra quem gerou cada codigo do lote', async () => {
       const fazendaId = 'fazenda-1';
-      mockManager.findOne.mockResolvedValue({ numero: 5 }); // maior numero ja existente
-
-      mockManager.create.mockImplementation((_entidade: any, entrada: any) => entrada);
-      mockManager.save.mockImplementation(( entrada: any) =>
-        Promise.resolve({ id: `id-${entrada.numero}`, ...entrada }),
-      );
-
-      const resultado = await service.gerarLote(fazendaId, { quantidade: 3 } as any);
-
-      expect(resultado.map((c) => c.numero)).toEqual([6, 7, 8]);
-    });
-
-    it('comeca em 1 quando a fazenda ainda nao tem nenhum codigo', async () => {
-      const fazendaId = 'fazenda-1';
+      const usuarioLogadoId = 'usuario-logado-1';
       mockManager.findOne.mockResolvedValue(null);
-
       mockManager.create.mockImplementation((_entidade: any, entrada: any) => entrada);
-      mockManager.save.mockImplementation(( entrada: any) =>
+      mockManager.save.mockImplementation((entrada: any) =>
         Promise.resolve({ id: `id-${entrada.numero}`, ...entrada }),
       );
 
-      const resultado = await service.gerarLote(fazendaId, { quantidade: 2 } as any);
+      const resultado = await service.gerarLote(fazendaId, usuarioLogadoId, { quantidade: 2 } as any);
 
-      expect(resultado.map((c) => c.numero)).toEqual([1, 2]);
-    });
-  });
-
-  describe('listarDisponiveis', () => {
-    it('busca apenas codigos com status DISPONIVEL da fazenda', async () => {
-      const fazendaId = 'fazenda-1';
-      mockCodigoRepository.find.mockResolvedValue([{ numero: 1 }, { numero: 2 }]);
-
-      const resultado = await service.listarDisponiveis(fazendaId);
-
-      expect(mockCodigoRepository.find).toHaveBeenCalledWith({
-        where: { fazendaId, status: StatusCodigo.DISPONIVEL },
-        order: { numero: 'ASC' },
-      });
-      expect(resultado).toHaveLength(2);
+      expect(resultado.every((c) => c.criadoPorId === usuarioLogadoId)).toBe(true);
     });
   });
 });

@@ -20,7 +20,7 @@ export class CodigoIdentificacaoController {
 
   @Post('lote')
   gerarLote(@CurrentUser() user: JwtPayload, @Body() dto: GerarLoteDto) {
-    return this.codigoService.gerarLote(user.fazendaId, dto);
+    return this.codigoService.gerarLote(user.fazendaId, user.sub, dto);
   }
 
   @Get(':codigo')
@@ -39,6 +39,6 @@ export class CodigoIdentificacaoController {
 
   @Post('reemitir')
   reemitir(@CurrentUser() user: JwtPayload, @Body() dto: ReemitirCodigoDto) {
-    return this.codigoService.reemitir(user.fazendaId, dto);
+    return this.codigoService.reemitir(user.fazendaId, user.sub, dto);
   }
 }
