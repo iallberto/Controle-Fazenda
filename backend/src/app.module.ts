@@ -19,6 +19,7 @@ import { MovimentacaoPastoModule } from './movimentacao-pasto/movimentacao-pasto
 import { ConfiguracaoModule } from './configuracao/configuracao.module';
 import { RelatorioModule } from './relatorio/relatorio.module';
 import { VeterinarioModule } from './veterinario/veterinario.module';
+import { PesagemModule } from './pesagem/pesagem.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { VeterinarioModule } from './veterinario/veterinario.module';
     ConfiguracaoModule,
     RelatorioModule,
     VeterinarioModule,
+    PesagemModule,
   ],
   controllers: [AppController],
   providers: [
