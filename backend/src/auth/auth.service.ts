@@ -71,6 +71,7 @@ export class AuthService {
           email: dto.email,
           senhaHash,
           papel: PapelUsuario.DONO,
+          criadoPorId: null,
         }),
       );
       return { fazenda, usuario };

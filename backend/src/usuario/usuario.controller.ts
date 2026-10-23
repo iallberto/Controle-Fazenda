@@ -17,7 +17,7 @@ export class UsuarioController {
   @Roles(PapelUsuario.DONO)
   @Post()
   create(@CurrentUser() user: JwtPayload, @Body() dto: CreateUsuarioDto) {
-    return this.usuarioService.create(user.fazendaId, dto);
+    return this.usuarioService.create(user.fazendaId, user.sub, dto);
   }
 
   @Roles(PapelUsuario.DONO)

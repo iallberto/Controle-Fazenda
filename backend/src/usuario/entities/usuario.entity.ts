@@ -6,9 +6,8 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { Fazenda } from '../../fazenda/entities/fazenda.entity';
 import { Exclude } from 'class-transformer';
-
+import { Fazenda } from '../../fazenda/entities/fazenda.entity';
 
 export enum PapelUsuario {
   DONO = 'DONO',
@@ -39,6 +38,13 @@ export class Usuario {
 
   @Column({ type: 'enum', enum: PapelUsuario, default: PapelUsuario.FUNCIONARIO })
   papel: PapelUsuario;
+
+  @ManyToOne(() => Usuario, { nullable: true })
+  @JoinColumn({ name: 'criado_por' })
+  criadoPor?: Usuario;
+
+  @Column({ name: 'criado_por', type: 'uuid', nullable: true })
+  criadoPorId: string | null;
 
   @CreateDateColumn({ name: 'criado_em' })
   criadoEm: Date;

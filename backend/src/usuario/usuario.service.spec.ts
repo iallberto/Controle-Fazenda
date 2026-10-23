@@ -6,50 +6,49 @@ import * as bcrypt from 'bcryptjs';
 import { UsuarioService } from './usuario.service';
 import { Usuario, PapelUsuario } from './entities/usuario.entity';
 
-type MockRepository<T = any> = Partial<Record<keyof Repository<T>, jest.Mock>>;
-
-const createMockRepository = (): MockRepository => ({
-  find: jest.fn(),
-  findOneBy: jest.fn(),
-  create: jest.fn(),
-  save: jest.fn(),
-});
-
 describe('UsuarioService', () => {
   let service: UsuarioService;
-  let repository: MockRepository;
+  let repository: Partial<Record<keyof Repository<Usuario>, jest.Mock>>;
 
   beforeEach(async () => {
+    repository = {
+      find: jest.fn(),
+      findOneBy: jest.fn(),
+      create: jest.fn(),
+      save: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UsuarioService,
-        { provide: getRepositoryToken(Usuario), useValue: createMockRepository() },
+        { provide: getRepositoryToken(Usuario), useValue: repository },
       ],
     }).compile();
 
     service = module.get<UsuarioService>(UsuarioService);
-    repository = module.get(getRepositoryToken(Usuario));
   });
 
   describe('create', () => {
-    it('deve gerar hash da senha e nunca salvar a senha em texto puro', async () => {
+    it('deve gerar hash da senha, registrar quem criou e nunca salvar a senha em texto puro', async () => {
       const fazendaId = 'fazenda-1';
+      const usuarioLogadoId = 'dono-1';
       const dto = {
-        nome: 'Alberto',
-        email: 'alberto@teste.com',
+        nome: 'Funcionario',
+        email: 'funcionario@teste.com',
         senha: '123456',
-        papel: PapelUsuario.DONO,
+        papel: PapelUsuario.FUNCIONARIO,
       };
 
       repository.findOneBy!.mockResolvedValue(null);
       repository.create!.mockImplementation((entrada) => entrada);
-      repository.save!.mockImplementation((entrada) => Promise.resolve({ id: 'usuario-1', ...entrada }));
+      repository.save!.mockImplementation((entrada) => Promise.resolve({ id: 'usuario-2', ...entrada }));
 
-      const resultado = await service.create(fazendaId, dto as any);
+      const resultado = await service.create(fazendaId, usuarioLogadoId, dto as any);
 
       const argumentoDoCreate = repository.create!.mock.calls[0][0];
       expect(argumentoDoCreate.senhaHash).toBeDefined();
       expect(argumentoDoCreate.senhaHash).not.toBe(dto.senha);
+      expect(argumentoDoCreate.criadoPorId).toBe(usuarioLogadoId);
 
       const senhaConfere = await bcrypt.compare(dto.senha, argumentoDoCreate.senhaHash);
       expect(senhaConfere).toBe(true);
@@ -67,7 +66,7 @@ describe('UsuarioService', () => {
         papel: PapelUsuario.FUNCIONARIO,
       };
 
-      await expect(service.create('fazenda-1', dto as any)).rejects.toThrow(ConflictException);
+      await expect(service.create('fazenda-1', 'dono-1', dto as any)).rejects.toThrow(ConflictException);
     });
   });
 });

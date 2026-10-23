@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ConflictException,ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
@@ -13,7 +13,7 @@ export class UsuarioService {
     private readonly usuarioRepository: Repository<Usuario>,
   ) {}
 
-  async create(fazendaId: string, dto: CreateUsuarioDto) {
+  async create(fazendaId: string, usuarioLogadoId: string | null, dto: CreateUsuarioDto) {
     const emailExistente = await this.usuarioRepository.findOneBy({ email: dto.email });
     if (emailExistente) {
       throw new ConflictException('Já existe um usuário com este e-mail');
@@ -27,6 +27,7 @@ export class UsuarioService {
       email: dto.email,
       senhaHash,
       papel: dto.papel,
+      criadoPorId: usuarioLogadoId,
     });
 
     return this.usuarioRepository.save(usuario);
@@ -42,7 +43,7 @@ export class UsuarioService {
       throw new NotFoundException(`Usuário ${id} não encontrado`);
     }
     if (usuario.fazendaId !== fazendaId) {
-      throw new ForbiddenException('Este usuário não pertence à sua fazenda');
+      throw new NotFoundException(`Usuário ${id} não encontrado`);
     }
     return usuario;
   }
