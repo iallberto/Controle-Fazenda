@@ -22,6 +22,7 @@ export function Animais() {
         <Link to="/animais/mover">Mover animal</Link><br></br>
         <Link to="/qrcodes">QR Codes</Link><br></br>
         <Link to="/">Voltar ao painel</Link>
+        <Link to="/pesagens/novo">Registrar pesagem</Link>
       </header>
 
       {carregando && <p>Carregando...</p>}

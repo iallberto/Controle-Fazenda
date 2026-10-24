@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { buscarAnimal, type Animal } from '../api/animais';
 import { listarTratamentosPorAnimal, type Tratamento } from '../api/tratamentos';
 import { listarPartosPorMae, type Parto } from '../api/partos';
+import { listarPesagensPorAnimal, type Pesagem } from '../api/pesagens';
 
 interface PartoComIntervalo extends Parto {
   diasDesdeUltimoParto: number | null;
@@ -29,6 +30,7 @@ export function AnimalDetalhe() {
   const [animal, setAnimal] = useState<Animal | null>(null);
   const [tratamentos, setTratamentos] = useState<Tratamento[]>([]);
   const [partos, setPartos] = useState<PartoComIntervalo[]>([]);
+  const [pesagens, setPesagens] = useState<Pesagem[]>([]);
 
   useEffect(() => {
     if (!id) return;
@@ -38,6 +40,7 @@ export function AnimalDetalhe() {
       if (dadosAnimal.categoria === 'MATRIZ') {
         listarPartosPorMae(id).then((dadosPartos) => {
           setPartos(calcularIntervalos(dadosPartos));
+          listarPesagensPorAnimal(id).then(setPesagens);
         });
       }
     });
@@ -102,6 +105,20 @@ export function AnimalDetalhe() {
               )}
             </li>
           ))}
+        </ul>
+      </section>
+      <section>
+        <h2>Pesagens ({pesagens.length})</h2>
+          {pesagens.length === 0 && <p>Nenhuma pesagem registrada ainda.</p>}
+        <ul>
+            {pesagens.map((pesagem) => (
+          <li key={pesagem.id}>
+            {pesagem.data} — {pesagem.pesoKg} kg
+            {pesagem.gmdDesdeAnterior !== null && (
+              <> — GMD: {pesagem.gmdDesdeAnterior} kg/dia</>
+            )}
+          </li>
+            ))}
         </ul>
       </section>
     </div>

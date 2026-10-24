@@ -28,6 +28,7 @@ const movimentacao_pasto_module_1 = require("./movimentacao-pasto/movimentacao-p
 const configuracao_module_1 = require("./configuracao/configuracao.module");
 const relatorio_module_1 = require("./relatorio/relatorio.module");
 const veterinario_module_1 = require("./veterinario/veterinario.module");
+const pesagem_module_1 = require("./pesagem/pesagem.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -63,6 +64,7 @@ exports.AppModule = AppModule = __decorate([
             configuracao_module_1.ConfiguracaoModule,
             relatorio_module_1.RelatorioModule,
             veterinario_module_1.VeterinarioModule,
+            pesagem_module_1.PesagemModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [

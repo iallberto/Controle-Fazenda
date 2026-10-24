@@ -14,6 +14,7 @@ import { Usuarios } from './pages/Usuarios';
 import { Relatorios } from './pages/Relatorios';
 import { AnimalDetalhe } from './pages/AnimalDetalhe';
 import { NovoVeterinario } from './pages/NovoVeterinario';
+import { NovaPesagem } from './pages/NovaPesagem';
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
         <Route path="/relatorios" element={<Relatorios />} />
         <Route path="/animais/:id" element={<AnimalDetalhe />} />
         <Route path="/veterinarios/novo" element={<NovoVeterinario />} />
+        <Route path="/pesagens/novo" element={<NovaPesagem />} />
       </Route>
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
