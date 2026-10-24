@@ -5,10 +5,15 @@ import { PesagemService } from './pesagem.service';
 describe('PesagemController', () => {
   let controller: PesagemController;
 
+  const mockPesagemService = {
+    create: jest.fn(),
+    findAllPorAnimal: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [PesagemController],
-      providers: [PesagemService],
+      providers: [{ provide: PesagemService, useValue: mockPesagemService }],
     }).compile();
 
     controller = module.get<PesagemController>(PesagemController);
