@@ -15,6 +15,7 @@ import { Relatorios } from './pages/Relatorios';
 import { AnimalDetalhe } from './pages/AnimalDetalhe';
 import { NovoVeterinario } from './pages/NovoVeterinario';
 import { NovaPesagem } from './pages/NovaPesagem';
+import { Manejo } from './pages/Manejo';
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
         <Route path="/animais/:id" element={<AnimalDetalhe />} />
         <Route path="/veterinarios/novo" element={<NovoVeterinario />} />
         <Route path="/pesagens/novo" element={<NovaPesagem />} />
+        <Route path="/manejo" element={<Manejo />} />
       </Route>
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>

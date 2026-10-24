@@ -24,6 +24,7 @@ export function Dashboard() {
         <Link to="/configuracao">Configurações</Link><br></br>
         {usuario?.papel === 'DONO' && <Link to="/usuarios">Usuários</Link>}<br></br>
         <Link to="/relatorios">Relatórios</Link><br></br>
+        <Link to="/manejo">Manejo</Link>
         <button onClick={logout}>Sair</button>
       </header>
 

@@ -174,4 +174,22 @@ describe('AnimalService', () => {
       expect(resultado.mae?.brinco).toBe('10');
     });
   });
+  
+    describe('findByBrinco', () => {
+    it('encontra o animal pelo brinco dentro da fazenda', async () => {
+      const fazendaId = 'fazenda-1';
+      mockRepository.findOneBy!.mockResolvedValue({ id: 'animal-1', brinco: '7', fazendaId });
+
+      const resultado = await service.findByBrinco(fazendaId, '7');
+
+      expect(mockRepository.findOneBy).toHaveBeenCalledWith({ fazendaId, brinco: '7' });
+      expect(resultado.id).toBe('animal-1');
+    });
+
+    it('lanca NotFoundException quando o brinco nao existe na fazenda', async () => {
+      mockRepository.findOneBy!.mockResolvedValue(null);
+
+      await expect(service.findByBrinco('fazenda-1', '999')).rejects.toThrow(NotFoundException);
+    });
+  });
 });

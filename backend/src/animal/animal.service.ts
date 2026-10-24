@@ -103,6 +103,14 @@ export class AnimalService {
     return animal;
   }
 
+  async findByBrinco(fazendaId: string, brinco: string) {
+    const animal = await this.animalRepository.findOneBy({ fazendaId, brinco });
+    if (!animal) {
+      throw new NotFoundException(`Animal com brinco ${brinco} não encontrado`);
+    }
+    return animal;
+  }
+
   async update(fazendaId: string, id: string, dto: UpdateAnimalDto) {
     const animal = await this.findOne(fazendaId, id);
     if (dto.sexo || dto.categoria) {

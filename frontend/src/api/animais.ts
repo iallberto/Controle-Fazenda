@@ -38,3 +38,13 @@ export async function buscarAnimal(id: string): Promise<Animal> {
   const resposta = await apiClient.get<Animal>(`/animal/${id}`);
   return resposta.data;
 }
+
+export async function buscarPorBrinco(brinco: string): Promise<Animal> {
+  const resposta = await apiClient.get<Animal>(`/animal/brinco/${brinco}`);
+  return resposta.data;
+}
+
+export async function atualizarAnimal(id: string, dados: Partial<CriarAnimalDto>): Promise<Animal> {
+  const resposta = await apiClient.patch<Animal>(`/animal/${id}`, dados);
+  return resposta.data;
+}
