@@ -25,6 +25,11 @@ export class AnimalController {
     return this.animalService.findAll(user.fazendaId, categoria);
   }
 
+  @Get('brinco/:brinco')
+  findByBrinco(@CurrentUser() user: JwtPayload, @Param('brinco') brinco: string) {
+    return this.animalService.findByBrinco(user.fazendaId, brinco);
+  }
+
   @Get(':id')
   findOne(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
     return this.animalService.findOne(user.fazendaId, id);

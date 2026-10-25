@@ -40,11 +40,11 @@ export function AnimalDetalhe() {
       if (dadosAnimal.categoria === 'MATRIZ') {
         listarPartosPorMae(id).then((dadosPartos) => {
           setPartos(calcularIntervalos(dadosPartos));
-          listarPesagensPorAnimal(id).then(setPesagens);
+          
         });
       }
     });
-
+    listarPesagensPorAnimal(id).then(setPesagens); 
     listarTratamentosPorAnimal(id).then(setTratamentos);
   }, [id]);
 
@@ -92,6 +92,21 @@ export function AnimalDetalhe() {
           </ul>
         </section>
       )}
+      <section>
+        <h2>Pesagens ({pesagens.length})</h2>
+          {pesagens.length === 0 && <p>Nenhuma pesagem registrada ainda.</p>}
+        <ul>
+            {pesagens.map((pesagem) => (
+          <li key={pesagem.id}>
+            {pesagem.data} — {pesagem.pesoKg} kg
+            {pesagem.gmdDesdeAnterior !== null && (
+              <> — GMD: {pesagem.gmdDesdeAnterior} kg/dia</>
+            )}
+          </li>
+            ))}
+        </ul>
+      </section>
+
 
       <section>
         <h2>Tratamentos ({tratamentos.length})</h2>
@@ -107,20 +122,7 @@ export function AnimalDetalhe() {
           ))}
         </ul>
       </section>
-      <section>
-        <h2>Pesagens ({pesagens.length})</h2>
-          {pesagens.length === 0 && <p>Nenhuma pesagem registrada ainda.</p>}
-        <ul>
-            {pesagens.map((pesagem) => (
-          <li key={pesagem.id}>
-            {pesagem.data} — {pesagem.pesoKg} kg
-            {pesagem.gmdDesdeAnterior !== null && (
-              <> — GMD: {pesagem.gmdDesdeAnterior} kg/dia</>
-            )}
-          </li>
-            ))}
-        </ul>
-      </section>
+      
     </div>
   );
 }
