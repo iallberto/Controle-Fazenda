@@ -21,3 +21,8 @@ export async function vincularCodigo(codigo: string, animalId: string) {
   const resposta = await apiClient.post(`/codigo/${codigo}/vincular`, { animalId });
   return resposta.data;
 }
+
+export async function reemitirCodigo(animalId: string): Promise<Codigo> {
+  const resposta = await apiClient.post<Codigo>('/codigo/reemitir', { animalId });
+  return resposta.data;
+}

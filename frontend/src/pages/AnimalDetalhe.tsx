@@ -4,6 +4,7 @@ import { buscarAnimal, type Animal } from '../api/animais';
 import { listarTratamentosPorAnimal, type Tratamento } from '../api/tratamentos';
 import { listarPartosPorMae, type Parto } from '../api/partos';
 import { listarPesagensPorAnimal, type Pesagem } from '../api/pesagens';
+import { reemitirCodigo } from '../api/codigos';
 
 interface PartoComIntervalo extends Parto {
   diasDesdeUltimoParto: number | null;
@@ -31,6 +32,7 @@ export function AnimalDetalhe() {
   const [tratamentos, setTratamentos] = useState<Tratamento[]>([]);
   const [partos, setPartos] = useState<PartoComIntervalo[]>([]);
   const [pesagens, setPesagens] = useState<Pesagem[]>([]);
+  const [mensagemReemissao, setMensagemReemissao] = useState('');
 
   useEffect(() => {
     if (!id) return;
@@ -51,6 +53,18 @@ export function AnimalDetalhe() {
   if (!animal) {
     return <p>Carregando...</p>;
   }
+  
+  async function handleReemitir() {
+    if (!id) return;
+    setMensagemReemissao('');
+    try {
+      const novoCodigo = await reemitirCodigo(id);
+      setMensagemReemissao(`Novo código gerado: #${String(novoCodigo.numero).padStart(4, '0')}`);
+    } catch {
+      setMensagemReemissao('Não foi possível reemitir o código.');
+    }
+  }   
+
 
   return (
     <div>
@@ -67,10 +81,12 @@ export function AnimalDetalhe() {
         <p>Nascimento: {animal.dataNascimento}</p>
         <p>Origem: {animal.origem === 'COMPRADO' ? 'Comprado' : 'Nascido na fazenda'}</p>
         {animal.mae && (
-      <p>
-        Mãe: <Link to={`/animais/${animal.mae.id}`}>{animal.mae.brinco}</Link>
-      </p>
-  )}
+      <><p>
+            Mãe: <Link to={`/animais/${animal.mae.id}`}>{animal.mae.brinco}</Link>
+          </p><button type="button" onClick={handleReemitir}>
+              Reemitir código (brinco perdido)
+            </button></>)}
+            {mensagemReemissao && <p>{mensagemReemissao}</p>}
 </section>
 
       {animal.categoria === 'MATRIZ' && (

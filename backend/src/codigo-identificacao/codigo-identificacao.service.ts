@@ -125,7 +125,12 @@ export class CodigoIdentificacaoService {
         vinculadoEm: new Date(),
         criadoPorId: usuarioLogadoId,
       });
-      return manager.save(novoRegistro);
+      const codigoSalvo = await manager.save(novoRegistro);
+
+      animal.brinco = String(proximoNumero);
+      await manager.save(animal);
+
+      return codigoSalvo;
     });
   }
 
