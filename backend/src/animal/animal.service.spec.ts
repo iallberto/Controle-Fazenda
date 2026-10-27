@@ -5,6 +5,7 @@ import { AnimalService } from './animal.service';
 import { Animal, CategoriaAnimal, OrigemAnimal, Sexo } from './entities/animal.entity';
 import { CodigoIdentificacao, StatusCodigo } from '../codigo-identificacao/entities/codigo-identificacao.entity';
 import { MovimentacaoPasto } from '../movimentacao-pasto/entities/movimentacao-pasto.entity';
+import { Pasto } from '../pasto/entities/pasto.entity';
 
 describe('AnimalService', () => {
   let service: AnimalService;
@@ -27,15 +28,20 @@ describe('AnimalService', () => {
     findOneBy: jest.fn(),
   };
 
+  const pastoRepository = { findOneBy: jest.fn() };
+
   beforeEach(async () => {
+    
     jest.clearAllMocks();
     mockRepository.manager.transaction = jest.fn((cb: any) => cb(mockManager));
+    pastoRepository.findOneBy.mockResolvedValue({ id: 'pasto-1', fazendaId: 'fazenda-1' });
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AnimalService,
         { provide: getRepositoryToken(Animal), useValue: mockRepository },
         { provide: getRepositoryToken(CodigoIdentificacao), useValue: mockCodigoRepository },
+        { provide: getRepositoryToken(Pasto), useValue: pastoRepository },
       ],
     }).compile();
 
@@ -169,7 +175,7 @@ describe('AnimalService', () => {
 
       expect(mockRepository.findOne).toHaveBeenCalledWith({
         where: { id: 'animal-1' },
-        relations: { mae: true },
+        relations: { mae: true, pastoAtual: true },
       });
       expect(resultado.mae?.brinco).toBe('10');
     });

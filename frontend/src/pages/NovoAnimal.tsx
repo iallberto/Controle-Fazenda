@@ -52,10 +52,9 @@ export function NovoAnimal() {
           { valor: 'TOURO', rotulo: 'Touro' },
         ];
 
-  async function handleSubmit(evento: FormEvent) {
-    pastoAtualId: pastoAtualId || undefined,
-    evento.preventDefault();
-    setErro('');
+async function handleSubmit(evento: FormEvent) {
+  evento.preventDefault();
+  setErro('');
 
     try {
       await criarAnimal({
@@ -68,6 +67,7 @@ export function NovoAnimal() {
         maeId: origem === 'NASCIDO_FAZENDA' ? maeId : undefined,
         dataCompra: origem === 'COMPRADO' ? dataCompra : undefined,
         procedencia: origem === 'COMPRADO' ? procedencia || undefined : undefined,
+        pastoAtualId: pastoAtualId || undefined, 
       });
       navigate('/animais');
     } catch (erroRequisicao) {

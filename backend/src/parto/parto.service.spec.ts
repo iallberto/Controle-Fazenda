@@ -9,6 +9,7 @@ import {
   StatusCodigo,
 } from '../codigo-identificacao/entities/codigo-identificacao.entity';
 import { MovimentacaoPasto } from '../movimentacao-pasto/entities/movimentacao-pasto.entity';
+import { Pasto } from '../pasto/entities/pasto.entity';
 
 describe('PartoService', () => {
   let service: PartoService;
@@ -39,16 +40,20 @@ describe('PartoService', () => {
     findOneBy: jest.fn(),
   };
 
+  const pastoRepository = { findOneBy: jest.fn() };
+
   beforeEach(async () => {
+    
     jest.clearAllMocks();
     mockPartoRepository.manager.transaction = jest.fn((cb: any) => cb(mockManager));
-
+    pastoRepository.findOneBy.mockResolvedValue({ id: 'pasto-1', fazendaId: 'fazenda-1' });
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         PartoService,
         { provide: getRepositoryToken(Parto), useValue: mockPartoRepository },
         { provide: getRepositoryToken(Animal), useValue: mockAnimalRepository },
         { provide: getRepositoryToken(CodigoIdentificacao), useValue: mockCodigoRepository },
+        { provide: getRepositoryToken(Pasto), useValue: pastoRepository },
       ],
     }).compile();
 

@@ -110,6 +110,7 @@ export function AnimalDetalhe() {
             </Link>
           </p>
         )}
+        <p>Pasto: {animal.pastoAtual?.nome ?? 'Não informado'}</p>
       </section>
 
       <section>
@@ -199,7 +200,7 @@ export function AnimalDetalhe() {
               {formatarData(tratamento.data)} — {tratamento.produto} ({tratamento.responsavel})
               {tratamento.proximaDataPrevista && (
                   <> — próxima aplicação prevista: {formatarData(tratamento.proximaDataPrevista)}</>
-              )}
+            )}
             </li>
           ))}
         </ul>

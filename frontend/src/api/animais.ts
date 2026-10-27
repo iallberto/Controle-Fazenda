@@ -10,6 +10,7 @@ export interface Animal {
   origem: 'NASCIDO_FAZENDA' | 'COMPRADO';
   dataNascimento: string;
   mae?: { id: string; brinco: string } | null;
+  pastoAtual?: { id: string; nome: string } | null;
 }
 
 export interface CriarAnimalDto {
@@ -22,6 +23,7 @@ export interface CriarAnimalDto {
   maeId?: string;
   dataCompra?: string;
   procedencia?: string;
+  pastoAtualId?: string;
 }
 
 export async function listarAnimais(categoria?: string): Promise<Animal[]> {

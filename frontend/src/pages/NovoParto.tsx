@@ -47,10 +47,9 @@ export function NovoParto() {
     return codigosDisponiveis.filter((c) => !idsUsadosEmOutrasLinhas.includes(c.id));
   }
 
-  async function handleSubmit(evento: FormEvent) {
-    pastoAtualId: pastoAtualId || undefined,
-    evento.preventDefault();
-    setErro('');
+ async function handleSubmit(evento: FormEvent) {
+  evento.preventDefault();
+  setErro('');
 
     try {
       await criarParto({
@@ -60,6 +59,7 @@ export function NovoParto() {
         resultado,
         observacoes: observacoes || undefined,
         crias: resultado === 'VIVO' ? crias : undefined,
+        pastoId: pastoAtualId || undefined, 
       });
       navigate('/animais');
     } catch (erroRequisicao) {

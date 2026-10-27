@@ -13,6 +13,7 @@ import {
   StatusCodigo,
 } from '../codigo-identificacao/entities/codigo-identificacao.entity';
 import { MovimentacaoPasto } from '../movimentacao-pasto/entities/movimentacao-pasto.entity';
+import { Pasto } from '../pasto/entities/pasto.entity';
 import { CreateAnimalDto } from './dto/create-animal.dto';
 import { UpdateAnimalDto } from './dto/update-animal.dto';
 
@@ -23,6 +24,8 @@ export class AnimalService {
     private readonly animalRepository: Repository<Animal>,
     @InjectRepository(CodigoIdentificacao)
     private readonly codigoRepository: Repository<CodigoIdentificacao>,
+    @InjectRepository(Pasto)
+    private readonly pastoRepository: Repository<Pasto>,
   ) {}
 
   async create(fazendaId: string, usuarioLogadoId: string, dto: CreateAnimalDto) {
@@ -41,6 +44,9 @@ export class AnimalService {
     }
     if (dto.paiId) {
       await this.garantirParenteDaMesmaFazenda(fazendaId, dto.paiId, 'pai');
+    }
+    if (dto.pastoAtualId) {
+      await this.garantirPastoDaMesmaFazenda(fazendaId, dto.pastoAtualId);
     }
 
     return this.animalRepository.manager.transaction(async (manager) => {
@@ -92,7 +98,7 @@ export class AnimalService {
   async findOne(fazendaId: string, id: string) {
     const animal = await this.animalRepository.findOne({
       where: { id },
-      relations: { mae: true },
+      relations: { mae: true, pastoAtual: true },
     });
     if (!animal) {
       throw new NotFoundException(`Animal ${id} não encontrado`);
@@ -165,6 +171,13 @@ export class AnimalService {
     }
     if (parente.fazendaId !== fazendaId) {
       throw new BadRequestException(`O animal indicado como ${papel} pertence a outra fazenda`);
+    }
+  }
+
+  private async garantirPastoDaMesmaFazenda(fazendaId: string, pastoId: string) {
+    const pasto = await this.pastoRepository.findOneBy({ id: pastoId });
+    if (!pasto || pasto.fazendaId !== fazendaId) {
+      throw new NotFoundException('Pasto não encontrado');
     }
   }
 }

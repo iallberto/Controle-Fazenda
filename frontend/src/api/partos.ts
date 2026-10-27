@@ -12,6 +12,7 @@ export interface CriarPartoDto {
   resultado: 'VIVO' | 'NATIMORTO';
   observacoes?: string;
   crias?: Cria[];
+  pastoId?: string;
 }
 
 export async function criarParto(dto: CriarPartoDto) {

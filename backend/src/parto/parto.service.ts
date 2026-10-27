@@ -8,6 +8,7 @@ import {
   StatusCodigo,
 } from '../codigo-identificacao/entities/codigo-identificacao.entity';
 import { MovimentacaoPasto } from '../movimentacao-pasto/entities/movimentacao-pasto.entity';
+import { Pasto } from '../pasto/entities/pasto.entity';
 import { CreateCriaDto, CreatePartoDto } from './dto/create-parto.dto';
 import { UpdatePartoDto } from './dto/update-parto.dto';
 
@@ -20,6 +21,8 @@ export class PartoService {
     private readonly animalRepository: Repository<Animal>,
     @InjectRepository(CodigoIdentificacao)
     private readonly codigoRepository: Repository<CodigoIdentificacao>,
+    @InjectRepository(Pasto)
+    private readonly pastoRepository: Repository<Pasto>,
   ) {}
 
   async create(fazendaId: string, usuarioLogadoId: string, dto: CreatePartoDto) {
@@ -32,6 +35,13 @@ export class PartoService {
     }
     if (mae.categoria !== CategoriaAnimal.MATRIZ) {
       throw new BadRequestException('Somente matrizes podem ter partos registrados');
+    }
+
+    if (dto.pastoId) {
+      const pasto = await this.pastoRepository.findOneBy({ id: dto.pastoId });
+      if (!pasto || pasto.fazendaId !== fazendaId) {
+        throw new NotFoundException('Pasto não encontrado');
+      }
     }
 
     const codigosPorCria = new Map<string, CodigoIdentificacao>();
