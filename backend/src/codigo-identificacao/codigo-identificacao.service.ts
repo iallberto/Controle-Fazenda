@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { randomBytes } from 'crypto';
 import { CodigoIdentificacao, StatusCodigo } from './entities/codigo-identificacao.entity';
+import { HistoricoNumero } from './entities/historico-numero.entity';
 import { Animal } from '../animal/entities/animal.entity';
 import { GerarLoteDto } from './dto/gerar-lote.dto';
 import { VincularCodigoDto } from './dto/vincular-codigo.dto';
@@ -19,6 +20,8 @@ export class CodigoIdentificacaoService {
     private readonly codigoRepository: Repository<CodigoIdentificacao>,
     @InjectRepository(Animal)
     private readonly animalRepository: Repository<Animal>,
+    @InjectRepository(HistoricoNumero)
+    private readonly historicoRepository: Repository<HistoricoNumero>,
   ) {}
 
   async gerarLote(fazendaId: string, usuarioLogadoId: string, dto: GerarLoteDto) {
@@ -74,6 +77,49 @@ export class CodigoIdentificacaoService {
     return registro;
   }
 
+  async buscarPorNumero(fazendaId: string, numeroInformado: string) {
+    const numero = this.normalizarNumero(numeroInformado);
+
+    const atual = await this.animalRepository.findOne({
+      where: { fazendaId, brinco: numero },
+    });
+    if (atual) {
+      return { animal: atual, numeroBuscado: numero, reemitido: false, aviso: null };
+    }
+
+    const historico = await this.historicoRepository.findOne({
+      where: { fazendaId, numeroAnterior: numero },
+      order: { reemitidoEm: 'DESC' },
+    });
+    if (!historico) {
+      throw new NotFoundException('Animal não encontrado');
+    }
+
+    const animal = await this.animalRepository.findOneBy({ id: historico.animalId });
+    if (!animal || animal.fazendaId !== fazendaId) {
+      throw new NotFoundException('Animal não encontrado');
+    }
+
+    return {
+      animal,
+      numeroBuscado: numero,
+      reemitido: true,
+      aviso: `O brinco #${this.formatarNumero(numero)} foi substituído. Agora é o #${this.formatarNumero(animal.brinco)}.`,
+    };
+  }
+
+  async listarHistoricoDoAnimal(fazendaId: string, animalId: string) {
+    const animal = await this.animalRepository.findOneBy({ id: animalId });
+    if (!animal || animal.fazendaId !== fazendaId) {
+      throw new NotFoundException('Animal não encontrado');
+    }
+
+    return this.historicoRepository.find({
+      where: { fazendaId, animalId },
+      order: { reemitidoEm: 'DESC' },
+    });
+  }
+
   async vincular(fazendaId: string, codigo: string, dto: VincularCodigoDto) {
     const registro = await this.codigoRepository.findOneBy({ codigo });
     if (!registro || registro.fazendaId !== fazendaId) {
@@ -101,6 +147,8 @@ export class CodigoIdentificacaoService {
     }
 
     return this.codigoRepository.manager.transaction(async (manager) => {
+      const numeroAnterior = animal.brinco;
+
       const codigoAntigo = await manager.findOne(CodigoIdentificacao, {
         where: { animalId: animal.id, status: StatusCodigo.VINCULADO },
       });
@@ -130,8 +178,27 @@ export class CodigoIdentificacaoService {
       animal.brinco = String(proximoNumero);
       await manager.save(animal);
 
+      const historico = manager.create(HistoricoNumero, {
+        fazendaId,
+        animalId: animal.id,
+        numeroAnterior,
+        numeroNovo: animal.brinco,
+        motivo: dto.motivo ?? null,
+        reemitidoPorId: usuarioLogadoId,
+      });
+      await manager.save(historico);
+
       return codigoSalvo;
     });
+  }
+
+  private normalizarNumero(valor: string): string {
+    const texto = valor.trim();
+    return /^\d+$/.test(texto) ? String(parseInt(texto, 10)) : texto;
+  }
+
+  private formatarNumero(valor: string): string {
+    return /^\d+$/.test(valor) ? valor.padStart(4, '0') : valor;
   }
 
   private async gerarCodigoUnico(): Promise<string> {

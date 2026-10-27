@@ -3,6 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { CodigoIdentificacaoService } from './codigo-identificacao.service';
 import { CodigoIdentificacao, StatusCodigo } from './entities/codigo-identificacao.entity';
 import { Animal } from '../animal/entities/animal.entity';
+import { HistoricoNumero } from './entities/historico-numero.entity';
 
 describe('CodigoIdentificacaoService', () => {
   let service: CodigoIdentificacaoService;
@@ -35,6 +36,7 @@ describe('CodigoIdentificacaoService', () => {
         CodigoIdentificacaoService,
         { provide: getRepositoryToken(CodigoIdentificacao), useValue: mockCodigoRepository },
         { provide: getRepositoryToken(Animal), useValue: mockAnimalRepository },
+        { provide: getRepositoryToken(HistoricoNumero), useValue: { find: jest.fn(), findOne: jest.fn() } },
       ],
     }).compile();
 

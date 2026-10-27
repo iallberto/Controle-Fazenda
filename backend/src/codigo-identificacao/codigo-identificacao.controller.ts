@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, ParseUUIDPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CodigoIdentificacaoService } from './codigo-identificacao.service';
 import { GerarLoteDto } from './dto/gerar-lote.dto';
@@ -16,6 +16,19 @@ export class CodigoIdentificacaoController {
   @Get('disponiveis')
   listarDisponiveis(@CurrentUser() user: JwtPayload) {
     return this.codigoService.listarDisponiveis(user.fazendaId);
+  }
+
+  @Get('numero/:numero')
+  buscarPorNumero(@CurrentUser() user: JwtPayload, @Param('numero') numero: string) {
+    return this.codigoService.buscarPorNumero(user.fazendaId, numero);
+  }
+
+  @Get('animal/:animalId/historico')
+  listarHistoricoDoAnimal(
+    @CurrentUser() user: JwtPayload,
+    @Param('animalId', ParseUUIDPipe) animalId: string,
+  ) {
+    return this.codigoService.listarHistoricoDoAnimal(user.fazendaId, animalId);
   }
 
   @Post('lote')

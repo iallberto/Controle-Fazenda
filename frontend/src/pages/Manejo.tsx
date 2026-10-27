@@ -1,12 +1,15 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { buscarPorBrinco, atualizarAnimal, type Animal } from '../api/animais';
+import { atualizarAnimal, type Animal } from '../api/animais';
+import { buscarPorNumero } from '../api/codigos';
 import { criarPesagem } from '../api/pesagens';
 import { criarTratamento } from '../api/tratamentos';
 import { moverAnimal } from '../api/movimentacoes';
 import { listarPastos, type Pasto } from '../api/pastos';
 import { useAuth } from '../contexts/useAuth';
+import { formatarBrinco } from '../utils/formatarBrinco';
+import { formatarSexo } from '../utils/formatadores';
 
 function extrairMensagem(erro: unknown, padrao: string) {
   const mensagem =
@@ -19,6 +22,7 @@ export function Manejo() {
   const [brinco, setBrinco] = useState('');
   const [animal, setAnimal] = useState<Animal | null>(null);
   const [erroBusca, setErroBusca] = useState('');
+  const [avisoReemissao, setAvisoReemissao] = useState('');
   const [pastos, setPastos] = useState<Pasto[]>([]);
 
   const [editandoCategoria, setEditandoCategoria] = useState(false);
@@ -46,12 +50,14 @@ export function Manejo() {
   async function handleBuscar(evento: FormEvent) {
     evento.preventDefault();
     setErroBusca('');
+    setAvisoReemissao('');
     setAnimal(null);
 
     try {
-      const encontrado = await buscarPorBrinco(brinco);
-      setAnimal(encontrado);
-      setNovaCategoria(encontrado.categoria);
+      const resultado = await buscarPorNumero(brinco);
+      setAnimal(resultado.animal);
+      setNovaCategoria(resultado.animal.categoria);
+      setAvisoReemissao(resultado.aviso ?? '');
     } catch (erro) {
       setErroBusca(extrairMensagem(erro, 'Animal não encontrado.'));
     }
@@ -136,9 +142,18 @@ export function Manejo() {
 
       {animal && (
         <>
+          {avisoReemissao && (
+            <p
+              role="status"
+              style={{ background: '#fff3cd', padding: '0.5rem', borderRadius: '4px' }}
+            >
+              {avisoReemissao}
+            </p>
+          )}
+
           <section>
-            <h2>Animal #{animal.brinco}</h2>
-            <p>Sexo: {animal.sexo}</p>
+            <h2>Brinco {formatarBrinco(animal.brinco)}</h2>
+            <p>Sexo: {formatarSexo(animal.sexo)}</p>
             <p>
               Categoria: {editandoCategoria ? (
                 <>
