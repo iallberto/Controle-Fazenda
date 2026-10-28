@@ -39,7 +39,7 @@ export function QrCodes() {
   const [erro, setErro] = useState('');
   const [sucesso, setSucesso] = useState('');
 
-  function carregar(filtro: FiltroCodigos) {
+  /*function carregar(filtro: FiltroCodigos) {
     setCarregando(true);
     setErroLista('');
     setPagina(1);
@@ -47,10 +47,29 @@ export function QrCodes() {
       .then(setCodigos)
       .catch((e) => setErroLista(extrairMensagem(e, 'Não foi possível carregar os códigos.')))
       .finally(() => setCarregando(false));
-  }
+  }*/
 
   useEffect(() => {
-    carregar(filtroAplicado);
+    let cancelado = false;
+
+    listarCodigos(filtroAplicado)
+      .then((dados) => {
+        if (cancelado) return;
+        setCodigos(dados);
+        setErroLista('');
+        setPagina(1);
+      })
+      .catch((e) => {
+        if (cancelado) return;
+        setErroLista(extrairMensagem(e, 'Não foi possível carregar os códigos.'));
+      })
+      .finally(() => {
+        if (!cancelado) setCarregando(false);
+      });
+
+    return () => {
+      cancelado = true;
+    };
   }, [filtroAplicado]);
 
   function handleFiltrar(evento: FormEvent) {
@@ -62,7 +81,7 @@ export function QrCodes() {
       setErroLista('A faixa inicial não pode ser maior que a final.');
       return;
     }
-
+    setCarregando(true);
     setFiltroAplicado({
       status: status || undefined,
       de: de ? Number(de) : undefined,
@@ -76,6 +95,7 @@ export function QrCodes() {
     setAte('');
     setErroLista('');
     setSucesso('');
+    setCarregando(true);
     setFiltroAplicado({ status: 'DISPONIVEL' });
   }
 
@@ -98,6 +118,7 @@ export function QrCodes() {
         setStatus('DISPONIVEL');
         setDe(String(primeiro));
         setAte(String(ultimo));
+        setCarregando(true);
         setFiltroAplicado({ status: 'DISPONIVEL', de: primeiro, ate: ultimo });
       }
     } catch (e) {
