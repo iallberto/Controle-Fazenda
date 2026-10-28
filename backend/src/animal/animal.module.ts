@@ -8,7 +8,7 @@ import { MovimentacaoPasto } from '../movimentacao-pasto/entities/movimentacao-p
 import { Pasto } from '../pasto/entities/pasto.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Animal, CodigoIdentificacao, MovimentacaoPasto])],
+  imports: [TypeOrmModule.forFeature([Animal, CodigoIdentificacao, MovimentacaoPasto, Pasto])],
   controllers: [AnimalController],
   providers: [AnimalService],
 })
