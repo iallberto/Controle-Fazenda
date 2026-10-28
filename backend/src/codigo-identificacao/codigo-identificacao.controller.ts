@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Body, Param, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, ParseUUIDPipe, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CodigoIdentificacaoService } from './codigo-identificacao.service';
 import { GerarLoteDto } from './dto/gerar-lote.dto';
 import { VincularCodigoDto } from './dto/vincular-codigo.dto';
 import { ReemitirCodigoDto } from './dto/reemitir-codigo.dto';
+import { ListarCodigosQueryDto } from './dto/listar-codigos-query.dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { JwtPayload } from '../auth/auth.service';
 
@@ -12,6 +13,11 @@ import type { JwtPayload } from '../auth/auth.service';
 @Controller('codigo')
 export class CodigoIdentificacaoController {
   constructor(private readonly codigoService: CodigoIdentificacaoService) {}
+
+  @Get()
+  listar(@CurrentUser() user: JwtPayload, @Query() filtro: ListarCodigosQueryDto) {
+    return this.codigoService.listar(user.fazendaId, filtro);
+  }
 
   @Get('disponiveis')
   listarDisponiveis(@CurrentUser() user: JwtPayload) {

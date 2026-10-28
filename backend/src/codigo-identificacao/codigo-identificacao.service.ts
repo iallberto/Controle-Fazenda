@@ -2,9 +2,16 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import {
+  Between,
+  FindOptionsWhere,
+  LessThanOrEqual,
+  MoreThanOrEqual,
+  Repository,
+} from 'typeorm';
 import { randomBytes } from 'crypto';
 import { CodigoIdentificacao, StatusCodigo } from './entities/codigo-identificacao.entity';
 import { HistoricoNumero } from './entities/historico-numero.entity';
@@ -12,6 +19,7 @@ import { Animal } from '../animal/entities/animal.entity';
 import { GerarLoteDto } from './dto/gerar-lote.dto';
 import { VincularCodigoDto } from './dto/vincular-codigo.dto';
 import { ReemitirCodigoDto } from './dto/reemitir-codigo.dto';
+import { ListarCodigosQueryDto } from './dto/listar-codigos-query.dto';
 
 @Injectable()
 export class CodigoIdentificacaoService {
@@ -53,6 +61,34 @@ export class CodigoIdentificacaoService {
   async listarDisponiveis(fazendaId: string) {
     return this.codigoRepository.find({
       where: { fazendaId, status: StatusCodigo.DISPONIVEL },
+      order: { numero: 'ASC' },
+    });
+  }
+
+  async listar(fazendaId: string, filtro: ListarCodigosQueryDto) {
+    // Number() garante o tipo mesmo se o ValidationPipe não estiver com transform ligado
+    const de = filtro.de !== undefined ? Number(filtro.de) : undefined;
+    const ate = filtro.ate !== undefined ? Number(filtro.ate) : undefined;
+
+    if (de !== undefined && ate !== undefined && de > ate) {
+      throw new BadRequestException('A faixa inicial não pode ser maior que a final');
+    }
+
+    const where: FindOptionsWhere<CodigoIdentificacao> = { fazendaId };
+    if (filtro.status) {
+      where.status = filtro.status;
+    }
+    if (de !== undefined && ate !== undefined) {
+      where.numero = Between(de, ate);
+    } else if (de !== undefined) {
+      where.numero = MoreThanOrEqual(de);
+    } else if (ate !== undefined) {
+      where.numero = LessThanOrEqual(ate);
+    }
+
+    return this.codigoRepository.find({
+      where,
+      relations: { animal: true },
       order: { numero: 'ASC' },
     });
   }
