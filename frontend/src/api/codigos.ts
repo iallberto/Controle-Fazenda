@@ -6,6 +6,14 @@ export interface Codigo {
   codigo: string;
   numero: number;
   status: 'DISPONIVEL' | 'VINCULADO' | 'DESATIVADO';
+  animalId: string | null;
+  animal?: { id: string; brinco: string } | null;
+}
+
+export interface FiltroCodigos {
+  status?: Codigo['status'];
+  de?: number;
+  ate?: number;
 }
 
 export interface HistoricoNumero {
@@ -26,6 +34,11 @@ export interface BuscaPorNumero {
 
 export async function listarDisponiveis(): Promise<Codigo[]> {
   const resposta = await apiClient.get<Codigo[]>('/codigo/disponiveis');
+  return resposta.data;
+}
+
+export async function listarCodigos(filtro: FiltroCodigos = {}): Promise<Codigo[]> {
+  const resposta = await apiClient.get<Codigo[]>('/codigo', { params: filtro });
   return resposta.data;
 }
 
