@@ -6,44 +6,59 @@ import {
   atualizarValorArroba,
   type Configuracao as ConfiguracaoType,
 } from '../api/configuracao';
+import { mensagemDeErro } from '../api/client';
+import { useAuth } from '../contexts/useAuth';
 
 export function Configuracao() {
   const [config, setConfig] = useState<ConfiguracaoType | null>(null);
   const [valoresEditados, setValoresEditados] = useState<Record<string, string>>({});
+  const [erro, setErro] = useState('');
+  const { usuario } = useAuth();
+  // Só o dono altera as configurações; o funcionário apenas consulta
+  const somenteLeitura = usuario?.papel !== 'DONO';
 
   function carregar() {
-    obterConfiguracao().then((dados) => {
-      setConfig(dados);
-      const iniciais: Record<string, string> = {};
-      dados.valoresArroba.forEach((v) => {
-        iniciais[v.categoria] = v.pesoReferenciaKg;
-      });
-      setValoresEditados(iniciais);
-    });
+    obterConfiguracao()
+      .then((dados) => {
+        setConfig(dados);
+        const iniciais: Record<string, string> = {};
+        dados.valoresArroba.forEach((v) => {
+          iniciais[v.categoria] = v.pesoReferenciaKg;
+        });
+        setValoresEditados(iniciais);
+      })
+      .catch((erroRequisicao) => setErro(mensagemDeErro(erroRequisicao)));
+  }
+
+  async function salvar(acao: () => Promise<unknown>) {
+    setErro('');
+    try {
+      await acao();
+      carregar();
+    } catch (erroRequisicao) {
+      setErro(mensagemDeErro(erroRequisicao, 'Não foi possível salvar.'));
+    }
   }
 
   useEffect(() => {
     carregar();
   }, []);
 
-  async function handleNotificacoesChange(valor: boolean) {
-    await atualizarPreferencias({ notificacoesAtivas: valor });
-    carregar();
+  function handleNotificacoesChange(valor: boolean) {
+    return salvar(() => atualizarPreferencias({ notificacoesAtivas: valor }));
   }
 
-  async function handleSomChange(valor: boolean) {
-    await atualizarPreferencias({ somAtivo: valor });
-    carregar();
+  function handleSomChange(valor: boolean) {
+    return salvar(() => atualizarPreferencias({ somAtivo: valor }));
   }
 
-  async function handleSalvarArroba(categoria: string) {
+  function handleSalvarArroba(categoria: string) {
     const valor = Number(valoresEditados[categoria]);
-    await atualizarValorArroba(categoria, valor);
-    carregar();
+    return salvar(() => atualizarValorArroba(categoria, valor));
   }
 
   if (!config) {
-    return <p>Carregando...</p>;
+    return erro ? <p role="alert">{erro}</p> : <p>Carregando...</p>;
   }
 
   return (
@@ -53,12 +68,16 @@ export function Configuracao() {
         <Link to="/">Voltar ao painel</Link>
       </header>
 
+      {erro && <p role="alert">{erro}</p>}
+      {somenteLeitura && <p>Somente o dono da fazenda pode alterar as configurações.</p>}
+
       <section>
         <h2>Notificações</h2>
         <label>
           <input
             type="checkbox"
             checked={config.notificacoesAtivas}
+            disabled={somenteLeitura}
             onChange={(e) => handleNotificacoesChange(e.target.checked)}
           />
           Notificações ativas
@@ -68,6 +87,7 @@ export function Configuracao() {
           <input
             type="checkbox"
             checked={config.somAtivo}
+            disabled={somenteLeitura}
             onChange={(e) => handleSomChange(e.target.checked)}
           />
           Som ativo
@@ -84,11 +104,14 @@ export function Configuracao() {
               type="number"
               step="0.1"
               value={valoresEditados[valor.categoria] ?? ''}
+              disabled={somenteLeitura}
               onChange={(e) =>
                 setValoresEditados({ ...valoresEditados, [valor.categoria]: e.target.value })
               }
             />
-            <button onClick={() => handleSalvarArroba(valor.categoria)}>Salvar</button>
+            {!somenteLeitura && (
+              <button onClick={() => handleSalvarArroba(valor.categoria)}>Salvar</button>
+            )}
           </div>
         ))}
       </section>

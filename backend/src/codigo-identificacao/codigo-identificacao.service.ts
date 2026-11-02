@@ -20,6 +20,7 @@ import { GerarLoteDto } from './dto/gerar-lote.dto';
 import { VincularCodigoDto } from './dto/vincular-codigo.dto';
 import { ReemitirCodigoDto } from './dto/reemitir-codigo.dto';
 import { ListarCodigosQueryDto } from './dto/listar-codigos-query.dto';
+import { garantirAnimalAtivo, reservarCodigo, travarNumeracaoDaFazenda } from '../common/vinculos';
 
 @Injectable()
 export class CodigoIdentificacaoService {
@@ -34,6 +35,7 @@ export class CodigoIdentificacaoService {
 
   async gerarLote(fazendaId: string, usuarioLogadoId: string, dto: GerarLoteDto) {
     return this.codigoRepository.manager.transaction(async (manager) => {
+      await travarNumeracaoDaFazenda(manager, fazendaId);
       const ultimo = await manager.findOne(CodigoIdentificacao, {
         where: { fazendaId },
         order: { numero: 'DESC' },
@@ -170,10 +172,8 @@ export class CodigoIdentificacaoService {
       throw new NotFoundException('Animal não encontrado');
     }
 
-    registro.status = StatusCodigo.VINCULADO;
-    registro.animalId = animal.id;
-    registro.vinculadoEm = new Date();
-    return this.codigoRepository.save(registro);
+    await reservarCodigo(this.codigoRepository.manager, registro.id, animal.id);
+    return this.codigoRepository.findOneBy({ id: registro.id });
   }
 
   async reemitir(fazendaId: string, usuarioLogadoId: string, dto: ReemitirCodigoDto) {
@@ -182,7 +182,10 @@ export class CodigoIdentificacaoService {
       throw new NotFoundException('Animal não encontrado');
     }
 
+    garantirAnimalAtivo(animal);
+
     return this.codigoRepository.manager.transaction(async (manager) => {
+      await travarNumeracaoDaFazenda(manager, fazendaId);
       const numeroAnterior = animal.brinco;
 
       const codigoAntigo = await manager.findOne(CodigoIdentificacao, {

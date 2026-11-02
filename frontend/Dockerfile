@@ -4,6 +4,9 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
+# O Vite embute a URL da API no build; o .env local não entra na imagem
+ARG VITE_API_URL=http://localhost:3000
+ENV VITE_API_URL=$VITE_API_URL
 RUN npm run build
 
 # Etapa de produção: só o Nginx servindo os arquivos prontos

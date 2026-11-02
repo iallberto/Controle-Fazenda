@@ -9,11 +9,13 @@ import {
   type ObitoPorCausa,
   type TratamentoRelatorio,
 } from '../api/relatorios';
+import { mensagemDeErro } from '../api/client';
 
 export function Relatorios() {
   const [inicio, setInicio] = useState('');
   const [fim, setFim] = useState('');
   const [carregando, setCarregando] = useState(false);
+  const [erro, setErro] = useState('');
 
   const [nascimentos, setNascimentos] = useState<NascimentoOuNatimorto[]>([]);
   const [natimortos, setNatimortos] = useState<NascimentoOuNatimorto[]>([]);
@@ -23,19 +25,25 @@ export function Relatorios() {
   async function handleGerar(evento: FormEvent) {
     evento.preventDefault();
     setCarregando(true);
+    setErro('');
 
-    const [resNascimentos, resNatimortos, resObitos, resTratamentos] = await Promise.all([
-      buscarNascimentos(inicio, fim),
-      buscarNatimortos(inicio, fim),
-      buscarObitosPorCausa(inicio, fim),
-      buscarTratamentosPorPeriodo(inicio, fim),
-    ]);
+    try {
+      const [resNascimentos, resNatimortos, resObitos, resTratamentos] = await Promise.all([
+        buscarNascimentos(inicio, fim),
+        buscarNatimortos(inicio, fim),
+        buscarObitosPorCausa(inicio, fim),
+        buscarTratamentosPorPeriodo(inicio, fim),
+      ]);
 
-    setNascimentos(resNascimentos);
-    setNatimortos(resNatimortos);
-    setObitosPorCausa(resObitos);
-    setTratamentos(resTratamentos);
-    setCarregando(false);
+      setNascimentos(resNascimentos);
+      setNatimortos(resNatimortos);
+      setObitosPorCausa(resObitos);
+      setTratamentos(resTratamentos);
+    } catch (erroRequisicao) {
+      setErro(mensagemDeErro(erroRequisicao, 'Não foi possível gerar os relatórios.'));
+    } finally {
+      setCarregando(false);
+    }
   }
 
   return (
@@ -54,6 +62,7 @@ export function Relatorios() {
       </form>
 
       {carregando && <p>Carregando...</p>}
+      {erro && <p role="alert">{erro}</p>}
 
       {!carregando && (
         <>

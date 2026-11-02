@@ -15,6 +15,8 @@ describe('PartoService', () => {
   let service: PartoService;
 
   const mockManager = {
+    update: jest.fn(async () => ({ affected: 1 })),
+    query: jest.fn(),
     create: jest.fn(),
     save: jest.fn(),
     findOne: jest.fn(),
@@ -72,6 +74,7 @@ describe('PartoService', () => {
       fazendaId,
       categoria: CategoriaAnimal.MATRIZ,
       racaId: 'raca-1',
+      status: 'ATIVO',
     };
     const codigoDisponivel = (id: string, numero: number) => ({
       id,

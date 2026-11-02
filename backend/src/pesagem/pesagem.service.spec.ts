@@ -41,7 +41,7 @@ describe('PesagemService', () => {
     const usuarioLogadoId = 'usuario-logado-1';
 
     it('usa o usuario logado como pesadoPor quando nao informado', async () => {
-      mockAnimalRepository.findOneBy.mockResolvedValue({ id: 'animal-1', fazendaId });
+      mockAnimalRepository.findOneBy.mockResolvedValue({ id: 'animal-1', fazendaId, status: 'ATIVO' });
       mockPesagemRepository.create.mockImplementation((entrada) => entrada);
       mockPesagemRepository.save.mockImplementation((entrada) => Promise.resolve(entrada));
 
@@ -64,7 +64,7 @@ describe('PesagemService', () => {
   describe('findAllPorAnimal', () => {
     it('calcula o GMD entre pesagens consecutivas', async () => {
       const fazendaId = 'fazenda-1';
-      mockAnimalRepository.findOneBy.mockResolvedValue({ id: 'animal-1', fazendaId });
+      mockAnimalRepository.findOneBy.mockResolvedValue({ id: 'animal-1', fazendaId, status: 'ATIVO' });
       mockPesagemRepository.find.mockResolvedValue([
         { id: 'p1', animalId: 'animal-1', pesoKg: 100, data: '2026-01-01' },
         { id: 'p2', animalId: 'animal-1', pesoKg: 130, data: '2026-01-11' },

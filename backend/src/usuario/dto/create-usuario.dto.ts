@@ -1,4 +1,5 @@
 import { IsEmail, IsEnum, IsNotEmpty, IsString, IsUUID, MinLength } from 'class-validator';
+import { NormalizarEmail } from '../../common/transformacoes';
 import { PapelUsuario } from '../entities/usuario.entity';
 
 export class CreateUsuarioDto {
@@ -7,6 +8,7 @@ export class CreateUsuarioDto {
   @IsNotEmpty()
   nome: string;
 
+  @NormalizarEmail()
   @IsEmail()
   email: string;
 

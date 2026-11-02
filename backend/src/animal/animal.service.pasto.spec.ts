@@ -14,7 +14,7 @@ import { CreateAnimalDto } from './dto/create-animal.dto';
 describe('AnimalService - pasto no cadastro (M9)', () => {
   let service: AnimalService;
 
-  const manager = { create: jest.fn(), save: jest.fn() };
+  const manager = { create: jest.fn(), save: jest.fn(), update: jest.fn(async () => ({ affected: 1 })) };
   const animalRepository = { manager: { transaction: jest.fn() }, findOneBy: jest.fn() };
   const codigoRepository = { findOneBy: jest.fn() };
   const pastoRepository = { findOneBy: jest.fn() };
@@ -30,6 +30,7 @@ describe('AnimalService - pasto no cadastro (M9)', () => {
 
   beforeEach(async () => {
     jest.resetAllMocks();
+    manager.update.mockResolvedValue({ affected: 1 });
     manager.create.mockImplementation((_e: unknown, dados: object) => ({ ...dados }));
     manager.save.mockImplementation(async (e: object) => ({ id: 'novo', ...e }));
     animalRepository.manager.transaction.mockImplementation(

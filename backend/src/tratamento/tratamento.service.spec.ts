@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { TratamentoService } from './tratamento.service';
 import { Tratamento, AplicadoPorTipo } from './entities/tratamento.entity';
 import { Animal } from '../animal/entities/animal.entity';
@@ -59,7 +59,7 @@ describe('TratamentoService', () => {
     };
 
     beforeEach(() => {
-      mockAnimalRepository.findOneBy.mockResolvedValue({ id: 'animal-1', fazendaId });
+      mockAnimalRepository.findOneBy.mockResolvedValue({ id: 'animal-1', fazendaId, status: 'ATIVO' });
       mockTratamentoRepository.create.mockImplementation((entrada) => entrada);
       mockTratamentoRepository.save.mockImplementation((entrada) => Promise.resolve(entrada));
     });
@@ -110,7 +110,7 @@ describe('TratamentoService', () => {
       };
 
       await expect(service.create(fazendaId, usuarioLogadoId, dto as any)).rejects.toThrow(
-        ForbiddenException,
+        NotFoundException,
       );
     });
 

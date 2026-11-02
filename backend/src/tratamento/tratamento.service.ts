@@ -1,7 +1,6 @@
 import {
   Injectable,
   NotFoundException,
-  ForbiddenException,
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -12,6 +11,8 @@ import { Usuario } from '../usuario/entities/usuario.entity';
 import { Veterinario } from '../veterinario/entities/veterinario.entity';
 import { CreateTratamentoDto } from './dto/create-tratamento.dto';
 import { UpdateTratamentoDto } from './dto/update-tratamento.dto';
+import { garantirAnimalAtivo } from '../common/vinculos';
+import { formatarDataLocal } from '../common/datas';
 
 @Injectable()
 export class TratamentoService {
@@ -31,26 +32,14 @@ export class TratamentoService {
     if (!animal || animal.fazendaId !== fazendaId) {
       throw new NotFoundException('Animal não encontrado');
     }
+    garantirAnimalAtivo(animal);
 
-    if (dto.aplicadoPorTipo === AplicadoPorTipo.USUARIO) {
-      const usuario = await this.usuarioRepository.findOneBy({ id: dto.aplicadoPorUsuarioId });
-      if (!usuario) {
-        throw new NotFoundException('Usuário informado como aplicador não encontrado');
-      }
-      if (usuario.fazendaId !== fazendaId) {
-        throw new ForbiddenException('Este usuário não pertence à sua fazenda');
-      }
-    } else {
-      const veterinario = await this.veterinarioRepository.findOneBy({
-        id: dto.aplicadoPorVeterinarioId,
-      });
-      if (!veterinario || veterinario.fazendaId !== fazendaId) {
-        throw new NotFoundException('Veterinário informado não encontrado');
-      }
-      if (!veterinario.ativo) {
-        throw new BadRequestException('Este veterinário está inativo');
-      }
-    }
+    await this.validarAplicador(
+      fazendaId,
+      dto.aplicadoPorTipo,
+      dto.aplicadoPorUsuarioId,
+      dto.aplicadoPorVeterinarioId,
+    );
 
     const tratamento = this.tratamentoRepository.create({
       animalId: dto.animalId,
@@ -80,18 +69,34 @@ export class TratamentoService {
       where: { id },
       relations: { animal: true },
     });
-    if (!tratamento) {
+    if (!tratamento || tratamento.animal.fazendaId !== fazendaId) {
       throw new NotFoundException(`Tratamento ${id} não encontrado`);
-    }
-    if (tratamento.animal.fazendaId !== fazendaId) {
-      throw new ForbiddenException('Este tratamento não pertence à sua fazenda');
     }
     return tratamento;
   }
 
   async update(fazendaId: string, id: string, dto: UpdateTratamentoDto) {
     const tratamento = await this.findOne(fazendaId, id);
-    Object.assign(tratamento, dto);
+    const { aplicadoPorTipo, aplicadoPorUsuarioId, aplicadoPorVeterinarioId, ...demais } = dto;
+
+    if (
+      aplicadoPorTipo !== undefined ||
+      aplicadoPorUsuarioId !== undefined ||
+      aplicadoPorVeterinarioId !== undefined
+    ) {
+      const tipo = aplicadoPorTipo ?? tratamento.aplicadoPorTipo;
+      const usuarioId = aplicadoPorUsuarioId ?? tratamento.aplicadoPorUsuarioId ?? undefined;
+      const veterinarioId =
+        aplicadoPorVeterinarioId ?? tratamento.aplicadoPorVeterinarioId ?? undefined;
+      await this.validarAplicador(fazendaId, tipo, usuarioId, veterinarioId);
+      // Mantém só o aplicador correspondente ao tipo
+      tratamento.aplicadoPorTipo = tipo;
+      tratamento.aplicadoPorUsuarioId = tipo === AplicadoPorTipo.USUARIO ? usuarioId! : null;
+      tratamento.aplicadoPorVeterinarioId =
+        tipo === AplicadoPorTipo.VETERINARIO ? veterinarioId! : null;
+    }
+
+    Object.assign(tratamento, demais);
 
     const novaData = dto.data ?? tratamento.data;
     const novaRecorrencia = dto.recorrenciaDias ?? tratamento.recorrenciaDias;
@@ -100,12 +105,36 @@ export class TratamentoService {
     return this.tratamentoRepository.save(tratamento);
   }
 
+  private async validarAplicador(
+    fazendaId: string,
+    tipo: AplicadoPorTipo,
+    usuarioId?: string,
+    veterinarioId?: string,
+  ) {
+    if (tipo === AplicadoPorTipo.USUARIO) {
+      const usuario = usuarioId ? await this.usuarioRepository.findOneBy({ id: usuarioId }) : null;
+      if (!usuario || usuario.fazendaId !== fazendaId) {
+        throw new NotFoundException('Usuário informado como aplicador não encontrado');
+      }
+    } else {
+      const veterinario = veterinarioId
+        ? await this.veterinarioRepository.findOneBy({ id: veterinarioId })
+        : null;
+      if (!veterinario || veterinario.fazendaId !== fazendaId) {
+        throw new NotFoundException('Veterinário informado não encontrado');
+      }
+      if (!veterinario.ativo) {
+        throw new BadRequestException('Este veterinário está inativo');
+      }
+    }
+  }
+
   private calcularProximaData(data: string, recorrenciaDias?: number | null): string | null {
     if (!recorrenciaDias) {
       return null;
     }
     const base = new Date(data + 'T00:00:00');
     base.setDate(base.getDate() + recorrenciaDias);
-    return base.toISOString().split('T')[0];
+    return formatarDataLocal(base);
   }
 }

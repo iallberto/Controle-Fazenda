@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Animal, StatusAnimal } from '../animal/entities/animal.entity';
 import { Parto, ResultadoParto } from '../parto/entities/parto.entity';
 import { Tratamento } from '../tratamento/entities/tratamento.entity';
+import { formatarDataLocal } from '../common/datas';
 
 
 @Injectable()
@@ -20,7 +21,7 @@ export class RelatorioService {
   async painelInicial(fazendaId: string) {
     const primeiroDiaDoMes = new Date();
     primeiroDiaDoMes.setDate(1);
-    const inicioMes = primeiroDiaDoMes.toISOString().split('T')[0];
+    const inicioMes = formatarDataLocal(primeiroDiaDoMes);
 
     const porCategoria = await this.animalRepository
       .createQueryBuilder('animal')
@@ -41,10 +42,11 @@ export class RelatorioService {
       .groupBy('pasto.nome')
       .getRawMany();
 
-    const nascimentosNoMes = await this.partoRepository
-      .createQueryBuilder('parto')
-      .innerJoin('parto.mae', 'mae')
-      .where('mae.fazendaId = :fazendaId', { fazendaId })
+    // Conta as crias, não os partos: um parto de gêmeos são dois nascimentos
+    const nascimentosNoMes = await this.animalRepository
+      .createQueryBuilder('cria')
+      .innerJoin('cria.parto', 'parto')
+      .where('cria.fazendaId = :fazendaId', { fazendaId })
       .andWhere('parto.resultado = :resultado', { resultado: ResultadoParto.VIVO })
       .andWhere('parto.data >= :inicioMes', { inicioMes })
       .getCount();

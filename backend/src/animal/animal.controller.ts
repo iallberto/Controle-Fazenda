@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Query, ParseUUIDPipe, ParseEnumPipe } from '@nestjs/common';
 import { AnimalService } from './animal.service';
 import { CreateAnimalDto } from './dto/create-animal.dto';
 import { UpdateAnimalDto } from './dto/update-animal.dto';
@@ -21,7 +21,7 @@ export class AnimalController {
   }
 
  @Get()
-  findAll(@CurrentUser() user: JwtPayload, @Query('categoria') categoria?: CategoriaAnimal) {
+  findAll(@CurrentUser() user: JwtPayload, @Query('categoria', new ParseEnumPipe(CategoriaAnimal, { optional: true })) categoria?: CategoriaAnimal) {
     return this.animalService.findAll(user.fazendaId, categoria);
   }
 
@@ -31,14 +31,14 @@ export class AnimalController {
   }
 
   @Get(':id')
-  findOne(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+  findOne(@CurrentUser() user: JwtPayload, @Param('id', ParseUUIDPipe) id: string) {
     return this.animalService.findOne(user.fazendaId, id);
   }
 
   @Patch(':id')
   update(
     @CurrentUser() user: JwtPayload,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateAnimalDto,
   ) {
     return this.animalService.update(user.fazendaId, id, dto);
@@ -47,7 +47,7 @@ export class AnimalController {
   @Patch(':id/status')
   alterarStatus(
     @CurrentUser() user: JwtPayload,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: AlterarStatusAnimalDto,
   ) {
     return this.animalService.alterarStatus(user.fazendaId, id, dto.status, dto.motivo, dto.data);

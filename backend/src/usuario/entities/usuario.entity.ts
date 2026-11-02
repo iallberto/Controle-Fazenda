@@ -46,6 +46,9 @@ export class Usuario {
   @Column({ name: 'criado_por', type: 'uuid', nullable: true })
   criadoPorId: string | null;
 
+  @Column({ default: true })
+  ativo: boolean;
+
   @CreateDateColumn({ name: 'criado_em' })
   criadoEm: Date;
 }

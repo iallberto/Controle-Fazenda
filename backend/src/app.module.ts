@@ -36,7 +36,9 @@ import { PesagemModule } from './pesagem/pesagem.module';
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_DATABASE'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: true,
+        // Em produção o schema deve evoluir por migrations: o synchronize pode
+        // apagar colunas quando uma entidade muda. Ligue só em desenvolvimento.
+        synchronize: config.get<string>('DB_SYNCHRONIZE') === 'true',
       }),
     }),
     FazendaModule,

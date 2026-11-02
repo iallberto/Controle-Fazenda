@@ -58,7 +58,7 @@ export class RacaService implements OnModuleInit {
       throw new NotFoundException(`Raça ${id} não encontrada`);
     }
     if (raca.fazendaId !== null && raca.fazendaId !== fazendaId) {
-      throw new ForbiddenException('Esta raça não pertence à sua fazenda');
+      throw new NotFoundException(`Raça ${id} não encontrada`);
     }
     return raca;
   }

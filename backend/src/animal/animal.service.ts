@@ -3,10 +3,9 @@ import {
   NotFoundException,
   ConflictException,
   BadRequestException,
-  ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 import { Animal, CategoriaAnimal, Sexo, StatusAnimal } from './entities/animal.entity';
 import {
   CodigoIdentificacao,
@@ -16,6 +15,11 @@ import { MovimentacaoPasto } from '../movimentacao-pasto/entities/movimentacao-p
 import { Pasto } from '../pasto/entities/pasto.entity';
 import { CreateAnimalDto } from './dto/create-animal.dto';
 import { UpdateAnimalDto } from './dto/update-animal.dto';
+import {
+  garantirAnimalAtivo,
+  garantirRacaDisponivel,
+  reservarCodigo,
+} from '../common/vinculos';
 
 @Injectable()
 export class AnimalService {
@@ -39,12 +43,7 @@ export class AnimalService {
       throw new ConflictException('Este código já está vinculado ou foi desativado');
     }
 
-    if (dto.maeId) {
-      await this.garantirParenteDaMesmaFazenda(fazendaId, dto.maeId, 'mãe');
-    }
-    if (dto.paiId) {
-      await this.garantirParenteDaMesmaFazenda(fazendaId, dto.paiId, 'pai');
-    }
+    await this.validarVinculos(fazendaId, dto);
     if (dto.pastoAtualId) {
       await this.garantirPastoDaMesmaFazenda(fazendaId, dto.pastoAtualId);
     }
@@ -70,10 +69,7 @@ export class AnimalService {
       });
       const animalSalvo = await manager.save(animal);
 
-      codigo.status = StatusCodigo.VINCULADO;
-      codigo.animalId = animalSalvo.id;
-      codigo.vinculadoEm = new Date();
-      await manager.save(codigo);
+      await reservarCodigo(manager, codigo.id, animalSalvo.id);
 
       if (dto.pastoAtualId) {
         const movimentacao = manager.create(MovimentacaoPasto, {
@@ -100,11 +96,8 @@ export class AnimalService {
       where: { id },
       relations: { mae: true, pastoAtual: true },
     });
-    if (!animal) {
+    if (!animal || animal.fazendaId !== fazendaId) {
       throw new NotFoundException(`Animal ${id} não encontrado`);
-    }
-    if (animal.fazendaId !== fazendaId) {
-      throw new ForbiddenException('Este animal não pertence à sua fazenda');
     }
     return animal;
   }
@@ -124,6 +117,10 @@ export class AnimalService {
       const categoriaEfetiva = dto.categoria ?? animal.categoria;
       this.validarSexoCategoria(sexoEfetivo, categoriaEfetiva);
     }
+    if (dto.maeId === id || dto.paiId === id) {
+      throw new BadRequestException('Um animal não pode ser mãe ou pai de si mesmo');
+    }
+    await this.validarVinculos(fazendaId, dto);
     Object.assign(animal, dto);
     return this.animalRepository.save(animal);
   }
@@ -135,11 +132,44 @@ export class AnimalService {
     motivo: string,
     data: string,
   ) {
+    if (novoStatus === StatusAnimal.ATIVO) {
+      throw new BadRequestException('Use um status de saída (vendido, morto ou descartado)');
+    }
     const animal = await this.findOne(fazendaId, id);
-    animal.status = novoStatus;
-    animal.motivoStatus = motivo;
-    animal.dataStatus = data;
-    return this.animalRepository.save(animal);
+    garantirAnimalAtivo(animal);
+
+    return this.animalRepository.manager.transaction(async (manager) => {
+      // O animal sai do rebanho: fecha a permanência no pasto atual
+      const movimentacaoAberta = await manager.findOne(MovimentacaoPasto, {
+        where: { animalId: animal.id, dataSaida: IsNull() },
+      });
+      if (movimentacaoAberta) {
+        movimentacaoAberta.dataSaida = data;
+        await manager.save(movimentacaoAberta);
+      }
+
+      animal.status = novoStatus;
+      animal.motivoStatus = motivo;
+      animal.dataStatus = data;
+      animal.pastoAtualId = null;
+      animal.pastoAtual = undefined;
+      return manager.save(animal);
+    });
+  }
+
+  private async validarVinculos(
+    fazendaId: string,
+    dto: { maeId?: string; paiId?: string; racaId?: string },
+  ) {
+    if (dto.maeId) {
+      await this.garantirParenteDaMesmaFazenda(fazendaId, dto.maeId, 'mãe', Sexo.F);
+    }
+    if (dto.paiId) {
+      await this.garantirParenteDaMesmaFazenda(fazendaId, dto.paiId, 'pai', Sexo.M);
+    }
+    if (dto.racaId) {
+      await garantirRacaDisponivel(this.animalRepository.manager, fazendaId, dto.racaId);
+    }
   }
 
   private validarSexoCategoria(sexo: Sexo, categoria: CategoriaAnimal) {
@@ -164,13 +194,14 @@ export class AnimalService {
     fazendaId: string,
     parenteId: string,
     papel: string,
+    sexoEsperado: Sexo,
   ) {
     const parente = await this.animalRepository.findOneBy({ id: parenteId });
-    if (!parente) {
+    if (!parente || parente.fazendaId !== fazendaId) {
       throw new NotFoundException(`Animal indicado como ${papel} não encontrado`);
     }
-    if (parente.fazendaId !== fazendaId) {
-      throw new BadRequestException(`O animal indicado como ${papel} pertence a outra fazenda`);
+    if (parente.sexo !== sexoEsperado) {
+      throw new BadRequestException(`O animal indicado como ${papel} deve ser do sexo ${sexoEsperado}`);
     }
   }
 

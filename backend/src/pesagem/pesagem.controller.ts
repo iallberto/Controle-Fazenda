@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, ParseUUIDPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { PesagemService } from './pesagem.service';
 import { CreatePesagemDto } from './dto/create-pesagem.dto';
@@ -17,7 +17,7 @@ export class PesagemController {
   }
 
   @Get('animal/:animalId')
-  findAllPorAnimal(@CurrentUser() user: JwtPayload, @Param('animalId') animalId: string) {
+  findAllPorAnimal(@CurrentUser() user: JwtPayload, @Param('animalId', ParseUUIDPipe) animalId: string) {
     return this.pesagemService.findAllPorAnimal(user.fazendaId, animalId);
   }
 }

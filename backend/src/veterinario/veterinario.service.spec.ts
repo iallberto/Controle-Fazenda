@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { NotFoundException, ForbiddenException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { VeterinarioService } from './veterinario.service';
 import { Veterinario } from './entities/veterinario.entity';
 
@@ -96,10 +96,10 @@ describe('VeterinarioService', () => {
       await expect(service.inativar(fazendaId, 'inexistente')).rejects.toThrow(NotFoundException);
     });
 
-    it('lanca ForbiddenException quando o veterinario e de outra fazenda', async () => {
+    it('lanca NotFoundException quando o veterinario e de outra fazenda', async () => {
       mockRepository.findOneBy.mockResolvedValue({ ...veterinarioExistente, fazendaId: 'outra-fazenda' });
 
-      await expect(service.inativar(fazendaId, 'vet-1')).rejects.toThrow(ForbiddenException);
+      await expect(service.inativar(fazendaId, 'vet-1')).rejects.toThrow(NotFoundException);
     });
   });
 });

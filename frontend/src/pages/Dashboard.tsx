@@ -2,15 +2,18 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/useAuth';
 import { buscarPainelInicial, type PainelInicial } from '../api/relatorios';
 import { Link } from 'react-router-dom';
+import { mensagemDeErro } from '../api/client';
 
 export function Dashboard() {
   const { usuario, logout } = useAuth();
   const [painel, setPainel] = useState<PainelInicial | null>(null);
   const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState('');
 
   useEffect(() => {
     buscarPainelInicial()
       .then(setPainel)
+      .catch((erroRequisicao) => setErro(mensagemDeErro(erroRequisicao)))
       .finally(() => setCarregando(false));
   }, []);
 
@@ -30,6 +33,7 @@ export function Dashboard() {
 
       <main>
         {carregando && <p>Carregando...</p>}
+        {erro && <p role="alert">{erro}</p>}
 
         {painel && (
           <>

@@ -40,9 +40,8 @@ Melhorias de visibilidade parciais: [docs/pos-v1/Mudancas-de-visibilidade-parcia
 
 Pré-requisitos: Docker Desktop instalado.
 
-1. Crie um arquivo `.env` na raiz do projeto, com:
-
- - JWT_SECRET=uma-frase-bem-longa-e-dificil-de-adivinhar-aqui
+1. Copie o `.env.example` da raiz para `.env` e preencha ao menos `JWT_SECRET` e `DB_PASSWORD`.
+   Em produção, use `DB_SYNCHRONIZE=false` e `SWAGGER_ENABLED=false`.
 
 2. Suba tudo:
 
@@ -57,7 +56,7 @@ Pré-requisitos: Docker Desktop instalado.
 
 Pré-requisitos: Node.js 24+, Docker (para o banco de dados).
 
-**Banco de dados:**
+**Banco de dados** (precisa do `.env` da raiz com `DB_PASSWORD`):
 
  - docker compose up -d db
 
@@ -68,7 +67,7 @@ Pré-requisitos: Node.js 24+, Docker (para o banco de dados).
  - npm install
  - npm run start:dev
 
-Crie um `.env` dentro de `backend/`, com `DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD`, `DB_DATABASE` e `JWT_SECRET`.
+Crie um `.env` dentro de `backend/`, com `DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD`, `DB_DATABASE`, `JWT_SECRET` e `DB_SYNCHRONIZE=true` (para criar as tabelas em desenvolvimento).
 
 **Front-end** (pasta `frontend/`):
 

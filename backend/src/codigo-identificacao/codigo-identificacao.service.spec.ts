@@ -9,6 +9,8 @@ describe('CodigoIdentificacaoService', () => {
   let service: CodigoIdentificacaoService;
 
   const mockManager = {
+    update: jest.fn(async () => ({ affected: 1 })),
+    query: jest.fn(),
     create: jest.fn(),
     save: jest.fn(),
     findOne: jest.fn(),
@@ -67,7 +69,7 @@ describe('CodigoIdentificacaoService', () => {
     it('atualiza o brinco do animal para o novo numero gerado', async () => {
       const fazendaId = 'fazenda-1';
       const usuarioLogadoId = 'usuario-logado-1';
-      const animal = { id: 'animal-1', fazendaId, brinco: '5' };
+      const animal = { id: 'animal-1', fazendaId, brinco: '5', status: 'ATIVO' };
 
       mockAnimalRepository.findOneBy.mockResolvedValue(animal);
       mockManager.findOne.mockResolvedValueOnce(null); // codigo antigo vinculado (nenhum, simplificando)

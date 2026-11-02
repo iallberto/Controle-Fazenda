@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Query, ParseUUIDPipe } from '@nestjs/common';
 import { PartoService } from './parto.service';
 import { CreatePartoDto } from './dto/create-parto.dto';
 import { UpdatePartoDto } from './dto/update-parto.dto';
@@ -18,19 +18,19 @@ export class PartoController {
   }
 
   @Get()
-  findAll(@CurrentUser() user: JwtPayload, @Query('maeId') maeId?: string) {
+  findAll(@CurrentUser() user: JwtPayload, @Query('maeId', new ParseUUIDPipe({ optional: true })) maeId?: string) {
     return this.partoService.findAll(user.fazendaId, maeId);
   }
 
   @Get(':id')
-  findOne(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+  findOne(@CurrentUser() user: JwtPayload, @Param('id', ParseUUIDPipe) id: string) {
     return this.partoService.findOne(user.fazendaId, id);
   }
 
   @Patch(':id')
   update(
     @CurrentUser() user: JwtPayload,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdatePartoDto,
   ) {
     return this.partoService.update(user.fazendaId, id, dto);

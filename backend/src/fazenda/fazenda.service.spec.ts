@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ObjectLiteral, Repository } from 'typeorm';
 import { FazendaService } from './fazenda.service';
 import { Fazenda } from './entities/fazenda.entity';
 
-type MockRepository<T = any> = Partial<Record<keyof Repository<T>, jest.Mock>>;
+type MockRepository<T extends ObjectLiteral = any> = Partial<Record<keyof Repository<T>, jest.Mock>>;
 
 const createMockRepository = (): MockRepository => ({
   find: jest.fn(),
@@ -33,14 +33,19 @@ describe('FazendaService', () => {
     expect(service).toBeDefined();
   });
 
-  it('deve criar uma fazenda', async () => {
-    const dto = { nome: 'Fazenda Teste' };
-    repository.create!.mockReturnValue(dto);
-    repository.save!.mockResolvedValue({ id: 'fazenda-1', ...dto });
+  it('deve atualizar a fazenda informada', async () => {
+    const fazenda = { id: 'fazenda-1', nome: 'Antiga' };
+    repository.findOneBy!.mockResolvedValue(fazenda);
+    repository.save!.mockImplementation(async (f) => f);
 
-    const resultado = await service.create(dto as any);
+    const resultado = await service.update('fazenda-1', { nome: 'Nova' });
 
-    expect(repository.save).toHaveBeenCalled();
-    expect(resultado).toEqual({ id: 'fazenda-1', ...dto });
+    expect(repository.findOneBy).toHaveBeenCalledWith({ id: 'fazenda-1' });
+    expect(resultado.nome).toBe('Nova');
+  });
+
+  it('deve lançar NotFound quando a fazenda não existe', async () => {
+    repository.findOneBy!.mockResolvedValue(null);
+    await expect(service.findOne('x')).rejects.toThrow('não encontrada');
   });
 });

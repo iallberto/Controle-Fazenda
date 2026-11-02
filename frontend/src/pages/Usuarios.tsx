@@ -1,10 +1,18 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { listarUsuarios, criarUsuario, type Usuario } from '../api/usuarios';
+import {
+  listarUsuarios,
+  criarUsuario,
+  alterarAtivoUsuario,
+  type Usuario,
+} from '../api/usuarios';
+import { mensagemDeErro } from '../api/client';
+import { useAuth } from '../contexts/useAuth';
 
 export function Usuarios() {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [erro, setErro] = useState('');
+  const { usuario: usuarioLogado } = useAuth();
 
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
@@ -12,7 +20,9 @@ export function Usuarios() {
   const [papel, setPapel] = useState<'DONO' | 'FUNCIONARIO'>('FUNCIONARIO');
 
   function carregar() {
-    listarUsuarios().then(setUsuarios);
+    listarUsuarios()
+      .then(setUsuarios)
+      .catch((erroRequisicao) => setErro(mensagemDeErro(erroRequisicao)));
   }
 
   useEffect(() => {
@@ -32,6 +42,16 @@ export function Usuarios() {
       carregar();
     } catch {
       setErro('Não foi possível cadastrar o usuário. O e-mail já pode estar em uso.');
+    }
+  }
+
+  async function handleAlterarAtivo(usuario: Usuario) {
+    setErro('');
+    try {
+      await alterarAtivoUsuario(usuario.id, !usuario.ativo);
+      carregar();
+    } catch (erroRequisicao) {
+      setErro(mensagemDeErro(erroRequisicao, 'Não foi possível alterar o usuário.'));
     }
   }
 
@@ -82,6 +102,12 @@ export function Usuarios() {
         {usuarios.map((usuario) => (
           <li key={usuario.id}>
             {usuario.nome} ({usuario.email}) — {usuario.papel}
+            {!usuario.ativo && ' (desativado)'}{' '}
+            {usuario.id !== usuarioLogado?.id && (
+              <button type="button" onClick={() => handleAlterarAtivo(usuario)}>
+                {usuario.ativo ? 'Desativar' : 'Reativar'}
+              </button>
+            )}
           </li>
         ))}
       </ul>

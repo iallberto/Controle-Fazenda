@@ -35,9 +35,11 @@ export function NovoAnimal() {
     listarPastos().then(setPastos);
   }, []);
 
-  useEffect(() => {
-    setCategoria(sexo === 'F' ? 'NOVILHA' : 'BEZERRO');
-  }, [sexo]);
+  // A categoria padrão acompanha o sexo escolhido
+  function handleSexoChange(novoSexo: 'M' | 'F') {
+    setSexo(novoSexo);
+    setCategoria(novoSexo === 'F' ? 'NOVILHA' : 'BEZERRO');
+  }
 
   const opcoesCategoria =
     sexo === 'F'
@@ -113,7 +115,7 @@ async function handleSubmit(evento: FormEvent) {
 
         <div>
           <label htmlFor="sexo">Sexo</label>
-          <select id="sexo" value={sexo} onChange={(e) => setSexo(e.target.value as 'M' | 'F')}>
+          <select id="sexo" value={sexo} onChange={(e) => handleSexoChange(e.target.value as 'M' | 'F')}>
             <option value="F">Fêmea</option>
             <option value="M">Macho</option>
           </select>

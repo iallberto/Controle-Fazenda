@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, ParseUUIDPipe } from '@nestjs/common';
 import { UsuarioService } from './usuario.service';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
@@ -27,7 +27,7 @@ export class UsuarioController {
   }
 
   @Get(':id')
-  findOne(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+  findOne(@CurrentUser() user: JwtPayload, @Param('id', ParseUUIDPipe) id: string) {
     return this.usuarioService.findOne(user.fazendaId, id);
   }
 
@@ -35,9 +35,21 @@ export class UsuarioController {
   @Patch(':id')
   update(
     @CurrentUser() user: JwtPayload,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateUsuarioDto,
   ) {
     return this.usuarioService.update(user.fazendaId, id, dto);
+  }
+
+  @Roles(PapelUsuario.DONO)
+  @Patch(':id/desativar')
+  desativar(@CurrentUser() user: JwtPayload, @Param('id', ParseUUIDPipe) id: string) {
+    return this.usuarioService.alterarAtivo(user.fazendaId, user.sub, id, false);
+  }
+
+  @Roles(PapelUsuario.DONO)
+  @Patch(':id/reativar')
+  reativar(@CurrentUser() user: JwtPayload, @Param('id', ParseUUIDPipe) id: string) {
+    return this.usuarioService.alterarAtivo(user.fazendaId, user.sub, id, true);
   }
 }

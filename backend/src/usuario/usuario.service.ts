@@ -1,8 +1,13 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
-import { Usuario } from './entities/usuario.entity';
+import { PapelUsuario, Usuario } from './entities/usuario.entity';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 
@@ -39,10 +44,7 @@ export class UsuarioService {
 
   async findOne(fazendaId: string, id: string) {
     const usuario = await this.usuarioRepository.findOneBy({ id });
-    if (!usuario) {
-      throw new NotFoundException(`Usuário ${id} não encontrado`);
-    }
-    if (usuario.fazendaId !== fazendaId) {
+    if (!usuario || usuario.fazendaId !== fazendaId) {
       throw new NotFoundException(`Usuário ${id} não encontrado`);
     }
     return usuario;
@@ -50,7 +52,46 @@ export class UsuarioService {
 
   async update(fazendaId: string, id: string, dto: UpdateUsuarioDto) {
     const usuario = await this.findOne(fazendaId, id);
+
+    if (dto.email && dto.email !== usuario.email) {
+      const emailExistente = await this.usuarioRepository.findOneBy({ email: dto.email });
+      if (emailExistente) {
+        throw new ConflictException('Já existe um usuário com este e-mail');
+      }
+    }
+    if (
+      dto.papel &&
+      dto.papel !== PapelUsuario.DONO &&
+      usuario.papel === PapelUsuario.DONO
+    ) {
+      await this.garantirOutroDonoAtivo(fazendaId, usuario.id);
+    }
+
     Object.assign(usuario, dto);
     return this.usuarioRepository.save(usuario);
+  }
+
+  async alterarAtivo(fazendaId: string, usuarioLogadoId: string, id: string, ativo: boolean) {
+    const usuario = await this.findOne(fazendaId, id);
+    if (!ativo) {
+      if (usuario.id === usuarioLogadoId) {
+        throw new BadRequestException('Você não pode desativar o próprio usuário');
+      }
+      if (usuario.papel === PapelUsuario.DONO) {
+        await this.garantirOutroDonoAtivo(fazendaId, usuario.id);
+      }
+    }
+    usuario.ativo = ativo;
+    return this.usuarioRepository.save(usuario);
+  }
+
+  // A fazenda nunca pode ficar sem um dono ativo
+  private async garantirOutroDonoAtivo(fazendaId: string, usuarioId: string) {
+    const donos = await this.usuarioRepository.find({
+      where: { fazendaId, papel: PapelUsuario.DONO, ativo: true },
+    });
+    if (!donos.some((dono) => dono.id !== usuarioId)) {
+      throw new BadRequestException('A fazenda precisa ter ao menos um dono ativo');
+    }
   }
 }

@@ -1,10 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Repository } from 'typeorm';
 import { MovimentacaoPasto } from './entities/movimentacao-pasto.entity';
 import { Animal } from '../animal/entities/animal.entity';
 import { Pasto } from '../pasto/entities/pasto.entity';
 import { MoverAnimalDto } from './dto/mover-animal.dto';
+import { garantirAnimalAtivo } from '../common/vinculos';
+import { hojeLocal } from '../common/datas';
 
 @Injectable()
 export class MovimentacaoPastoService {
@@ -22,13 +24,18 @@ export class MovimentacaoPastoService {
     if (!animal || animal.fazendaId !== fazendaId) {
       throw new NotFoundException('Animal não encontrado');
     }
+    garantirAnimalAtivo(animal);
 
     const pasto = await this.pastoRepository.findOneBy({ id: dto.pastoId });
     if (!pasto || pasto.fazendaId !== fazendaId) {
       throw new NotFoundException('Pasto não encontrado');
     }
 
-    const data = dto.data ?? new Date().toISOString().split('T')[0];
+    if (animal.pastoAtualId === pasto.id) {
+      throw new BadRequestException('O animal já está neste pasto');
+    }
+
+    const data = dto.data ?? hojeLocal();
 
     return this.movimentacaoRepository.manager.transaction(async (manager) => {
       const movimentacaoAberta = await manager.findOne(MovimentacaoPasto, {
@@ -46,7 +53,11 @@ export class MovimentacaoPastoService {
         dataSaida: null,
         criadoPorId: usuarioLogadoId,
       });
-      return manager.save(novaMovimentacao);
+      const movimentacaoSalva = await manager.save(novaMovimentacao);
+
+      await manager.update(Animal, { id: animal.id }, { pastoAtualId: pasto.id });
+
+      return movimentacaoSalva;
     });
   }
 

@@ -11,6 +11,8 @@ describe('AnimalService', () => {
   let service: AnimalService;
 
   const mockManager = {
+    update: jest.fn(async () => ({ affected: 1 })),
+    query: jest.fn(),
     create: jest.fn(),
     save: jest.fn(),
   };
@@ -196,6 +198,39 @@ describe('AnimalService', () => {
       mockRepository.findOneBy!.mockResolvedValue(null);
 
       await expect(service.findByBrinco('fazenda-1', '999')).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('alterarStatus', () => {
+    const fazendaId = 'fazenda-1';
+
+    it('rejeita alterar o status de um animal que ja saiu do rebanho', async () => {
+      mockRepository.findOne.mockResolvedValue({ id: 'a1', fazendaId, brinco: '7', status: 'MORTO' });
+
+      await expect(
+        service.alterarStatus(fazendaId, 'a1', 'VENDIDO' as any, 'venda', '2026-01-01'),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('rejeita voltar um animal para ATIVO', async () => {
+      await expect(
+        service.alterarStatus(fazendaId, 'a1', 'ATIVO' as any, 'engano', '2026-01-01'),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('fecha a permanencia no pasto e limpa o pasto atual', async () => {
+      const movimentacaoAberta = { id: 'mov-1', dataSaida: null };
+      (mockManager as any).findOne = jest.fn().mockResolvedValue(movimentacaoAberta);
+      mockManager.save.mockImplementation((entrada: any) => Promise.resolve(entrada));
+      mockRepository.findOne.mockResolvedValue({
+        id: 'a1', fazendaId, brinco: '7', status: 'ATIVO', pastoAtualId: 'pasto-1',
+      });
+
+      const resultado = await service.alterarStatus(fazendaId, 'a1', 'MORTO' as any, 'raio', '2026-03-10');
+
+      expect(movimentacaoAberta.dataSaida).toBe('2026-03-10');
+      expect(resultado.pastoAtualId).toBeNull();
+      expect(resultado.status).toBe('MORTO');
     });
   });
 });

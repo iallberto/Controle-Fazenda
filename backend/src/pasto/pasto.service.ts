@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ConflictException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Pasto } from './entities/pasto.entity';
@@ -28,7 +28,7 @@ export class PastoService {
       throw new NotFoundException(`Pasto ${id} não encontrado`);
     }
     if (pasto.fazendaId !== fazendaId) {
-      throw new ForbiddenException('Este pasto não pertence à sua fazenda');
+      throw new NotFoundException(`Pasto ${id} não encontrado`);
     }
     return pasto;
   }

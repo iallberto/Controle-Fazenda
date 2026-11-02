@@ -2,7 +2,6 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Fazenda } from './entities/fazenda.entity';
-import { CreateFazendaDto } from './dto/create-fazenda.dto';
 import { UpdateFazendaDto } from './dto/update-fazenda.dto';
 
 @Injectable()
@@ -11,15 +10,6 @@ export class FazendaService {
     @InjectRepository(Fazenda)
     private readonly fazendaRepository: Repository<Fazenda>,
   ) {}
-
-  create(dto: CreateFazendaDto) {
-    const fazenda = this.fazendaRepository.create(dto);
-    return this.fazendaRepository.save(fazenda);
-  }
-
-  findAll() {
-    return this.fazendaRepository.find();
-  }
 
   async findOne(id: string) {
     const fazenda = await this.fazendaRepository.findOneBy({ id });

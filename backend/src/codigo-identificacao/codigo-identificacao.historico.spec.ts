@@ -9,7 +9,7 @@ import { Animal } from '../animal/entities/animal.entity';
 describe('CodigoIdentificacaoService - histórico de número (M12)', () => {
   let service: CodigoIdentificacaoService;
 
-  const manager = { findOne: jest.fn(), create: jest.fn(), save: jest.fn() };
+  const manager = { findOne: jest.fn(), create: jest.fn(), save: jest.fn(), query: jest.fn() };
   const codigoRepository = {
     manager: { transaction: jest.fn() },
     findOneBy: jest.fn(),
@@ -40,7 +40,7 @@ describe('CodigoIdentificacaoService - histórico de número (M12)', () => {
 
   describe('reemitir', () => {
     it('grava o número anterior e o novo no histórico', async () => {
-      animalRepository.findOneBy.mockResolvedValue({ id: 'a1', fazendaId: 'f1', brinco: '42' });
+      animalRepository.findOneBy.mockResolvedValue({ id: 'a1', fazendaId: 'f1', brinco: '42', status: 'ATIVO' });
       manager.findOne
         .mockResolvedValueOnce({ id: 'c42', animalId: 'a1', status: StatusCodigo.VINCULADO, numero: 42 })
         .mockResolvedValueOnce({ numero: 186 });
@@ -65,7 +65,7 @@ describe('CodigoIdentificacaoService - histórico de número (M12)', () => {
 
     it('desativa o código antigo e nunca reaproveita o número', async () => {
       const codigoAntigo = { id: 'c42', animalId: 'a1', status: StatusCodigo.VINCULADO, numero: 42 };
-      animalRepository.findOneBy.mockResolvedValue({ id: 'a1', fazendaId: 'f1', brinco: '42' });
+      animalRepository.findOneBy.mockResolvedValue({ id: 'a1', fazendaId: 'f1', brinco: '42', status: 'ATIVO' });
       manager.findOne
         .mockResolvedValueOnce(codigoAntigo)
         .mockResolvedValueOnce({ numero: 186 });
@@ -78,7 +78,7 @@ describe('CodigoIdentificacaoService - histórico de número (M12)', () => {
     });
 
     it('grava motivo nulo quando não informado', async () => {
-      animalRepository.findOneBy.mockResolvedValue({ id: 'a1', fazendaId: 'f1', brinco: '42' });
+      animalRepository.findOneBy.mockResolvedValue({ id: 'a1', fazendaId: 'f1', brinco: '42', status: 'ATIVO' });
       manager.findOne.mockResolvedValueOnce(null).mockResolvedValueOnce({ numero: 10 });
 
       await service.reemitir('f1', 'u1', { animalId: 'a1' });
@@ -90,7 +90,7 @@ describe('CodigoIdentificacaoService - histórico de número (M12)', () => {
     });
 
     it('rejeita animal de outra fazenda e não grava nada', async () => {
-      animalRepository.findOneBy.mockResolvedValue({ id: 'a1', fazendaId: 'outra', brinco: '42' });
+      animalRepository.findOneBy.mockResolvedValue({ id: 'a1', fazendaId: 'outra', brinco: '42', status: 'ATIVO' });
 
       await expect(
         service.reemitir('f1', 'u1', { animalId: 'a1' }),
@@ -101,7 +101,7 @@ describe('CodigoIdentificacaoService - histórico de número (M12)', () => {
 
   describe('buscarPorNumero', () => {
     it('encontra o animal pelo número atual, sem aviso', async () => {
-      const animal = { id: 'a1', fazendaId: 'f1', brinco: '187' };
+      const animal = { id: 'a1', fazendaId: 'f1', brinco: '187', status: 'ATIVO' };
       animalRepository.findOne.mockResolvedValue(animal);
 
       const resultado = await service.buscarPorNumero('f1', '187');
@@ -111,7 +111,7 @@ describe('CodigoIdentificacaoService - histórico de número (M12)', () => {
     });
 
     it('aceita zeros à esquerda (0187)', async () => {
-      animalRepository.findOne.mockResolvedValue({ id: 'a1', fazendaId: 'f1', brinco: '187' });
+      animalRepository.findOne.mockResolvedValue({ id: 'a1', fazendaId: 'f1', brinco: '187', status: 'ATIVO' });
 
       await service.buscarPorNumero('f1', '0187');
 
@@ -123,7 +123,7 @@ describe('CodigoIdentificacaoService - histórico de número (M12)', () => {
     it('encontra pelo número antigo e avisa o número atual', async () => {
       animalRepository.findOne.mockResolvedValue(null);
       historicoRepository.findOne.mockResolvedValue({ animalId: 'a1', numeroAnterior: '42' });
-      animalRepository.findOneBy.mockResolvedValue({ id: 'a1', fazendaId: 'f1', brinco: '187' });
+      animalRepository.findOneBy.mockResolvedValue({ id: 'a1', fazendaId: 'f1', brinco: '187', status: 'ATIVO' });
 
       const resultado = await service.buscarPorNumero('f1', '42');
 
@@ -136,7 +136,7 @@ describe('CodigoIdentificacaoService - histórico de número (M12)', () => {
     it('usa o número atual mesmo após reemissões encadeadas (42 → 187 → 203)', async () => {
       animalRepository.findOne.mockResolvedValue(null);
       historicoRepository.findOne.mockResolvedValue({ animalId: 'a1', numeroAnterior: '42' });
-      animalRepository.findOneBy.mockResolvedValue({ id: 'a1', fazendaId: 'f1', brinco: '203' });
+      animalRepository.findOneBy.mockResolvedValue({ id: 'a1', fazendaId: 'f1', brinco: '203', status: 'ATIVO' });
 
       const resultado = await service.buscarPorNumero('f1', '42');
 

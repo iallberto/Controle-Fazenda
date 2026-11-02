@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { ConflictException } from '@nestjs/common';
+import { BadRequestException, ConflictException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import { UsuarioService } from './usuario.service';
@@ -67,6 +67,51 @@ describe('UsuarioService', () => {
       };
 
       await expect(service.create('fazenda-1', 'dono-1', dto as any)).rejects.toThrow(ConflictException);
+    });
+  });
+
+  describe('update e alterarAtivo', () => {
+    const dono = { id: 'dono-1', fazendaId: 'fazenda-1', email: 'dono@teste.com', papel: PapelUsuario.DONO, ativo: true };
+
+    beforeEach(() => {
+      repository.save!.mockImplementation(async (u) => u);
+    });
+
+    it('rejeita trocar para um e-mail que ja existe', async () => {
+      repository.findOneBy!
+        .mockResolvedValueOnce({ ...dono })
+        .mockResolvedValueOnce({ id: 'outro' });
+
+      await expect(
+        service.update('fazenda-1', 'dono-1', { email: 'outro@teste.com' }),
+      ).rejects.toThrow(ConflictException);
+    });
+
+    it('nao deixa rebaixar o unico dono ativo', async () => {
+      repository.findOneBy!.mockResolvedValue({ ...dono });
+      repository.find!.mockResolvedValue([dono]);
+
+      await expect(
+        service.update('fazenda-1', 'dono-1', { papel: PapelUsuario.FUNCIONARIO }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('nao deixa o usuario desativar a si mesmo', async () => {
+      repository.findOneBy!.mockResolvedValue({ ...dono });
+
+      await expect(service.alterarAtivo('fazenda-1', 'dono-1', 'dono-1', false)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('desativa um funcionario', async () => {
+      repository.findOneBy!.mockResolvedValue({
+        id: 'func-1', fazendaId: 'fazenda-1', papel: PapelUsuario.FUNCIONARIO, ativo: true,
+      });
+
+      const resultado = await service.alterarAtivo('fazenda-1', 'dono-1', 'func-1', false);
+
+      expect(resultado.ativo).toBe(false);
     });
   });
 });

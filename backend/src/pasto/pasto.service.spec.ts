@@ -1,11 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { ConflictException, ForbiddenException, NotFoundException } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { ConflictException, NotFoundException } from '@nestjs/common';
+import { ObjectLiteral, Repository } from 'typeorm';
 import { PastoService } from './pasto.service';
 import { Pasto } from './entities/pasto.entity';
 
-type MockRepository<T = any> = Partial<Record<keyof Repository<T>, jest.Mock>>;
+type MockRepository<T extends ObjectLiteral = any> = Partial<Record<keyof Repository<T>, jest.Mock>>;
 
 const createMockRepository = (): MockRepository => ({
   find: jest.fn(),
@@ -66,14 +66,14 @@ describe('PastoService', () => {
   });
 
   describe('findOne', () => {
-    it('deve lançar ForbiddenException quando o pasto pertence a outra fazenda', async () => {
+    it('deve lançar NotFoundException quando o pasto pertence a outra fazenda', async () => {
       repository.findOneBy!.mockResolvedValue({
         id: 'pasto-1',
         nome: 'Pasto X',
         fazendaId: 'fazenda-2',
       });
 
-      await expect(service.findOne('fazenda-1', 'pasto-1')).rejects.toThrow(ForbiddenException);
+      await expect(service.findOne('fazenda-1', 'pasto-1')).rejects.toThrow(NotFoundException);
     });
 
     it('deve lançar NotFoundException quando o pasto não existe', async () => {

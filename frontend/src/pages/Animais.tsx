@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { listarAnimais, type Animal } from '../api/animais';
+import { mensagemDeErro } from '../api/client';
 
 export function Animais() {
   const [animais, setAnimais] = useState<Animal[]>([]);
   const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState('');
 
   useEffect(() => {
     listarAnimais()
       .then(setAnimais)
+      .catch((erroRequisicao) => setErro(mensagemDeErro(erroRequisicao)))
       .finally(() => setCarregando(false));
   }, []);
 
@@ -26,8 +29,9 @@ export function Animais() {
       </header>
 
       {carregando && <p>Carregando...</p>}
+      {erro && <p role="alert">{erro}</p>}
 
-      {!carregando && animais.length === 0 && <p>Nenhum animal cadastrado ainda.</p>}
+      {!carregando && !erro && animais.length === 0 && <p>Nenhum animal cadastrado ainda.</p>}
 
       {animais.length > 0 && (
         <table>

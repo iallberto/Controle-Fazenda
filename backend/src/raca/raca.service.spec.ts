@@ -64,14 +64,14 @@ describe('RacaService', () => {
   });
 
   describe('findOne', () => {
-    it('lanca ForbiddenException quando a raca e de outra fazenda', async () => {
+    it('lanca NotFoundException quando a raca e de outra fazenda', async () => {
       mockRepository.findOneBy.mockResolvedValue({
         id: 'raca-1',
         nome: 'Raca X',
         fazendaId: 'fazenda-2',
       });
 
-      await expect(service.findOne('fazenda-1', 'raca-1')).rejects.toThrow(ForbiddenException);
+      await expect(service.findOne('fazenda-1', 'raca-1')).rejects.toThrow(NotFoundException);
     });
 
     it('permite acessar raca do sistema (fazendaId nulo) de qualquer fazenda', async () => {

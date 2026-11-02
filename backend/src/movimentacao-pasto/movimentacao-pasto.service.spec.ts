@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { MovimentacaoPastoService } from './movimentacao-pasto.service';
 import { MovimentacaoPasto } from './entities/movimentacao-pasto.entity';
 import { Animal } from '../animal/entities/animal.entity';
@@ -10,6 +10,8 @@ describe('MovimentacaoPastoService', () => {
   let service: MovimentacaoPastoService;
 
   const mockManager = {
+    update: jest.fn(async () => ({ affected: 1 })),
+    query: jest.fn(),
     findOne: jest.fn(),
     create: jest.fn(),
     save: jest.fn(),
@@ -56,7 +58,7 @@ describe('MovimentacaoPastoService', () => {
     const usuarioLogadoId = 'usuario-logado-1';
 
     it('registra quem criou a movimentacao', async () => {
-      mockAnimalRepository.findOneBy.mockResolvedValue({ id: 'animal-1', fazendaId });
+      mockAnimalRepository.findOneBy.mockResolvedValue({ id: 'animal-1', fazendaId, status: 'ATIVO' });
       mockPastoRepository.findOneBy.mockResolvedValue({ id: 'pasto-1', fazendaId });
       mockManager.findOne.mockResolvedValue(null);
       mockManager.create.mockImplementation((_entidade: any, entrada: any) => entrada);
@@ -74,6 +76,45 @@ describe('MovimentacaoPastoService', () => {
       const dto = { animalId: 'inexistente', pastoId: 'pasto-1', data: '2026-01-01' };
 
       await expect(service.mover(fazendaId, usuarioLogadoId, dto as any)).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('mover - pasto atual', () => {
+    const fazendaId = 'fazenda-1';
+
+    beforeEach(() => {
+      mockPastoRepository.findOneBy.mockResolvedValue({ id: 'pasto-2', fazendaId });
+      mockManager.findOne.mockResolvedValue(null);
+      mockManager.create.mockImplementation((_entidade: any, entrada: any) => entrada);
+      mockManager.save.mockImplementation((entrada: any) => Promise.resolve(entrada));
+    });
+
+    it('atualiza o pasto atual do animal', async () => {
+      mockAnimalRepository.findOneBy.mockResolvedValue({
+        id: 'animal-1', fazendaId, status: 'ATIVO', pastoAtualId: 'pasto-1',
+      });
+
+      await service.mover(fazendaId, 'u1', { animalId: 'animal-1', pastoId: 'pasto-2' } as any);
+
+      expect(mockManager.update).toHaveBeenCalledWith(Animal, { id: 'animal-1' }, { pastoAtualId: 'pasto-2' });
+    });
+
+    it('rejeita mover um animal que nao esta ativo', async () => {
+      mockAnimalRepository.findOneBy.mockResolvedValue({ id: 'animal-1', fazendaId, status: 'MORTO' });
+
+      await expect(
+        service.mover(fazendaId, 'u1', { animalId: 'animal-1', pastoId: 'pasto-2' } as any),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('rejeita mover para o pasto em que o animal ja esta', async () => {
+      mockAnimalRepository.findOneBy.mockResolvedValue({
+        id: 'animal-1', fazendaId, status: 'ATIVO', pastoAtualId: 'pasto-2',
+      });
+
+      await expect(
+        service.mover(fazendaId, 'u1', { animalId: 'animal-1', pastoId: 'pasto-2' } as any),
+      ).rejects.toThrow('já está neste pasto');
     });
   });
 });

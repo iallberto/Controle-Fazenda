@@ -15,7 +15,7 @@ import { CreatePartoDto } from './dto/create-parto.dto';
 describe('PartoService - pasto da cria (M9)', () => {
   let service: PartoService;
 
-  const manager = { create: jest.fn(), save: jest.fn(), findOne: jest.fn() };
+  const manager = { create: jest.fn(), save: jest.fn(), findOne: jest.fn(), update: jest.fn(async () => ({ affected: 1 })) };
   const partoRepository = { manager: { transaction: jest.fn() } };
   const animalRepository = { findOneBy: jest.fn() };
   const codigoRepository = { findOneBy: jest.fn() };
@@ -35,6 +35,7 @@ describe('PartoService - pasto da cria (M9)', () => {
 
   beforeEach(async () => {
     jest.resetAllMocks();
+    manager.update.mockResolvedValue({ affected: 1 });
     manager.create.mockImplementation((_e: unknown, dados: object) => ({ ...dados }));
     manager.save.mockImplementation(async (e: object) => ({ id: 'gerado', ...e }));
     manager.findOne.mockResolvedValue({ id: 'gerado' });
@@ -46,6 +47,7 @@ describe('PartoService - pasto da cria (M9)', () => {
       fazendaId: 'f1',
       categoria: CategoriaAnimal.MATRIZ,
       racaId: null,
+      status: 'ATIVO',
     });
     codigoRepository.findOneBy.mockImplementation(async ({ id }: { id: string }) => ({
       id,

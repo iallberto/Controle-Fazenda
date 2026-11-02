@@ -6,7 +6,7 @@ export interface Animal {
   sexo: 'M' | 'F';
   categoria: 'BEZERRO' | 'NOVILHA' | 'MATRIZ' | 'GARROTE' | 'BOI' | 'TOURO';
   status: 'ATIVO' | 'VENDIDO' | 'MORTO' | 'DESCARTADO';
-  statusReprodutivo: 'PRENHE' | 'LACTANTE' | 'VAZIA' | null;
+  statusReprodutivo: 'PRENHA' | 'LACTANTE' | 'VAZIA' | null;
   origem: 'NASCIDO_FAZENDA' | 'COMPRADO';
   dataNascimento: string;
   mae?: { id: string; brinco: string } | null;

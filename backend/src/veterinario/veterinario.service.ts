@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Veterinario } from './entities/veterinario.entity';
@@ -33,7 +33,7 @@ export class VeterinarioService {
       throw new NotFoundException(`Veterinário ${id} não encontrado`);
     }
     if (veterinario.fazendaId !== fazendaId) {
-      throw new ForbiddenException('Este veterinário não pertence à sua fazenda');
+      throw new NotFoundException(`Veterinário ${id} não encontrado`);
     }
     veterinario.ativo = false;
     return this.veterinarioRepository.save(veterinario);

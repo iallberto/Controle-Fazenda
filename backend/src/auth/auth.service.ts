@@ -1,4 +1,10 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
@@ -14,8 +20,15 @@ export interface JwtPayload {
   papel: string;
 }
 
+const MAX_TENTATIVAS_LOGIN = 5;
+const JANELA_BLOQUEIO_MS = 15 * 60 * 1000;
+
 @Injectable()
 export class AuthService {
+  // Falhas de login por e-mail, em memória. Basta para uma instância só;
+  // com várias instâncias, o controle precisaria ir para um armazenamento comum.
+  private readonly falhasLogin = new Map<string, { quantidade: number; desde: number }>();
+
   constructor(
     @InjectRepository(Usuario)
     private readonly usuarioRepository: Repository<Usuario>,
@@ -24,15 +37,18 @@ export class AuthService {
   ) {}
 
   async login(dto: LoginDto) {
-    const usuario = await this.usuarioRepository.findOneBy({ email: dto.email });
-    if (!usuario) {
-      throw new UnauthorizedException('E-mail ou senha inválidos');
-    }
+    this.garantirLoginNaoBloqueado(dto.email);
 
-    const senhaConfere = await bcrypt.compare(dto.senha, usuario.senhaHash);
-    if (!senhaConfere) {
+    const usuario = await this.usuarioRepository.findOneBy({ email: dto.email });
+    const senhaConfere = usuario ? await bcrypt.compare(dto.senha, usuario.senhaHash) : false;
+    if (!usuario || !senhaConfere) {
+      this.registrarFalhaLogin(dto.email);
       throw new UnauthorizedException('E-mail ou senha inválidos');
     }
+    if (!usuario.ativo) {
+      throw new UnauthorizedException('Este usuário está desativado');
+    }
+    this.falhasLogin.delete(dto.email);
 
     const payload: JwtPayload = {
       sub: usuario.id,
@@ -50,6 +66,32 @@ export class AuthService {
         fazendaId: usuario.fazendaId,
       },
     };
+  }
+
+  private garantirLoginNaoBloqueado(email: string) {
+    const falhas = this.falhasLogin.get(email);
+    if (!falhas) {
+      return;
+    }
+    if (Date.now() - falhas.desde > JANELA_BLOQUEIO_MS) {
+      this.falhasLogin.delete(email);
+      return;
+    }
+    if (falhas.quantidade >= MAX_TENTATIVAS_LOGIN) {
+      throw new HttpException(
+        'Muitas tentativas de login. Tente novamente em alguns minutos.',
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
+  }
+
+  private registrarFalhaLogin(email: string) {
+    const falhas = this.falhasLogin.get(email);
+    if (!falhas || Date.now() - falhas.desde > JANELA_BLOQUEIO_MS) {
+      this.falhasLogin.set(email, { quantidade: 1, desde: Date.now() });
+    } else {
+      falhas.quantidade++;
+    }
   }
 
   async registrarFazenda(dto: RegistrarFazendaDto) {

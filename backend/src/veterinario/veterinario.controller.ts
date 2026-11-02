@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Body, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Param, Query, ParseUUIDPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { VeterinarioService } from './veterinario.service';
 import { CreateVeterinarioDto } from './dto/create-veterinario.dto';
@@ -22,7 +22,7 @@ export class VeterinarioController {
   }
 
   @Patch(':id/inativar')
-  inativar(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+  inativar(@CurrentUser() user: JwtPayload, @Param('id', ParseUUIDPipe) id: string) {
     return this.veterinarioService.inativar(user.fazendaId, id);
   }
 }

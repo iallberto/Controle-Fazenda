@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Query, ParseUUIDPipe } from '@nestjs/common';
 import { PastoService } from './pasto.service';
 import { CreatePastoDto } from './dto/create-pasto.dto';
 import { UpdatePastoDto } from './dto/update-pasto.dto';
@@ -23,14 +23,14 @@ export class PastoController {
   }
 
   @Get(':id')
-  findOne(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+  findOne(@CurrentUser() user: JwtPayload, @Param('id', ParseUUIDPipe) id: string) {
     return this.pastoService.findOne(user.fazendaId, id);
   }
 
   @Patch(':id')
   update(
     @CurrentUser() user: JwtPayload,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdatePastoDto,
   ) {
     return this.pastoService.update(user.fazendaId, id, dto);

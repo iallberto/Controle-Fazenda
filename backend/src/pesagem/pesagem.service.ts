@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Pesagem } from './entities/pesagem.entity';
 import { Animal } from '../animal/entities/animal.entity';
 import { CreatePesagemDto } from './dto/create-pesagem.dto';
+import { garantirAnimalAtivo, garantirUsuarioDaFazenda } from '../common/vinculos';
 
 @Injectable()
 export class PesagemService {
@@ -18,6 +19,15 @@ export class PesagemService {
     const animal = await this.animalRepository.findOneBy({ id: dto.animalId });
     if (!animal || animal.fazendaId !== fazendaId) {
       throw new NotFoundException('Animal não encontrado');
+    }
+    garantirAnimalAtivo(animal);
+    if (dto.pesadoPorId) {
+      await garantirUsuarioDaFazenda(
+        this.pesagemRepository.manager,
+        fazendaId,
+        dto.pesadoPorId,
+        'informado como responsável pela pesagem',
+      );
     }
 
     const pesagem = this.pesagemRepository.create({

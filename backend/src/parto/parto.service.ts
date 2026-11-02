@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Parto, ResultadoParto } from './entities/parto.entity';
@@ -11,6 +11,7 @@ import { MovimentacaoPasto } from '../movimentacao-pasto/entities/movimentacao-p
 import { Pasto } from '../pasto/entities/pasto.entity';
 import { CreateCriaDto, CreatePartoDto } from './dto/create-parto.dto';
 import { UpdatePartoDto } from './dto/update-parto.dto';
+import { garantirAnimalAtivo, garantirRacaDisponivel, reservarCodigo } from '../common/vinculos';
 
 @Injectable()
 export class PartoService {
@@ -27,12 +28,10 @@ export class PartoService {
 
   async create(fazendaId: string, usuarioLogadoId: string, dto: CreatePartoDto) {
     const mae = await this.animalRepository.findOneBy({ id: dto.maeId });
-    if (!mae) {
+    if (!mae || mae.fazendaId !== fazendaId) {
       throw new NotFoundException('Matriz (mãe) não encontrada');
     }
-    if (mae.fazendaId !== fazendaId) {
-      throw new ForbiddenException('Esta matriz não pertence à sua fazenda');
-    }
+    garantirAnimalAtivo(mae);
     if (mae.categoria !== CategoriaAnimal.MATRIZ) {
       throw new BadRequestException('Somente matrizes podem ter partos registrados');
     }
@@ -61,6 +60,9 @@ export class PartoService {
         }
         if (codigo.status !== StatusCodigo.DISPONIVEL) {
           throw new ConflictException('Um dos códigos informados já está vinculado ou foi desativado');
+        }
+        if (cria.racaId) {
+          await garantirRacaDisponivel(this.partoRepository.manager, fazendaId, cria.racaId);
         }
         codigosPorCria.set(cria.codigoId, codigo);
       }
@@ -96,10 +98,7 @@ export class PartoService {
           });
           const animalSalvo = await manager.save(animal);
 
-          codigo.status = StatusCodigo.VINCULADO;
-          codigo.animalId = animalSalvo.id;
-          codigo.vinculadoEm = new Date();
-          await manager.save(codigo);
+          await reservarCodigo(manager, codigo.id, animalSalvo.id);
 
           if (dto.pastoId) {
             const movimentacao = manager.create(MovimentacaoPasto, {
@@ -131,11 +130,8 @@ export class PartoService {
       where: { id },
       relations: { crias: true, mae: true },
     });
-    if (!parto) {
+    if (!parto || parto.mae.fazendaId !== fazendaId) {
       throw new NotFoundException(`Parto ${id} não encontrado`);
-    }
-    if (parto.mae.fazendaId !== fazendaId) {
-      throw new ForbiddenException('Este parto não pertence à sua fazenda');
     }
     return parto;
   }

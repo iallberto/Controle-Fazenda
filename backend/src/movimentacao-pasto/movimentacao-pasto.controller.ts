@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Query, ParseUUIDPipe } from '@nestjs/common';
 import { MovimentacaoPastoService } from './movimentacao-pasto.service';
 import { MoverAnimalDto } from './dto/mover-animal.dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -17,7 +17,7 @@ export class MovimentacaoPastoController {
   }
 
   @Get('animal/:animalId')
-  historico(@CurrentUser() user: JwtPayload, @Param('animalId') animalId: string) {
+  historico(@CurrentUser() user: JwtPayload, @Param('animalId', ParseUUIDPipe) animalId: string) {
     return this.movimentacaoPastoService.historico(user.fazendaId, animalId);
   }
 }

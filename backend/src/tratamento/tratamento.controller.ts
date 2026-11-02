@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Query, ParseUUIDPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { TratamentoService } from './tratamento.service';
 import { CreateTratamentoDto } from './dto/create-tratamento.dto';
@@ -18,19 +18,19 @@ export class TratamentoController {
   }
 
   @Get()
-  findAll(@CurrentUser() user: JwtPayload, @Query('animalId') animalId?: string) {
+  findAll(@CurrentUser() user: JwtPayload, @Query('animalId', new ParseUUIDPipe({ optional: true })) animalId?: string) {
     return this.tratamentoService.findAll(user.fazendaId, animalId);
   }
 
   @Get(':id')
-  findOne(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+  findOne(@CurrentUser() user: JwtPayload, @Param('id', ParseUUIDPipe) id: string) {
     return this.tratamentoService.findOne(user.fazendaId, id);
   }
 
   @Patch(':id')
   update(
     @CurrentUser() user: JwtPayload,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateTratamentoDto,
   ) {
     return this.tratamentoService.update(user.fazendaId, id, dto);

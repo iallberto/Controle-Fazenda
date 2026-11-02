@@ -1,4 +1,5 @@
 import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { NormalizarEmail } from '../../common/transformacoes';
 
 export class RegistrarFazendaDto {
   @IsString()
@@ -9,6 +10,7 @@ export class RegistrarFazendaDto {
   @IsNotEmpty()
   nome: string;
 
+  @NormalizarEmail()
   @IsEmail()
   email: string;
 
