@@ -4,6 +4,7 @@ import { moverAnimal } from '../api/movimentacoes';
 import { listarAnimais, type Animal } from '../api/animais';
 import { listarPastos, type Pasto } from '../api/pastos';
 import { rotuloBrinco } from '../utils/formatadores';
+import { Aviso } from '../components/Aviso';
 
 export function MoverAnimal() {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ export function MoverAnimal() {
 
     try {
       await moverAnimal({ animalId, pastoId, data: data || undefined });
-      navigate('/animais');
+      navigate('/animais', { state: { aviso: 'Animal movido de pasto.' } });
     } catch {
       setErro('Não foi possível mover o animal.');
     }
@@ -70,7 +71,7 @@ export function MoverAnimal() {
           <input id="data" type="date" value={data} onChange={(e) => setData(e.target.value)} />
         </div>
 
-        {erro && <p style={{ color: 'red' }}>{erro}</p>}
+        {erro && <Aviso tipo="erro">{erro}</Aviso>}
         <button type="submit">Mover</button>
       </form>
     </div>

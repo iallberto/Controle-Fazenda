@@ -10,6 +10,7 @@ import {
   type HistoricoNumero,
 } from '../api/codigos';
 import { formatarBrinco, formatarCategoria, formatarData, formatarMomento, formatarOrigem, formatarResultadoParto, formatarSexo, formatarStatusAnimal, formatarTipoParto } from '../utils/formatadores';
+import { Aviso, type EstadoAviso } from '../components/Aviso';
 
 interface PartoComIntervalo extends Parto {
   diasDesdeUltimoParto: number | null;
@@ -42,7 +43,7 @@ export function AnimalDetalhe() {
   const [mostrarReemissao, setMostrarReemissao] = useState(false);
   const [motivoReemissao, setMotivoReemissao] = useState('');
   const [reemitindo, setReemitindo] = useState(false);
-  const [mensagemReemissao, setMensagemReemissao] = useState('');
+  const [avisoReemissao, setAvisoReemissao] = useState<EstadoAviso>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -63,7 +64,7 @@ export function AnimalDetalhe() {
   async function handleReemitir(evento: FormEvent) {
     evento.preventDefault();
     if (!id) return;
-    setMensagemReemissao('');
+    setAvisoReemissao(null);
     setReemitindo(true);
     try {
       const novoCodigo = await reemitirCodigo(id, motivoReemissao);
@@ -73,11 +74,11 @@ export function AnimalDetalhe() {
       ]);
       setAnimal(animalAtualizado);
       setHistoricoNumeros(historico);
-      setMensagemReemissao(`Novo brinco gerado: ${formatarBrinco(novoCodigo.numero)}`);
+      setAvisoReemissao({ tipo: 'sucesso', texto: `Novo brinco gerado: ${formatarBrinco(novoCodigo.numero)}.` });
       setMostrarReemissao(false);
       setMotivoReemissao('');
     } catch {
-      setMensagemReemissao('Não foi possível reemitir o código.');
+      setAvisoReemissao({ tipo: 'erro', texto: 'Não foi possível reemitir o código.' });
     } finally {
       setReemitindo(false);
     }
@@ -152,7 +153,7 @@ export function AnimalDetalhe() {
             </button>
           </form>
         )}
-        {mensagemReemissao && <p>{mensagemReemissao}</p>}
+        {avisoReemissao && <Aviso tipo={avisoReemissao.tipo}>{avisoReemissao.texto}</Aviso>}
       </section>
 
       {animal.categoria === 'MATRIZ' && (

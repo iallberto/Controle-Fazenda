@@ -6,6 +6,7 @@ import { listarAnimais, type Animal } from '../api/animais';
 import { listarDisponiveis, type Codigo } from '../api/codigos';
 import { listarPastos, type Pasto } from '../api/pastos';
 import { formatarBrinco, rotuloBrinco } from '../utils/formatadores';
+import { Aviso } from '../components/Aviso';
 
 export function NovoParto() {
   const navigate = useNavigate();
@@ -53,7 +54,7 @@ export function NovoParto() {
   setErro('');
 
     try {
-      await criarParto({
+      const parto = await criarParto({
         maeId,
         data,
         tipo,
@@ -62,7 +63,12 @@ export function NovoParto() {
         crias: resultado === 'VIVO' ? crias : undefined,
         pastoId: pastoAtualId || undefined, 
       });
-      navigate('/animais');
+      const quantidadeCrias = parto?.crias?.length ?? 0;
+      const aviso =
+        quantidadeCrias > 0
+          ? `Parto registrado. ${quantidadeCrias === 1 ? '1 cria cadastrada' : `${quantidadeCrias} crias cadastradas`}.`
+          : 'Parto registrado.';
+      navigate('/animais', { state: { aviso } });
     } catch (erroRequisicao) {
       const mensagem =
         axios.isAxiosError(erroRequisicao) && erroRequisicao.response?.data?.message
@@ -181,7 +187,7 @@ export function NovoParto() {
           </fieldset>
         )}
 
-        {erro && <p style={{ color: 'red' }}>{erro}</p>}
+        {erro && <Aviso tipo="erro">{erro}</Aviso>}
         <button type="submit">Registrar parto</button>
       </form>
     </div>

@@ -11,6 +11,7 @@ import {
   formatarBrinco,
   rotuloBrinco,
 } from '../utils/formatadores';
+import { Aviso } from '../components/Aviso';
 
 export function NovoAnimal() {
   const navigate = useNavigate();
@@ -57,7 +58,7 @@ async function handleSubmit(evento: FormEvent) {
   setErro('');
 
     try {
-      await criarAnimal({
+      const novo = await criarAnimal({
         codigoId,
         sexo,
         categoria,
@@ -69,7 +70,7 @@ async function handleSubmit(evento: FormEvent) {
         procedencia: origem === 'COMPRADO' ? procedencia || undefined : undefined,
         pastoAtualId: pastoAtualId || undefined, 
       });
-      navigate('/animais');
+      navigate('/animais', { state: { aviso: `${rotuloBrinco(novo.brinco)} cadastrado.` } });
     } catch (erroRequisicao) {
       const mensagem =
         axios.isAxiosError(erroRequisicao) && erroRequisicao.response?.data?.message
@@ -217,7 +218,7 @@ async function handleSubmit(evento: FormEvent) {
           </>
         )}
 
-        {erro && <p style={{ color: 'red' }}>{erro}</p>}
+        {erro && <Aviso tipo="erro">{erro}</Aviso>}
         <button type="submit">Cadastrar</button>
       </form>
     </div>

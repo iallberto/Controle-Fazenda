@@ -203,6 +203,98 @@ a:hover {
   text-decoration: underline;
 }
 
+/* Configurações: categoria, campo e botão alinhados em todas as linhas */
+.linha-arroba {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.linha-arroba button {
+  align-self: center;
+}
+
+/* --- Avisos (V3) -------------------------------------------------------------
+   Mensagens depois de salvar, carregar ou buscar: separadas do conteúdo,
+   com cor e ícone para distinguir sucesso, erro e atenção. */
+
+.aviso {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  margin: 12px 0;
+  padding: 12px 14px;
+  border: 1px solid;
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.aviso-sucesso {
+  background: #e8f5e9;
+  border-color: #a5d6a7;
+  color: #1b5e20;
+}
+
+.aviso-erro {
+  background: #fdecea;
+  border-color: #f5b5ae;
+  color: #8e1c1c;
+}
+
+.aviso-atencao {
+  background: #fff8e1;
+  border-color: #ffe08a;
+  color: #6b4e00;
+}
+
+.aviso-icone {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: white;
+}
+
+.aviso-sucesso .aviso-icone {
+  background: #2e7d32;
+}
+
+.aviso-erro .aviso-icone {
+  background: #c62828;
+}
+
+.aviso-atencao .aviso-icone {
+  background: #b07d00;
+}
+
+.aviso-texto {
+  flex: 1;
+  padding-top: 1px;
+}
+
+.aviso .aviso-fechar,
+.aviso .aviso-fechar:hover {
+  flex: none;
+  align-self: flex-start;
+  min-width: 32px;
+  min-height: 32px;
+  margin: -6px -6px -6px 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
 /* --- Layout com menu recolhível --------------------------------------------
    Celular: barra no topo com o botão ☰ e o atalho do Manejo; o menu desliza
    da esquerda. A partir de 768 px: menu fixo na lateral, sem o botão. */

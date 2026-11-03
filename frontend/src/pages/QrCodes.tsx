@@ -8,6 +8,7 @@ import {
   type FiltroCodigos,
 } from '../api/codigos';
 import { formatarBrinco, formatarStatusCodigo } from '../utils/formatadores';
+import { Aviso } from '../components/Aviso';
 
 const POR_PAGINA = 30;
 
@@ -147,8 +148,8 @@ export function QrCodes() {
         <button type="submit" disabled={gerando}>
           {gerando ? 'Gerando...' : 'Gerar'}
         </button>
-        {sucesso && <p role="status">{sucesso}</p>}
-        {erro && <p style={{ color: 'red' }}>{erro}</p>}
+        {sucesso && <Aviso tipo="sucesso">{sucesso}</Aviso>}
+        {erro && <Aviso tipo="erro">{erro}</Aviso>}
       </form>
 
       <form onSubmit={handleFiltrar} className="nao-imprimir">
@@ -187,7 +188,7 @@ export function QrCodes() {
         <button type="button" onClick={handleLimpar}>
           Limpar
         </button>
-        {erroLista && <p style={{ color: 'red' }}>{erroLista}</p>}
+        {erroLista && <Aviso tipo="erro">{erroLista}</Aviso>}
       </form>
 
       {!carregando && !erroLista && codigos.length === 0 && (

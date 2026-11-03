@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { listarAnimais, type Animal } from '../api/animais';
 import { mensagemDeErro } from '../api/client';
 import { formatarBrinco, formatarCategoria, formatarData, formatarSexo, formatarStatusAnimal } from '../utils/formatadores';
+import { Aviso } from '../components/Aviso';
 
 export function Animais() {
   const [animais, setAnimais] = useState<Animal[]>([]);
@@ -24,7 +25,7 @@ export function Animais() {
       </header>
 
       {carregando && <p>Carregando...</p>}
-      {erro && <p role="alert">{erro}</p>}
+      {erro && <Aviso tipo="erro">{erro}</Aviso>}
 
       {!carregando && !erro && animais.length === 0 && <p>Nenhum animal cadastrado ainda.</p>}
 

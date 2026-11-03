@@ -8,11 +8,13 @@ import {
 import { mensagemDeErro } from '../api/client';
 import { useAuth } from '../contexts/useAuth';
 import { formatarCategoria } from '../utils/formatadores';
+import { Aviso } from '../components/Aviso';
 
 export function Configuracao() {
   const [config, setConfig] = useState<ConfiguracaoType | null>(null);
   const [valoresEditados, setValoresEditados] = useState<Record<string, string>>({});
   const [erro, setErro] = useState('');
+  const [sucesso, setSucesso] = useState('');
   const { usuario } = useAuth();
   // Só o dono altera as configurações; o funcionário apenas consulta
   const somenteLeitura = usuario?.papel !== 'DONO';
@@ -32,8 +34,10 @@ export function Configuracao() {
 
   async function salvar(acao: () => Promise<unknown>) {
     setErro('');
+    setSucesso('');
     try {
       await acao();
+      setSucesso('Configuração salva.');
       carregar();
     } catch (erroRequisicao) {
       setErro(mensagemDeErro(erroRequisicao, 'Não foi possível salvar.'));
@@ -58,7 +62,7 @@ export function Configuracao() {
   }
 
   if (!config) {
-    return erro ? <p role="alert">{erro}</p> : <p>Carregando...</p>;
+    return erro ? <Aviso tipo="erro">{erro}</Aviso> : <p>Carregando...</p>;
   }
 
   return (
@@ -67,7 +71,8 @@ export function Configuracao() {
         <h1>Configurações</h1>
       </header>
 
-      {erro && <p role="alert">{erro}</p>}
+      {sucesso && <Aviso tipo="sucesso">{sucesso}</Aviso>}
+      {erro && <Aviso tipo="erro">{erro}</Aviso>}
       {somenteLeitura && <p>Somente o dono da fazenda pode alterar as configurações.</p>}
 
       <section>
@@ -96,7 +101,7 @@ export function Configuracao() {
       <section>
         <h2>Peso de referência da arroba (kg) por categoria</h2>
         {config.valoresArroba.map((valor) => (
-          <div key={valor.id}>
+          <div key={valor.id} className="linha-arroba">
             <label htmlFor={`arroba-${valor.categoria}`}>{formatarCategoria(valor.categoria)}</label>
             <input
               id={`arroba-${valor.categoria}`}

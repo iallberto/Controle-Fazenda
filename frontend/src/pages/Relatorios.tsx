@@ -10,6 +10,7 @@ import {
 } from '../api/relatorios';
 import { mensagemDeErro } from '../api/client';
 import { formatarData } from '../utils/formatadores';
+import { Aviso } from '../components/Aviso';
 
 export function Relatorios() {
   const [inicio, setInicio] = useState('');
@@ -61,7 +62,7 @@ export function Relatorios() {
       </form>
 
       {carregando && <p>Carregando...</p>}
-      {erro && <p role="alert">{erro}</p>}
+      {erro && <Aviso tipo="erro">{erro}</Aviso>}
 
       {!carregando && (
         <>

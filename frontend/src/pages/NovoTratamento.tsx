@@ -7,6 +7,7 @@ import { listarUsuarios, type Usuario } from '../api/usuarios';
 import { listarVeterinarios, type Veterinario } from '../api/veterinarios';
 import { useAuth } from '../contexts/useAuth';
 import { rotuloBrinco } from '../utils/formatadores';
+import { Aviso } from '../components/Aviso';
 
 export function NovoTratamento() {
   const navigate = useNavigate();
@@ -48,7 +49,7 @@ export function NovoTratamento() {
         aplicadoPorVeterinarioId:
           aplicadoPorTipo === 'VETERINARIO' ? aplicadoPorVeterinarioId : undefined,
       });
-      navigate('/animais');
+      navigate('/animais', { state: { aviso: `Tratamento "${produto}" registrado.` } });
     } catch (erroRequisicao) {
       const mensagem =
         axios.isAxiosError(erroRequisicao) && erroRequisicao.response?.data?.message
@@ -163,7 +164,7 @@ export function NovoTratamento() {
           </div>
         )}
 
-        {erro && <p style={{ color: 'red' }}>{erro}</p>}
+        {erro && <Aviso tipo="erro">{erro}</Aviso>}
         <button type="submit">Registrar</button>
       </form>
     </div>

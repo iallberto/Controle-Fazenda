@@ -6,8 +6,8 @@
 | | |
 |---|---|
 | **Levantamento original** | 19/10/2026 |
-| **Última atualização** | 03/11/2026 |
-| **Status geral** | V1, V2, V4, V5 e V6 concluídos · V3 pendente |
+| **Última atualização** | 04/11/2026 |
+| **Status geral** | Todos os itens (V1 a V6) concluídos |
 | **Legenda** | ✅ Feito · 🔶 Parcial · ⬜ Pendente · 🔎 Em estudo |
 
 ---
@@ -18,7 +18,7 @@
 |---|---|---|
 | V1 | Exibir o brinco como **"Brinco #0001"** em vez do número solto (listas, detalhe, mãe da cria, tela de criação) | ✅ Em todas as telas: lista de animais, detalhe, Manejo, QR codes e seleção de animal, matriz e código nos formulários |
 | V2 | Datas em **dia/mês/ano** em vez de ano-mês-dia | ✅ Detalhe do animal, lista de animais e relatórios |
-| V3 | Mensagem de confirmação após os botões **"Salvar"** com melhor formatação (hoje "tudo jogado e grudado") | ⬜ Pendente |
+| V3 | Mensagem de confirmação após os botões **"Salvar"** com melhor formatação (hoje "tudo jogado e grudado") | ✅ Componente `Aviso` em todas as telas: verde para sucesso, vermelho para erro e amarelo para atenção, com ícone e separado dos botões. Os cadastros que mudam de tela (animal, parto, tratamento, pesagem, mover) mostram a confirmação na tela seguinte, e Pastos, Usuários e Configurações passaram a confirmar o que foi salvo. No Manejo, cada seção diz o que foi gravado (ex.: "Peso de 412 kg registrado em 04/11/2026."). As linhas de arroba em Configurações ficaram alinhadas |
 
 ## 2. Itens identificados depois
 

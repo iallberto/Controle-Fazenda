@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/useAuth';
 import { buscarPainelInicial, type PainelInicial } from '../api/relatorios';
 import { mensagemDeErro } from '../api/client';
 import { formatarCategoria } from '../utils/formatadores';
+import { Aviso } from '../components/Aviso';
 
 export function Dashboard() {
   const { usuario } = useAuth();
@@ -26,7 +27,7 @@ export function Dashboard() {
 
       <main>
         {carregando && <p>Carregando...</p>}
-        {erro && <p role="alert">{erro}</p>}
+        {erro && <Aviso tipo="erro">{erro}</Aviso>}
 
         {painel && (
           <>

@@ -8,10 +8,12 @@ import {
 import { mensagemDeErro } from '../api/client';
 import { useAuth } from '../contexts/useAuth';
 import { formatarPapel } from '../utils/formatadores';
+import { Aviso } from '../components/Aviso';
 
 export function Usuarios() {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [erro, setErro] = useState('');
+  const [sucesso, setSucesso] = useState('');
   const { usuario: usuarioLogado } = useAuth();
 
   const [nome, setNome] = useState('');
@@ -32,9 +34,11 @@ export function Usuarios() {
   async function handleSubmit(evento: FormEvent) {
     evento.preventDefault();
     setErro('');
+    setSucesso('');
 
     try {
       await criarUsuario({ nome, email, senha, papel });
+      setSucesso(`Usuário ${nome} cadastrado.`);
       setNome('');
       setEmail('');
       setSenha('');
@@ -47,8 +51,10 @@ export function Usuarios() {
 
   async function handleAlterarAtivo(usuario: Usuario) {
     setErro('');
+    setSucesso('');
     try {
       await alterarAtivoUsuario(usuario.id, !usuario.ativo);
+      setSucesso(`Usuário ${usuario.nome} ${usuario.ativo ? 'desativado' : 'reativado'}.`);
       carregar();
     } catch (erroRequisicao) {
       setErro(mensagemDeErro(erroRequisicao, 'Não foi possível alterar o usuário.'));
@@ -93,7 +99,8 @@ export function Usuarios() {
             <option value="DONO">Dono</option>
           </select>
         </div>
-        {erro && <p style={{ color: 'red' }}>{erro}</p>}
+        {sucesso && <Aviso tipo="sucesso">{sucesso}</Aviso>}
+        {erro && <Aviso tipo="erro">{erro}</Aviso>}
         <button type="submit">Cadastrar</button>
       </form>
 

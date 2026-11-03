@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { criarVeterinario } from '../api/veterinarios';
+import { Aviso } from '../components/Aviso';
 
 export function NovoVeterinario() {
   const navigate = useNavigate();
@@ -35,7 +36,7 @@ export function NovoVeterinario() {
           <label htmlFor="crmv">CRMV (opcional)</label>
           <input id="crmv" value={crmv} onChange={(e) => setCrmv(e.target.value)} />
         </div>
-        {erro && <p style={{ color: 'red' }}>{erro}</p>}
+        {erro && <Aviso tipo="erro">{erro}</Aviso>}
         <button type="submit">Cadastrar</button>
       </form>
     </div>

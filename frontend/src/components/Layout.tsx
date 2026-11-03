@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Link, NavLink, Outlet } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/useAuth';
+import { Aviso } from './Aviso';
 
 interface ItemMenu {
   rotulo: string;
@@ -50,6 +51,11 @@ const GRUPOS_MENU: { titulo: string; itens: ItemMenu[] }[] = [
 export function Layout() {
   const { usuario, logout } = useAuth();
   const [menuAberto, setMenuAberto] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+  // Telas de cadastro mandam a confirmação junto com o redirecionamento:
+  // navigate(destino, { state: { aviso: 'Animal cadastrado.' } })
+  const avisoNavegacao = (location.state as { aviso?: string } | null)?.aviso;
 
   useEffect(() => {
     if (!menuAberto) return;
@@ -118,6 +124,16 @@ export function Layout() {
       </nav>
 
       <main className="conteudo">
+        {avisoNavegacao && (
+          <Aviso
+            tipo="sucesso"
+            aoFechar={() =>
+              navigate(location.pathname + location.search, { replace: true, state: null })
+            }
+          >
+            {avisoNavegacao}
+          </Aviso>
+        )}
         <Outlet />
       </main>
     </div>

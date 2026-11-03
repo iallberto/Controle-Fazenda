@@ -12,6 +12,7 @@ import {
   formatarPeso,
   formatarSexo,
 } from '../utils/formatadores';
+import { Aviso } from '../components/Aviso';
 
 // Página aberta a quem escaneia o QR da etiqueta (comprador ou visitante), sem login.
 // Mostra o essencial de cara e deixa os históricos recolhidos para a tela não ficar longa.
@@ -49,7 +50,7 @@ export function ConsultaAnimal() {
     return (
       <div className="pagina-publica">
         <h1>Consulta de animal</h1>
-        <p role="alert">{erro}</p>
+        <Aviso tipo="erro">{erro}</Aviso>
       </div>
     );
   }

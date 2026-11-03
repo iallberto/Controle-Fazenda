@@ -3,7 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { criarPesagem } from '../api/pesagens';
 import { listarAnimais, type Animal } from '../api/animais';
-import { rotuloBrinco } from '../utils/formatadores';
+import { formatarPeso, rotuloBrinco } from '../utils/formatadores';
+import { Aviso } from '../components/Aviso';
 
 export function NovaPesagem() {
   const navigate = useNavigate();
@@ -31,7 +32,9 @@ export function NovaPesagem() {
         data,
         observacao: observacao || undefined,
       });
-      navigate(`/animais/${animalId}`);
+      navigate(`/animais/${animalId}`, {
+        state: { aviso: `Pesagem de ${formatarPeso(pesoKg)} registrada.` },
+      });
     } catch (erroRequisicao) {
       const mensagem =
         axios.isAxiosError(erroRequisicao) && erroRequisicao.response?.data?.message
@@ -84,7 +87,7 @@ export function NovaPesagem() {
           <textarea id="observacao" value={observacao} onChange={(e) => setObservacao(e.target.value)} />
         </div>
 
-        {erro && <p style={{ color: 'red' }}>{erro}</p>}
+        {erro && <Aviso tipo="erro">{erro}</Aviso>}
         <button type="submit">Registrar</button>
       </form>
     </div>

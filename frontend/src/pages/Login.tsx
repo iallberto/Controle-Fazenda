@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/useAuth';
 import { mensagemDeErro } from '../api/client';
+import { Aviso } from '../components/Aviso';
 
 export function Login() {
   const [email, setEmail] = useState('');
@@ -52,7 +53,7 @@ export function Login() {
             required
           />
         </div>
-        {erro && <p style={{ color: 'red' }}>{erro}</p>}
+        {erro && <Aviso tipo="erro">{erro}</Aviso>}
         <button type="submit">Entrar</button>
       </form>
     </div>

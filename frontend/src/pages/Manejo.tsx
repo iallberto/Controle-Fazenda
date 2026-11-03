@@ -8,7 +8,16 @@ import { criarTratamento } from '../api/tratamentos';
 import { moverAnimal } from '../api/movimentacoes';
 import { listarPastos, type Pasto } from '../api/pastos';
 import { useAuth } from '../contexts/useAuth';
-import { CATEGORIAS_POR_SEXO, ROTULOS_CATEGORIA, formatarBrinco, formatarCategoria, formatarSexo } from '../utils/formatadores';
+import {
+  CATEGORIAS_POR_SEXO,
+  ROTULOS_CATEGORIA,
+  formatarBrinco,
+  formatarCategoria,
+  formatarData,
+  formatarPeso,
+  formatarSexo,
+} from '../utils/formatadores';
+import { Aviso, type EstadoAviso } from '../components/Aviso';
 
 function extrairMensagem(erro: unknown, padrao: string) {
   const mensagem =
@@ -26,21 +35,21 @@ export function Manejo() {
 
   const [editandoCategoria, setEditandoCategoria] = useState(false);
   const [novaCategoria, setNovaCategoria] = useState('');
-  const [mensagemCategoria, setMensagemCategoria] = useState('');
+  const [avisoCategoria, setAvisoCategoria] = useState<EstadoAviso>(null);
 
   const [mostrarPeso, setMostrarPeso] = useState(false);
   const [pesoKg, setPesoKg] = useState('');
   const [dataPeso, setDataPeso] = useState('');
-  const [mensagemPeso, setMensagemPeso] = useState('');
+  const [avisoPeso, setAvisoPeso] = useState<EstadoAviso>(null);
 
   const [mostrarTratamento, setMostrarTratamento] = useState(false);
   const [produto, setProduto] = useState('');
   const [dataTratamento, setDataTratamento] = useState('');
-  const [mensagemTratamento, setMensagemTratamento] = useState('');
+  const [avisoTratamento, setAvisoTratamento] = useState<EstadoAviso>(null);
 
   const [mostrarPasto, setMostrarPasto] = useState(false);
   const [pastoId, setPastoId] = useState('');
-  const [mensagemPasto, setMensagemPasto] = useState('');
+  const [avisoPasto, setAvisoPasto] = useState<EstadoAviso>(null);
 
   useEffect(() => {
     listarPastos().then(setPastos);
@@ -51,6 +60,10 @@ export function Manejo() {
     setErroBusca('');
     setAvisoReemissao('');
     setAnimal(null);
+    setAvisoCategoria(null);
+    setAvisoPeso(null);
+    setAvisoTratamento(null);
+    setAvisoPasto(null);
 
     try {
       const resultado = await buscarPorNumero(brinco);
@@ -64,36 +77,45 @@ export function Manejo() {
 
   async function handleSalvarCategoria() {
     if (!animal) return;
-    setMensagemCategoria('');
+    setAvisoCategoria(null);
     try {
       const atualizado = await atualizarAnimal(animal.id, { categoria: novaCategoria as Animal['categoria'] });
       setAnimal(atualizado);
       setEditandoCategoria(false);
-      setMensagemCategoria('Categoria atualizada.');
+      setAvisoCategoria({
+        tipo: 'sucesso',
+        texto: `Categoria alterada para ${formatarCategoria(atualizado.categoria)}.`,
+      });
     } catch (erro) {
-      setMensagemCategoria(extrairMensagem(erro, 'Não foi possível atualizar a categoria.'));
+      setAvisoCategoria({
+        tipo: 'erro',
+        texto: extrairMensagem(erro, 'Não foi possível atualizar a categoria.'),
+      });
     }
   }
 
   async function handleRegistrarPeso(evento: FormEvent) {
     evento.preventDefault();
     if (!animal) return;
-    setMensagemPeso('');
+    setAvisoPeso(null);
     try {
       await criarPesagem({ animalId: animal.id, pesoKg: Number(pesoKg), data: dataPeso });
-      setMensagemPeso('Peso registrado.');
+      setAvisoPeso({
+        tipo: 'sucesso',
+        texto: `Peso de ${formatarPeso(pesoKg)} registrado em ${formatarData(dataPeso)}.`,
+      });
       setMostrarPeso(false);
       setPesoKg('');
       setDataPeso('');
     } catch (erro) {
-      setMensagemPeso(extrairMensagem(erro, 'Não foi possível registrar o peso.'));
+      setAvisoPeso({ tipo: 'erro', texto: extrairMensagem(erro, 'Não foi possível registrar o peso.') });
     }
   }
 
   async function handleRegistrarTratamento(evento: FormEvent) {
     evento.preventDefault();
     if (!animal || !usuario) return;
-    setMensagemTratamento('');
+    setAvisoTratamento(null);
     try {
       await criarTratamento({
         animalId: animal.id,
@@ -102,26 +124,33 @@ export function Manejo() {
         aplicadoPorTipo: 'USUARIO',
         aplicadoPorUsuarioId: usuario.id,
       });
-      setMensagemTratamento('Tratamento registrado.');
+      setAvisoTratamento({ tipo: 'sucesso', texto: `Tratamento "${produto}" registrado.` });
       setMostrarTratamento(false);
       setProduto('');
       setDataTratamento('');
     } catch (erro) {
-      setMensagemTratamento(extrairMensagem(erro, 'Não foi possível registrar o tratamento.'));
+      setAvisoTratamento({
+        tipo: 'erro',
+        texto: extrairMensagem(erro, 'Não foi possível registrar o tratamento.'),
+      });
     }
   }
 
   async function handleMoverPasto(evento: FormEvent) {
     evento.preventDefault();
     if (!animal) return;
-    setMensagemPasto('');
+    setAvisoPasto(null);
     try {
       await moverAnimal({ animalId: animal.id, pastoId });
-      setMensagemPasto('Animal movido de pasto.');
+      const destino = pastos.find((pasto) => pasto.id === pastoId)?.nome;
+      setAvisoPasto({
+        tipo: 'sucesso',
+        texto: destino ? `Animal movido para ${destino}.` : 'Animal movido de pasto.',
+      });
       setMostrarPasto(false);
       setPastoId('');
     } catch (erro) {
-      setMensagemPasto(extrairMensagem(erro, 'Não foi possível mover o animal.'));
+      setAvisoPasto({ tipo: 'erro', texto: extrairMensagem(erro, 'Não foi possível mover o animal.') });
     }
   }
 
@@ -135,19 +164,12 @@ export function Manejo() {
         <label htmlFor="brinco">Brinco</label>
         <input id="brinco" value={brinco} onChange={(e) => setBrinco(e.target.value)} required />
         <button type="submit">Buscar</button>
-        {erroBusca && <p style={{ color: 'red' }}>{erroBusca}</p>}
       </form>
+      {erroBusca && <Aviso tipo="erro">{erroBusca}</Aviso>}
 
       {animal && (
         <>
-          {avisoReemissao && (
-            <p
-              role="status"
-              style={{ background: '#fff3cd', padding: '0.5rem', borderRadius: '4px' }}
-            >
-              {avisoReemissao}
-            </p>
-          )}
+          {avisoReemissao && <Aviso tipo="atencao">{avisoReemissao}</Aviso>}
 
           <section>
             <h2>Brinco {formatarBrinco(animal.brinco)}</h2>
@@ -172,7 +194,7 @@ export function Manejo() {
                 </>
               )}
             </p>
-            {mensagemCategoria && <p>{mensagemCategoria}</p>}
+            {avisoCategoria && <Aviso tipo={avisoCategoria.tipo}>{avisoCategoria.texto}</Aviso>}
           </section>
 
           <section>
@@ -198,7 +220,7 @@ export function Manejo() {
                 <button type="button" onClick={() => setMostrarPeso(false)}>Cancelar</button>
               </form>
             )}
-            {mensagemPeso && <p>{mensagemPeso}</p>}
+            {avisoPeso && <Aviso tipo={avisoPeso.tipo}>{avisoPeso.texto}</Aviso>}
           </section>
 
           <section>
@@ -224,7 +246,7 @@ export function Manejo() {
                 <button type="button" onClick={() => setMostrarTratamento(false)}>Cancelar</button>
               </form>
             )}
-            {mensagemTratamento && <p>{mensagemTratamento}</p>}
+            {avisoTratamento && <Aviso tipo={avisoTratamento.tipo}>{avisoTratamento.texto}</Aviso>}
           </section>
 
           <section>
@@ -244,7 +266,7 @@ export function Manejo() {
                 <button type="button" onClick={() => setMostrarPasto(false)}>Cancelar</button>
               </form>
             )}
-            {mensagemPasto && <p>{mensagemPasto}</p>}
+            {avisoPasto && <Aviso tipo={avisoPasto.tipo}>{avisoPasto.texto}</Aviso>}
           </section>
 
           <Link to={`/animais/${animal.id}`}>Ver histórico completo</Link>
