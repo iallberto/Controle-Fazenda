@@ -6,8 +6,8 @@
 | | |
 |---|---|
 | **Levantamento original** | 19/10/2026 |
-| **Última atualização** | 29/10/2026 |
-| **Status geral** | Parte aplicada · restante e novos itens ficam para a fase de reestilização |
+| **Última atualização** | 03/11/2026 |
+| **Status geral** | V1, V2, V4 e V5 concluídos · V3 pendente · V6 em estudo |
 | **Legenda** | ✅ Feito · 🔶 Parcial · ⬜ Pendente · 🔎 Em estudo |
 
 ---
@@ -16,16 +16,16 @@
 
 | # | Item | Situação |
 |---|---|---|
-| V1 | Exibir o brinco como **"Brinco #0001"** em vez do número solto (listas, detalhe, mãe da cria, tela de criação) | 🔶 Aplicado no Manejo, no detalhe do animal (título, mãe e crias) e na tela de QR codes. Falta revisar as demais telas |
-| V2 | Datas em **dia/mês/ano** em vez de ano-mês-dia | 🔶 Aplicado no detalhe do animal (nascimento, partos, pesagens, tratamentos e reemissão). Falta listas, relatórios e demais telas |
+| V1 | Exibir o brinco como **"Brinco #0001"** em vez do número solto (listas, detalhe, mãe da cria, tela de criação) | ✅ Em todas as telas: lista de animais, detalhe, Manejo, QR codes e seleção de animal, matriz e código nos formulários |
+| V2 | Datas em **dia/mês/ano** em vez de ano-mês-dia | ✅ Detalhe do animal, lista de animais e relatórios |
 | V3 | Mensagem de confirmação após os botões **"Salvar"** com melhor formatação (hoje "tudo jogado e grudado") | ⬜ Pendente |
 
 ## 2. Itens identificados depois
 
 | # | Item | Situação |
 |---|---|---|
-| V4 | **Sexo** exibido como "Fêmea" / "Macho" em vez de F / M | 🔶 Aplicado no detalhe do animal e no Manejo |
-| V5 | **Formatadores centralizados:** categoria (`MATRIZ` → "Matriz"), status (`ATIVO` → "Ativo") e origem (`NASCIDO_FAZENDA` → "Nascido na fazenda") ainda aparecem em formato cru em várias telas. Reunir tudo em um único arquivo de formatadores, junto com data e sexo | ⬜ Pendente |
+| V4 | **Sexo** exibido como "Fêmea" / "Macho" em vez de F / M | ✅ Detalhe do animal, Manejo e lista de animais |
+| V5 | **Formatadores centralizados:** categoria (`MATRIZ` → "Matriz"), status (`ATIVO` → "Ativo") e origem (`NASCIDO_FAZENDA` → "Nascido na fazenda") ainda aparecem em formato cru em várias telas. Reunir tudo em um único arquivo de formatadores, junto com data e sexo | ✅ Tudo em `frontend/src/utils/formatadores.ts` (brinco, datas, sexo, categoria, status, origem, parto, papel e status do código). As opções de categoria por sexo também saem de lá, e o Manejo passou a oferecer só as categorias válidas para o sexo do animal |
 | V6 | **Menu recolhível ("hambúrguer") e layout responsivo** | 🔎 Em estudo (ver seção 3) |
 
 ---

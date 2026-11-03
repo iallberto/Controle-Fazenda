@@ -9,8 +9,7 @@ import {
   listarHistoricoNumero,
   type HistoricoNumero,
 } from '../api/codigos';
-import { formatarBrinco } from '../utils/formatarBrinco';
-import { formatarData, formatarSexo } from '../utils/formatadores';
+import { formatarBrinco, formatarCategoria, formatarData, formatarMomento, formatarOrigem, formatarResultadoParto, formatarSexo, formatarStatusAnimal, formatarTipoParto } from '../utils/formatadores';
 
 interface PartoComIntervalo extends Parto {
   diasDesdeUltimoParto: number | null;
@@ -98,10 +97,10 @@ export function AnimalDetalhe() {
       <section>
         <h2>Dados gerais</h2>
         <p>Sexo: {formatarSexo(animal.sexo)}</p>
-        <p>Categoria: {animal.categoria}</p>
-        <p>Status: {animal.status}</p>
+        <p>Categoria: {formatarCategoria(animal.categoria)}</p>
+        <p>Status: {formatarStatusAnimal(animal.status)}</p>
         <p>Nascimento: {formatarData(animal.dataNascimento)}</p>
-        <p>Origem: {animal.origem === 'COMPRADO' ? 'Comprado' : 'Nascido na fazenda'}</p>
+        <p>Origem: {formatarOrigem(animal.origem)}</p>
         {animal.mae && (
           <p>
             Mãe:{' '}
@@ -121,7 +120,7 @@ export function AnimalDetalhe() {
               <li key={item.id}>
                 Antes era {formatarBrinco(item.numeroAnterior)} (agora{' '}
                 {formatarBrinco(item.numeroNovo)}) —{' '}
-                {new Date(item.reemitidoEm).toLocaleDateString('pt-BR')}
+                {formatarMomento(item.reemitidoEm)}
                 {item.motivo && <> — {item.motivo}</>}
               </li>
             ))}
@@ -163,7 +162,7 @@ export function AnimalDetalhe() {
           <ul>
             {partos.map((parto) => (
               <li key={parto.id}>
-                {formatarData(parto.data)} — {parto.resultado} ({parto.tipo})
+                {formatarData(parto.data)} — {formatarResultadoParto(parto.resultado)} ({formatarTipoParto(parto.tipo)})
                 {parto.diasDesdeUltimoParto !== null && (
                   <> — {parto.diasDesdeUltimoParto} dias desde o parto anterior</>
                 )}

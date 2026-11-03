@@ -5,6 +5,7 @@ import { criarParto, type Cria } from '../api/partos';
 import { listarAnimais, type Animal } from '../api/animais';
 import { listarDisponiveis, type Codigo } from '../api/codigos';
 import { listarPastos, type Pasto } from '../api/pastos';
+import { formatarBrinco, rotuloBrinco } from '../utils/formatadores';
 
 export function NovoParto() {
   const navigate = useNavigate();
@@ -92,7 +93,7 @@ export function NovoParto() {
             <option value="">Selecione a matriz</option>
             {matrizes.map((matriz) => (
               <option key={matriz.id} value={matriz.id}>
-                {matriz.brinco}
+                {rotuloBrinco(matriz.brinco)}
               </option>
             ))}
           </select>
@@ -156,7 +157,7 @@ export function NovoParto() {
                   <option value="">Selecione o código</option>
                   {opcoesParaLinha(indice).map((c) => (
                     <option key={c.id} value={c.id}>
-                      #{String(c.numero).padStart(4, '0')}
+                      {formatarBrinco(c.numero)}
                     </option>
                   ))}
                 </select>

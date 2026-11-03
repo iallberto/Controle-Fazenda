@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { listarAnimais, type Animal } from '../api/animais';
 import { mensagemDeErro } from '../api/client';
+import { formatarBrinco, formatarCategoria, formatarData, formatarSexo, formatarStatusAnimal } from '../utils/formatadores';
 
 export function Animais() {
   const [animais, setAnimais] = useState<Animal[]>([]);
@@ -48,12 +49,12 @@ export function Animais() {
             {animais.map((animal) => (
               <tr key={animal.id}>
                 <td>
-                  <Link to={`/animais/${animal.id}`}>{animal.brinco}</Link>
+                  <Link to={`/animais/${animal.id}`}>{formatarBrinco(animal.brinco)}</Link>
                 </td>
-                <td>{animal.sexo}</td>
-                <td>{animal.categoria}</td>
-                <td>{animal.status}</td>
-                <td>{animal.dataNascimento}</td>
+                <td>{formatarSexo(animal.sexo)}</td>
+                <td>{formatarCategoria(animal.categoria)}</td>
+                <td>{formatarStatusAnimal(animal.status)}</td>
+                <td>{formatarData(animal.dataNascimento)}</td>
               </tr>
             ))}
           </tbody>

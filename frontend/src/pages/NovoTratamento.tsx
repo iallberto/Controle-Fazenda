@@ -6,6 +6,7 @@ import { listarAnimais, type Animal } from '../api/animais';
 import { listarUsuarios, type Usuario } from '../api/usuarios';
 import { listarVeterinarios, type Veterinario } from '../api/veterinarios';
 import { useAuth } from '../contexts/useAuth';
+import { rotuloBrinco } from '../utils/formatadores';
 
 export function NovoTratamento() {
   const navigate = useNavigate();
@@ -71,7 +72,7 @@ export function NovoTratamento() {
             <option value="">Selecione o animal</option>
             {animais.map((animal) => (
               <option key={animal.id} value={animal.id}>
-                {animal.brinco}
+                {rotuloBrinco(animal.brinco)}
               </option>
             ))}
           </select>

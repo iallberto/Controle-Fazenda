@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/useAuth';
+import { mensagemDeErro } from '../api/client';
 
 export function Login() {
   const [email, setEmail] = useState('');
@@ -16,8 +17,14 @@ export function Login() {
     try {
       await login(email, senha);
       navigate('/');
-    } catch {
-      setErro('E-mail ou senha inválidos');
+    } catch (erroRequisicao) {
+      // Sem resposta do servidor é API fora do ar, não senha errada
+      setErro(
+        mensagemDeErro(
+          erroRequisicao,
+          'Não foi possível conectar ao servidor. Verifique se o sistema está no ar e tente de novo.',
+        ),
+      );
     }
   }
 

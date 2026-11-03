@@ -5,6 +5,12 @@ import { criarAnimal, listarAnimais, type Animal } from '../api/animais';
 import { listarRacas, type Raca } from '../api/racas';
 import { listarPastos, type Pasto } from '../api/pastos';
 import { listarDisponiveis, type Codigo } from '../api/codigos';
+import {
+  CATEGORIAS_POR_SEXO,
+  ROTULOS_CATEGORIA,
+  formatarBrinco,
+  rotuloBrinco,
+} from '../utils/formatadores';
 
 export function NovoAnimal() {
   const navigate = useNavigate();
@@ -41,18 +47,10 @@ export function NovoAnimal() {
     setCategoria(novoSexo === 'F' ? 'NOVILHA' : 'BEZERRO');
   }
 
-  const opcoesCategoria =
-    sexo === 'F'
-      ? [
-          { valor: 'NOVILHA', rotulo: 'Novilha' },
-          { valor: 'MATRIZ', rotulo: 'Matriz' },
-        ]
-      : [
-          { valor: 'BEZERRO', rotulo: 'Bezerro' },
-          { valor: 'GARROTE', rotulo: 'Garrote' },
-          { valor: 'BOI', rotulo: 'Boi' },
-          { valor: 'TOURO', rotulo: 'Touro' },
-        ];
+  const opcoesCategoria = CATEGORIAS_POR_SEXO[sexo].map((valor) => ({
+    valor,
+    rotulo: ROTULOS_CATEGORIA[valor],
+  }));
 
 async function handleSubmit(evento: FormEvent) {
   evento.preventDefault();
@@ -107,7 +105,7 @@ async function handleSubmit(evento: FormEvent) {
             <option value="">Selecione o código</option>
             {codigosDisponiveis.map((c) => (
               <option key={c.id} value={c.id}>
-                #{String(c.numero).padStart(4, '0')}
+                {formatarBrinco(c.numero)}
               </option>
             ))}
           </select>
@@ -189,7 +187,7 @@ async function handleSubmit(evento: FormEvent) {
               <option value="">Selecione a matriz</option>
               {matrizes.map((matriz) => (
                 <option key={matriz.id} value={matriz.id}>
-                  {matriz.brinco}
+                  {rotuloBrinco(matriz.brinco)}
                 </option>
               ))}
             </select>

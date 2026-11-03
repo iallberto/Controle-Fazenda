@@ -10,6 +10,7 @@ import {
   type TratamentoRelatorio,
 } from '../api/relatorios';
 import { mensagemDeErro } from '../api/client';
+import { formatarData } from '../utils/formatadores';
 
 export function Relatorios() {
   const [inicio, setInicio] = useState('');
@@ -71,7 +72,7 @@ export function Relatorios() {
             <ul>
               {nascimentos.map((parto) => (
                 <li key={parto.id}>
-                  {parto.data} — {parto.crias?.length ?? 0} cria(s)
+                  {formatarData(parto.data)} — {parto.crias?.length ?? 0} cria(s)
                 </li>
               ))}
             </ul>
@@ -81,7 +82,7 @@ export function Relatorios() {
             <h2>Natimortos ({natimortos.length})</h2>
             <ul>
               {natimortos.map((parto) => (
-                <li key={parto.id}>{parto.data}</li>
+                <li key={parto.id}>{formatarData(parto.data)}</li>
               ))}
             </ul>
           </section>
@@ -102,7 +103,7 @@ export function Relatorios() {
             <ul>
               {tratamentos.map((t) => (
                 <li key={t.id}>
-                  {t.data} — {t.produto} ({t.responsavel})
+                  {formatarData(t.data)} — {t.produto} ({t.responsavel})
                 </li>
               ))}
             </ul>

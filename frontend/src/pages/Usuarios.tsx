@@ -8,6 +8,7 @@ import {
 } from '../api/usuarios';
 import { mensagemDeErro } from '../api/client';
 import { useAuth } from '../contexts/useAuth';
+import { formatarPapel } from '../utils/formatadores';
 
 export function Usuarios() {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
@@ -101,7 +102,7 @@ export function Usuarios() {
       <ul>
         {usuarios.map((usuario) => (
           <li key={usuario.id}>
-            {usuario.nome} ({usuario.email}) — {usuario.papel}
+            {usuario.nome} ({usuario.email}) — {formatarPapel(usuario.papel)}
             {!usuario.ativo && ' (desativado)'}{' '}
             {usuario.id !== usuarioLogado?.id && (
               <button type="button" onClick={() => handleAlterarAtivo(usuario)}>

@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { moverAnimal } from '../api/movimentacoes';
 import { listarAnimais, type Animal } from '../api/animais';
 import { listarPastos, type Pasto } from '../api/pastos';
+import { rotuloBrinco } from '../utils/formatadores';
 
 export function MoverAnimal() {
   const navigate = useNavigate();
@@ -46,7 +47,7 @@ export function MoverAnimal() {
             <option value="">Selecione o animal</option>
             {animais.map((animal) => (
               <option key={animal.id} value={animal.id}>
-                {animal.brinco}
+                {rotuloBrinco(animal.brinco)}
               </option>
             ))}
           </select>

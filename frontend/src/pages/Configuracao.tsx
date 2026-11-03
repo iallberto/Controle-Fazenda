@@ -8,6 +8,7 @@ import {
 } from '../api/configuracao';
 import { mensagemDeErro } from '../api/client';
 import { useAuth } from '../contexts/useAuth';
+import { formatarCategoria } from '../utils/formatadores';
 
 export function Configuracao() {
   const [config, setConfig] = useState<ConfiguracaoType | null>(null);
@@ -98,7 +99,7 @@ export function Configuracao() {
         <h2>Peso de referência da arroba (kg) por categoria</h2>
         {config.valoresArroba.map((valor) => (
           <div key={valor.id}>
-            <label htmlFor={`arroba-${valor.categoria}`}>{valor.categoria}</label>
+            <label htmlFor={`arroba-${valor.categoria}`}>{formatarCategoria(valor.categoria)}</label>
             <input
               id={`arroba-${valor.categoria}`}
               type="number"

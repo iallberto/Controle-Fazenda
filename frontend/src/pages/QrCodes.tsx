@@ -7,15 +7,9 @@ import {
   type Codigo,
   type FiltroCodigos,
 } from '../api/codigos';
-import { formatarBrinco } from '../utils/formatarBrinco';
+import { formatarBrinco, formatarStatusCodigo } from '../utils/formatadores';
 
 const POR_PAGINA = 30;
-
-const ROTULO_STATUS: Record<Codigo['status'], string> = {
-  DISPONIVEL: 'Disponível',
-  VINCULADO: 'Vinculado',
-  DESATIVADO: 'Desativado (brinco reemitido)',
-};
 
 function extrairMensagem(erro: unknown, padrao: string) {
   const mensagem =
@@ -220,7 +214,7 @@ export function QrCodes() {
           <ul className="nao-imprimir">
             {codigosDaPagina.map((codigo) => (
               <li key={codigo.id}>
-                {formatarBrinco(codigo.numero)} — {ROTULO_STATUS[codigo.status]}
+                {formatarBrinco(codigo.numero)} — {formatarStatusCodigo(codigo.status)}
                 {codigo.status === 'VINCULADO' && codigo.animal && (
                   <>
                     {' '}(animal{' '}

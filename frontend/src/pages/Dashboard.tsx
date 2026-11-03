@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/useAuth';
 import { buscarPainelInicial, type PainelInicial } from '../api/relatorios';
 import { Link } from 'react-router-dom';
 import { mensagemDeErro } from '../api/client';
+import { formatarCategoria } from '../utils/formatadores';
 
 export function Dashboard() {
   const { usuario, logout } = useAuth();
@@ -42,7 +43,7 @@ export function Dashboard() {
               <ul>
                 {painel.porCategoria.map((item) => (
                   <li key={item.categoria}>
-                    {item.categoria}: {item.total}
+                    {formatarCategoria(item.categoria)}: {item.total}
                   </li>
                 ))}
               </ul>

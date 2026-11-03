@@ -8,8 +8,7 @@ import { criarTratamento } from '../api/tratamentos';
 import { moverAnimal } from '../api/movimentacoes';
 import { listarPastos, type Pasto } from '../api/pastos';
 import { useAuth } from '../contexts/useAuth';
-import { formatarBrinco } from '../utils/formatarBrinco';
-import { formatarSexo } from '../utils/formatadores';
+import { CATEGORIAS_POR_SEXO, ROTULOS_CATEGORIA, formatarBrinco, formatarCategoria, formatarSexo } from '../utils/formatadores';
 
 function extrairMensagem(erro: unknown, padrao: string) {
   const mensagem =
@@ -158,19 +157,18 @@ export function Manejo() {
               Categoria: {editandoCategoria ? (
                 <>
                   <select value={novaCategoria} onChange={(e) => setNovaCategoria(e.target.value)}>
-                    <option value="BEZERRO">Bezerro</option>
-                    <option value="NOVILHA">Novilha</option>
-                    <option value="MATRIZ">Matriz</option>
-                    <option value="GARROTE">Garrote</option>
-                    <option value="BOI">Boi</option>
-                    <option value="TOURO">Touro</option>
+                    {CATEGORIAS_POR_SEXO[animal.sexo].map((opcao) => (
+                      <option key={opcao} value={opcao}>
+                        {ROTULOS_CATEGORIA[opcao]}
+                      </option>
+                    ))}
                   </select>
                   <button type="button" onClick={handleSalvarCategoria}>Salvar</button>
                   <button type="button" onClick={() => setEditandoCategoria(false)}>Cancelar</button>
                 </>
               ) : (
                 <>
-                  {animal.categoria}{' '}
+                  {formatarCategoria(animal.categoria)}{' '}
                   <button type="button" onClick={() => setEditandoCategoria(true)}>Editar</button>
                 </>
               )}

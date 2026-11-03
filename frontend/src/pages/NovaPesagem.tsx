@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { criarPesagem } from '../api/pesagens';
 import { listarAnimais, type Animal } from '../api/animais';
+import { rotuloBrinco } from '../utils/formatadores';
 
 export function NovaPesagem() {
   const navigate = useNavigate();
@@ -54,7 +55,7 @@ export function NovaPesagem() {
             <option value="">Selecione o animal</option>
             {animais.map((animal) => (
               <option key={animal.id} value={animal.id}>
-                {animal.brinco}
+                {rotuloBrinco(animal.brinco)}
               </option>
             ))}
           </select>
