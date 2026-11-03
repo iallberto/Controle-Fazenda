@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Pesagem } from './entities/pesagem.entity';
 import { Animal } from '../animal/entities/animal.entity';
 import { CreatePesagemDto } from './dto/create-pesagem.dto';
+import { calcularGmd } from './gmd';
 import { garantirAnimalAtivo, garantirUsuarioDaFazenda } from '../common/vinculos';
 
 @Injectable()
@@ -49,20 +50,10 @@ export class PesagemService {
 
     const pesagens = await this.pesagemRepository.find({
       where: { animalId },
-      order: { data: 'ASC' },
+      // criadoEm desempata pesagens do mesmo dia
+      order: { data: 'ASC', criadoEm: 'ASC' },
     });
 
-    return pesagens.map((pesagem, indice) => {
-      if (indice === 0) {
-        return { ...pesagem, gmdDesdeAnterior: null };
-      }
-      const anterior = pesagens[indice - 1];
-      const dias =
-        (new Date(pesagem.data).getTime() - new Date(anterior.data).getTime()) /
-        (1000 * 60 * 60 * 24);
-      const ganho = Number(pesagem.pesoKg) - Number(anterior.pesoKg);
-      const gmd = dias > 0 ? Number((ganho / dias).toFixed(2)) : null;
-      return { ...pesagem, gmdDesdeAnterior: gmd };
-    });
+    return calcularGmd(pesagens);
   }
 }

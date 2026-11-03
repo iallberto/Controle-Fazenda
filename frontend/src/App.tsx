@@ -16,11 +16,14 @@ import { AnimalDetalhe } from './pages/AnimalDetalhe';
 import { NovoVeterinario } from './pages/NovoVeterinario';
 import { NovaPesagem } from './pages/NovaPesagem';
 import { Manejo } from './pages/Manejo';
+import { ConsultaAnimal } from './pages/ConsultaAnimal';
 
 function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      {/* Pública: aberta por quem escaneia o QR da etiqueta, sem login */}
+      <Route path="/a/:codigo" element={<ConsultaAnimal />} />
       <Route element={<RotaProtegida />}>
         <Route path="/" element={<Dashboard />} />
         <Route path="/animais" element={<Animais />} />

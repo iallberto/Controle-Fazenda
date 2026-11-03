@@ -20,6 +20,7 @@ import { ConfiguracaoModule } from './configuracao/configuracao.module';
 import { RelatorioModule } from './relatorio/relatorio.module';
 import { VeterinarioModule } from './veterinario/veterinario.module';
 import { PesagemModule } from './pesagem/pesagem.module';
+import { ConsultaPublicaModule } from './consulta-publica/consulta-publica.module';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { PesagemModule } from './pesagem/pesagem.module';
     RelatorioModule,
     VeterinarioModule,
     PesagemModule,
+    ConsultaPublicaModule,
   ],
   controllers: [AppController],
   providers: [

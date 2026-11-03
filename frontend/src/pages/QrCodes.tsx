@@ -220,7 +220,11 @@ export function QrCodes() {
                     <Link to={`/animais/${codigo.animal.id}`}>
                       {formatarBrinco(codigo.animal.brinco)}
                     </Link>
-                    )
+                    ) —{' '}
+                    {/* Prévia do que aparece para quem escanear a etiqueta */}
+                    <a href={`/a/${codigo.codigo}`} target="_blank" rel="noreferrer">
+                      Ver página pública
+                    </a>
                   </>
                 )}
               </li>

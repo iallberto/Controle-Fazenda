@@ -8,6 +8,8 @@ Complementos pós avaliação da Versão 1: [docs/pos-v1/Melhorias-pos-v1-comple
 
 Melhorias de visibilidade parciais: [docs/pos-v1/Mudancas-de-visibilidade-parciais.md](docs/pos-v1/Mudancas-de-visibilidade-parciais.md)]
 
+Etiqueta do brinco e consulta pública: [docs/pos-v1/Etiqueta-e-consulta-publica.md](docs/pos-v1/Etiqueta-e-consulta-publica.md)
+
 📄 Documentação completa: [enunciado do projeto](docs/enunciado-controle-fazenda.md) e [modelagem do sistema](docs/modelagem-controle-fazenda.md).
 
 

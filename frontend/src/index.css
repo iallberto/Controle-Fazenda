@@ -390,6 +390,121 @@ a:hover {
   }
 }
 
+/* --- Página pública do animal (QR da etiqueta) ----------------------------
+   Pensada para o celular de quem escaneia: o essencial primeiro e os
+   históricos recolhidos em <details>. */
+
+.pagina-publica {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.pagina-publica h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.publica-fazenda {
+  margin: 0 0 4px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--cor-primaria);
+}
+
+.publica-resumo {
+  margin: 4px 0 20px;
+  font-size: 1.05rem;
+}
+
+.publica-rotulo {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.publica-peso p {
+  margin: 0;
+}
+
+.publica-peso .publica-peso-arrobas {
+  margin: 0 0 6px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--cor-primaria-escura);
+}
+
+.publica-peso .publica-peso-valor {
+  margin: 4px 0;
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: var(--cor-texto);
+}
+
+.publica-dados {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px 16px;
+  margin: 0;
+}
+
+.publica-dados dt {
+  color: var(--cor-texto-suave);
+}
+
+.publica-dados dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.publica-historico {
+  background: var(--cor-card);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+}
+
+.publica-historico summary {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.publica-historico > p,
+.publica-historico ul {
+  margin: 0;
+  padding: 0 16px 12px;
+}
+
+.publica-historico ul li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  align-items: baseline;
+  margin: 0;
+  padding: 10px 0;
+  background: none;
+  border: none;
+  border-top: 1px solid var(--cor-borda);
+  border-radius: 0;
+}
+
+.publica-gmd {
+  font-size: 0.85rem;
+  color: var(--cor-texto-suave);
+}
+
+.publica-rodape {
+  margin-top: 24px;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
 .so-imprimir {
     display: none;
   }

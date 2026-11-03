@@ -14,6 +14,12 @@ export function rotuloBrinco(valor: string | number): string {
   return `Brinco ${formatarBrinco(valor)}`;
 }
 
+// Número como impresso na etiqueta do brinco, sem zeros à esquerda: "0240" → "240"
+export function formatarNumeroEtiqueta(valor: string | number): string {
+  const texto = String(valor).trim();
+  return /^\d+$/.test(texto) ? String(Number(texto)) : texto;
+}
+
 // --- Datas ------------------------------------------------------------------
 
 // Datas "puras" (AAAA-MM-DD) são convertidas por texto, sem usar new Date().
@@ -28,6 +34,32 @@ export function formatarData(valor: string | null | undefined): string {
 export function formatarMomento(valor: string | null | undefined): string {
   if (!valor) return '';
   return new Date(valor).toLocaleDateString('pt-BR');
+}
+
+// Idade a partir da data de nascimento (AAAA-MM-DD): "1 ano e 3 meses", "5 meses"
+export function formatarIdade(dataNascimento: string | null | undefined, hoje = new Date()): string {
+  if (!dataNascimento) return '';
+  const [ano, mes, dia] = dataNascimento.slice(0, 10).split('-').map(Number);
+  let meses = (hoje.getFullYear() - ano) * 12 + (hoje.getMonth() + 1 - mes);
+  if (hoje.getDate() < dia) meses--;
+  if (meses < 1) return 'menos de 1 mês';
+  const anos = Math.floor(meses / 12);
+  const resto = meses % 12;
+  const textoAnos = anos === 1 ? '1 ano' : `${anos} anos`;
+  const textoMeses = resto === 1 ? '1 mês' : `${resto} meses`;
+  if (anos === 0) return textoMeses;
+  return resto === 0 ? textoAnos : `${textoAnos} e ${textoMeses}`;
+}
+
+// Peso em kg no formato brasileiro: 412.5 → "412,5 kg"
+export function formatarPeso(pesoKg: number | string): string {
+  return `${Number(pesoKg).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} kg`;
+}
+
+// Arrobas com uma casa decimal: 33.3 → "33,3 arrobas", 1 → "1 arroba"
+export function formatarArrobas(arrobas: number): string {
+  const texto = arrobas.toLocaleString('pt-BR', { maximumFractionDigits: 1 });
+  return `${texto} ${arrobas === 1 ? 'arroba' : 'arrobas'}`;
 }
 
 // --- Enums ------------------------------------------------------------------
