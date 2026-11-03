@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| **Data** | 04/11/2026 |
+| **Data** | 03/11/2026 |
 | **Status** | Página pública implementada · etiqueta definida, impressão pendente |
 | **Foto de referência** | `docs/brinco-modelo.png` (o número "240" da foto é do fornecedor e não é usado) |
 

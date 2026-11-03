@@ -33,6 +33,6 @@ export class PastoController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdatePastoDto,
   ) {
-    return this.pastoService.update(user.fazendaId, id, dto);
+    return this.pastoService.update(user.fazendaId, user.sub, id, dto);
   }
 }

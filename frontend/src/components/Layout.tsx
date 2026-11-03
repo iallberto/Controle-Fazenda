@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/useAuth';
 import { Aviso } from './Aviso';
+import { Logo } from './Logo';
 
 interface ItemMenu {
   rotulo: string;
@@ -15,6 +16,7 @@ const GRUPOS_MENU: { titulo: string; itens: ItemMenu[] }[] = [
     itens: [
       { rotulo: 'Painel', destino: '/' },
       { rotulo: 'Manejo', destino: '/manejo' },
+      { rotulo: 'Manejo em lote', destino: '/manejo/lote' },
     ],
   },
   {
@@ -45,6 +47,23 @@ const GRUPOS_MENU: { titulo: string; itens: ItemMenu[] }[] = [
   },
 ];
 
+// Título da aba do navegador (M15). Rotas fora do menu entram aqui à parte.
+const TITULOS: Record<string, string> = {
+  ...Object.fromEntries(
+    GRUPOS_MENU.flatMap((grupo) => grupo.itens.map((item) => [item.destino, item.rotulo])),
+  ),
+  '/partos/novo': 'Registrar parto',
+  '/tratamentos/novo': 'Registrar tratamento',
+  '/pesagens/novo': 'Registrar pesagem',
+  '/veterinarios/novo': 'Novo veterinário',
+};
+
+function tituloDaRota(caminho: string) {
+  if (TITULOS[caminho]) return TITULOS[caminho];
+  if (caminho.startsWith('/animais/')) return 'Animal';
+  return null;
+}
+
 // Abaixo de 768 px o menu fica recolhido atrás do botão; acima, fixo na lateral
 // (a regra de largura está no index.css). O atalho do Manejo fica sempre na barra
 // do topo, porque a tela é usada no curral com pressa e mão suja.
@@ -56,6 +75,11 @@ export function Layout() {
   // Telas de cadastro mandam a confirmação junto com o redirecionamento:
   // navigate(destino, { state: { aviso: 'Animal cadastrado.' } })
   const avisoNavegacao = (location.state as { aviso?: string } | null)?.aviso;
+
+  useEffect(() => {
+    const titulo = tituloDaRota(location.pathname);
+    document.title = titulo ? `${titulo} · Controle Fazenda` : 'Controle Fazenda';
+  }, [location.pathname]);
 
   useEffect(() => {
     if (!menuAberto) return;
@@ -82,9 +106,10 @@ export function Layout() {
           <span aria-hidden="true">☰</span>
         </button>
         <Link to="/" className="marca">
+          <Logo tamanho={26} />
           Controle Fazenda
         </Link>
-        <NavLink to="/manejo" className="atalho-manejo">
+        <NavLink to="/manejo" end className="atalho-manejo">
           Manejo
         </NavLink>
       </header>
@@ -96,7 +121,10 @@ export function Layout() {
         className={`menu nao-imprimir${menuAberto ? ' aberto' : ''}`}
         aria-label="Menu principal"
       >
-        <p className="menu-marca">Controle Fazenda</p>
+        <p className="menu-marca">
+          <Logo tamanho={30} />
+          Controle Fazenda
+        </p>
         <p className="menu-usuario">Olá, {usuario?.nome}</p>
         {GRUPOS_MENU.map((grupo) => {
           const itens = grupo.itens.filter(

@@ -33,6 +33,6 @@ export class TratamentoController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateTratamentoDto,
   ) {
-    return this.tratamentoService.update(user.fazendaId, id, dto);
+    return this.tratamentoService.update(user.fazendaId, user.sub, id, dto);
   }
 }

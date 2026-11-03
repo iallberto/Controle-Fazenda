@@ -42,6 +42,16 @@ export class UsuarioService {
     return this.usuarioRepository.find({ where: { fazendaId } });
   }
 
+  // Lista enxuta para escolher "quem aplicou" um tratamento: qualquer usuário da
+  // fazenda pode ver, então só vai id, nome e papel (sem e-mail), e só ativos.
+  async listarAplicadores(fazendaId: string) {
+    const usuarios = await this.usuarioRepository.find({
+      where: { fazendaId, ativo: true },
+      order: { nome: 'ASC' },
+    });
+    return usuarios.map(({ id, nome, papel }) => ({ id, nome, papel }));
+  }
+
   async findOne(fazendaId: string, id: string) {
     const usuario = await this.usuarioRepository.findOneBy({ id });
     if (!usuario || usuario.fazendaId !== fazendaId) {
@@ -50,7 +60,7 @@ export class UsuarioService {
     return usuario;
   }
 
-  async update(fazendaId: string, id: string, dto: UpdateUsuarioDto) {
+  async update(fazendaId: string, usuarioLogadoId: string, id: string, dto: UpdateUsuarioDto) {
     const usuario = await this.findOne(fazendaId, id);
 
     if (dto.email && dto.email !== usuario.email) {
@@ -68,6 +78,7 @@ export class UsuarioService {
     }
 
     Object.assign(usuario, dto);
+    usuario.atualizadoPorId = usuarioLogadoId;
     return this.usuarioRepository.save(usuario);
   }
 
@@ -82,6 +93,7 @@ export class UsuarioService {
       }
     }
     usuario.ativo = ativo;
+    usuario.atualizadoPorId = usuarioLogadoId;
     return this.usuarioRepository.save(usuario);
   }
 

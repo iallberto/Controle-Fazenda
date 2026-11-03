@@ -41,7 +41,7 @@ export class AnimalController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateAnimalDto,
   ) {
-    return this.animalService.update(user.fazendaId, id, dto);
+    return this.animalService.update(user.fazendaId, user.sub, id, dto);
   }
 
   @Patch(':id/status')
@@ -50,6 +50,13 @@ export class AnimalController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: AlterarStatusAnimalDto,
   ) {
-    return this.animalService.alterarStatus(user.fazendaId, id, dto.status, dto.motivo, dto.data);
+    return this.animalService.alterarStatus(
+      user.fazendaId,
+      user.sub,
+      id,
+      dto.status,
+      dto.motivo,
+      dto.data,
+    );
   }
 }

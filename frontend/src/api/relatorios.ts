@@ -29,7 +29,37 @@ export interface TratamentoRelatorio {
   id: string;
   produto: string;
   data: string;
-  responsavel: string;
+  animal: { id: string; brinco: string };
+  responsavel: string | null;
+}
+
+export interface ProximoTratamento {
+  id: string;
+  produto: string;
+  ultimaAplicacao: string;
+  proximaData: string;
+  atrasado: boolean;
+  animal: { id: string; brinco: string };
+}
+
+export interface LinhaPorRaca {
+  raca: string;
+  total: number;
+  femeas: number;
+  machos: number;
+}
+
+// Doses recorrentes que vencem nos próximos `dias` dias, mais as já atrasadas
+export async function buscarProximosTratamentos(dias: number) {
+  const resposta = await apiClient.get<ProximoTratamento[]>('/relatorio/proximos-tratamentos', {
+    params: { dias },
+  });
+  return resposta.data;
+}
+
+export async function buscarPorRaca() {
+  const resposta = await apiClient.get<LinhaPorRaca[]>('/relatorio/por-raca');
+  return resposta.data;
 }
 
 export async function buscarNascimentos(inicio: string, fim: string) {

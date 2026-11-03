@@ -18,7 +18,8 @@ export interface Tratamento {
   id: string;
   produto: string;
   data: string;
-  responsavel: string;
+  // Nome de quem aplicou; veterinários vêm com "(veterinário)"
+  responsavel: string | null;
   recorrenciaDias: number | null;
   proximaDataPrevista: string | null;
 }

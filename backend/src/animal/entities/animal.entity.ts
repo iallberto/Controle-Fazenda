@@ -6,6 +6,7 @@ import {
   JoinColumn,
   Unique,
   CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Fazenda } from '../../fazenda/entities/fazenda.entity';
 import { Raca } from '../../raca/entities/raca.entity';
@@ -143,4 +144,15 @@ export class Animal {
 
   @CreateDateColumn({ name: 'criado_em' })
   criadoEm: Date;
+
+  // Auditoria (M8): quem fez a última alteração e quando
+  @UpdateDateColumn({ name: 'atualizado_em' })
+  atualizadoEm: Date;
+
+  @ManyToOne(() => Usuario, { nullable: true })
+  @JoinColumn({ name: 'atualizado_por' })
+  atualizadoPor?: Usuario;
+
+  @Column({ name: 'atualizado_por', type: 'uuid', nullable: true })
+  atualizadoPorId: string | null;
 }

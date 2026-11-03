@@ -19,6 +19,7 @@ export function Usuarios() {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+  const [confirmacaoSenha, setConfirmacaoSenha] = useState('');
   const [papel, setPapel] = useState<'DONO' | 'FUNCIONARIO'>('FUNCIONARIO');
 
   function carregar() {
@@ -36,12 +37,22 @@ export function Usuarios() {
     setErro('');
     setSucesso('');
 
+    if (senha.length < 6) {
+      setErro('A senha precisa ter pelo menos 6 caracteres.');
+      return;
+    }
+    if (senha !== confirmacaoSenha) {
+      setErro('As senhas não conferem. Digite a mesma senha nos dois campos.');
+      return;
+    }
+
     try {
       await criarUsuario({ nome, email, senha, papel });
       setSucesso(`Usuário ${nome} cadastrado.`);
       setNome('');
       setEmail('');
       setSenha('');
+      setConfirmacaoSenha('');
       setPapel('FUNCIONARIO');
       carregar();
     } catch {
@@ -89,6 +100,19 @@ export function Usuarios() {
             type="password"
             value={senha}
             onChange={(e) => setSenha(e.target.value)}
+            autoComplete="new-password"
+            minLength={6}
+            required
+          />
+        </div>
+        <div>
+          <label htmlFor="confirmacao-senha">Confirmar senha</label>
+          <input
+            id="confirmacao-senha"
+            type="password"
+            value={confirmacaoSenha}
+            onChange={(e) => setConfirmacaoSenha(e.target.value)}
+            autoComplete="new-password"
             required
           />
         </div>

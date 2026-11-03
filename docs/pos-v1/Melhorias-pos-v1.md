@@ -7,7 +7,7 @@
 |---|---|
 | **Origem** | Uso da V1 em protótipo (ainda sem teste em campo) |
 | **Documento de apoio** | `MUDANÇAS_DE_USABILIDADE_E_DESIGN.pdf` (15 itens originais) |
-| **Status** | Decisões tomadas · implementação pendente |
+| **Status** | M1–M16 concluídos em 03/11/2026 · foto do animal adiada |
 | **Legenda** | 🔴 Alta · 🟡 Média · 🟢 Baixa · ⏸️ Adiado |
 
 ---
@@ -47,41 +47,57 @@ Além disso: regras de domínio (sexo × categoria), responsável pela aplicaç�
 
 ### 🔴 Prioridade alta
 
-- [ ] **M1 — Código simplificado (orig. 9)**
+- [x] **M1 — Código simplificado (orig. 9)**
   Número sequencial por fazenda, gerado junto ao lote de QR codes (ex.: `#0001` a `#0100`). Impresso em destaque ao lado do QR. UUID permanece interno e na URL do QR.
-- [ ] **M2 — Registro de peso (orig. 13)**
+  ✅ Número sequencial por fazenda (`#0001`) já é o brinco. O QR na impressão aguarda o domínio definitivo (ver `Etiqueta-e-consulta-publica.md`).
+- [x] **M2 — Registro de peso (orig. 13)**
   Entidade `Pesagem` (animal, peso em kg, data, quem pesou, quem lançou). Exibição em @ conforme valor de referência das Configurações. GMD calculado entre pesagens. **Opcional por fazenda** (configuração "possui balança").
-- [ ] **M3 — Tela de manejo (brete)**
+  ✅ Pesagem com GMD e peso em arrobas (pelo peso de referência da categoria) no detalhe do animal e na página pública. A opção "possui balança" foi descartada: a pesagem já é opcional, quem não tem balança só não lança.
+- [x] **M3 — Tela de manejo (brete)**
   Fluxo: **brinco → peso → tratamento → pasto/categoria**, com poucos toques. Aceita sessão em lote (ver M4).
-- [ ] **M4 — Sessão de manejo em lote rastreável**
+  ✅ Tela de Manejo: busca pelo brinco, peso, tratamento, pasto e categoria na mesma tela.
+- [x] **M4 — Sessão de manejo em lote rastreável**
   Grupo (pasto/categoria) → todos marcados por padrão → desmarca-se exceções → confirma. Um registro por animal tratado; exceções guardadas com motivo.
-- [ ] **M5 — Sexo × categoria (orig. 1 e 2)**
+  ✅ Tela "Manejo em lote": grupo por pasto e/ou categoria, todos marcados, exceções com motivo obrigatório. Aplica **tratamento** ou **mudança de pasto**. Cada animal ganha o próprio registro, ligado à sessão; o histórico das sessões fica na própria tela.
+- [x] **M5 — Sexo × categoria (orig. 1 e 2)**
   Regras no **backend** (service/DTO) e espelhadas no front. Parto apenas para matriz.
+  ✅ Regras no backend (validação de sexo × categoria, mãe fêmea, pai macho, parto só de matriz) e espelhadas no front.
 
 ### 🟡 Prioridade média
 
-- [ ] **M6 — "Aplicado por" sem digitação (orig. 4 e 10)**
+- [x] **M6 — "Aplicado por" sem digitação (orig. 4 e 10)**
   Seleção do tipo (funcionário / veterinário / dono) e combo com os cadastrados. Se o usuário logado é dono, vem preenchido.
-- [ ] **M7 — Cadastro de veterinários (D4)**
+  ✅ Tipo (funcionário/dono ou veterinário) e lista dos cadastrados; o usuário logado vem preenchido. Corrigido: a lista vinha vazia para funcionário (rota `GET /usuario/aplicadores`).
+- [x] **M7 — Cadastro de veterinários (D4)**
   Nome, CRMV opcional, ativo/inativo. Criável por dono ou funcionário. Nunca excluído, apenas inativado.
-- [ ] **M8 — Auditoria mínima (D5)**
+  ✅ Cadastro de veterinários com CRMV opcional; inativação em vez de exclusão.
+- [x] **M8 — Auditoria mínima (D5)**
   `criadoPor`, `criadoEm`, `atualizadoPor`, `atualizadoEm` nos registros principais. Em tratamento e pesagem, separar **quem aplicou/pesou** de **quem lançou**.
-- [ ] **M9 — Pasto no cadastro (orig. 6)**
+  ✅ `criadoPor`/`criadoEm` e, agora, `atualizadoPor`/`atualizadoEm` em animal, parto, tratamento, pasto e usuário. Tratamento e pesagem separam quem aplicou/pesou de quem lançou.
+- [x] **M9 — Pasto no cadastro (orig. 6)**
   Campo de pasto no cadastro de animal e no parto (cria), gerando `MovimentacaoPasto` inicial na mesma transação.
-- [ ] **M10 — Relatórios por tipo (orig. 11)**
+  ✅ Pasto no cadastro do animal e do parto, com a movimentação inicial na mesma transação.
+- [x] **M10 — Relatórios por tipo (orig. 11)**
   Tela inicial pergunta o tipo: por animal · por tipo de animal · tratamentos realizados · **próximos tratamentos** · por raça. Datas só depois.
-- [ ] **M11 — Dados gerais do animal (orig. 3)**
+  ✅ A tela de relatórios pergunta o tipo primeiro: próximos tratamentos (com atrasados), por animal, por tipo de animal, por raça, tratamentos realizados e nascimentos/óbitos. Datas só nos que precisam, já preenchidas com o mês atual.
+- [x] **M11 — Dados gerais do animal (orig. 3)**
   Exibir mãe (quando houver) e origem "Comprado".
+  ✅ Mãe e origem aparecem no detalhe do animal.
 
 ### 🟢 Prioridade baixa
 
-- [ ] **M12 — Vincular código após perda do brinco (orig. 5)**
+- [x] **M12 — Vincular código após perda do brinco (orig. 5)**
   Separar na interface "vincular código a animal novo" de "reemitir por perda/extravio", com texto explicativo. Na reemissão, o número antigo é guardado no histórico do animal (D10) e a busca por ele redireciona ao número atual.
-- [ ] **M13 — Confirmação de senha (orig. 7)**
-- [ ] **M14 — Som de notificação (orig. 8)**
+  ✅ Textos explicam que a reemissão é só para brinco perdido/quebrado e que animal novo usa um código disponível. Número antigo fica no histórico e a busca por ele leva ao animal.
+- [x] **M13 — Confirmação de senha (orig. 7)**
+  ✅ Campo "Confirmar senha" no cadastro de usuários.
+- [x] **M14 — Som de notificação (orig. 8)**
   Seleção e reprodução do som já previsto nas Configurações.
-- [ ] **M15 — Títulos das páginas (orig. 14)** — substituir "frontend".
-- [ ] **M16 — Logo e favicon (orig. 15)**
+  ✅ Em Configurações: escolha entre três sons (sino, bipe curto, dois toques) com botão "Ouvir". Toca ao salvar com sucesso; erros têm um som grave diferente. Sons gerados no navegador, sem arquivos.
+- [x] **M15 — Títulos das páginas (orig. 14)** — substituir "frontend".
+  ✅ Cada página tem título na aba ("Manejo · Controle Fazenda"); a página pública usa o brinco e a fazenda.
+- [x] **M16 — Logo e favicon (orig. 15)**
+  ✅ Logo provisória (brinco com etiqueta) no menu, no login e como favicon. Trocar em `public/favicon.svg` e `components/Logo.tsx` quando houver logo definitiva.
 
 ### ⏸️ Adiado
 

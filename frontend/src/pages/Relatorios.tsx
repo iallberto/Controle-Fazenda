@@ -1,50 +1,70 @@
-import { useState, type FormEvent } from 'react';
-import {
-  buscarNascimentos,
-  buscarNatimortos,
-  buscarObitosPorCausa,
-  buscarTratamentosPorPeriodo,
-  type NascimentoOuNatimorto,
-  type ObitoPorCausa,
-  type TratamentoRelatorio,
-} from '../api/relatorios';
-import { mensagemDeErro } from '../api/client';
-import { formatarData } from '../utils/formatadores';
-import { Aviso } from '../components/Aviso';
+import { useSearchParams } from 'react-router-dom';
+import { RelatorioPorAnimal } from './relatorios/RelatorioPorAnimal';
+import { RelatorioPorCategoria } from './relatorios/RelatorioPorCategoria';
+import { RelatorioTratamentos } from './relatorios/RelatorioTratamentos';
+import { RelatorioProximosTratamentos } from './relatorios/RelatorioProximosTratamentos';
+import { RelatorioPorRaca } from './relatorios/RelatorioPorRaca';
+import { RelatorioNascimentos } from './relatorios/RelatorioNascimentos';
+
+// M10: primeiro a pessoa escolhe o tipo de relatório; as datas, quando
+// fazem sentido, vêm depois, dentro de cada relatório.
+const TIPOS = [
+  {
+    id: 'proximos',
+    titulo: 'Próximos tratamentos',
+    descricao: 'Doses que vencem nos próximos dias e as atrasadas',
+    Componente: RelatorioProximosTratamentos,
+  },
+  {
+    id: 'animal',
+    titulo: 'Por animal',
+    descricao: 'Histórico completo de um animal',
+    Componente: RelatorioPorAnimal,
+  },
+  {
+    id: 'categoria',
+    titulo: 'Por tipo de animal',
+    descricao: 'Quantos e quais animais em cada categoria',
+    Componente: RelatorioPorCategoria,
+  },
+  {
+    id: 'raca',
+    titulo: 'Por raça',
+    descricao: 'Rebanho ativo dividido por raça, fêmeas e machos',
+    Componente: RelatorioPorRaca,
+  },
+  {
+    id: 'tratamentos',
+    titulo: 'Tratamentos realizados',
+    descricao: 'O que foi aplicado em um período',
+    Componente: RelatorioTratamentos,
+  },
+  {
+    id: 'nascimentos',
+    titulo: 'Nascimentos e óbitos',
+    descricao: 'Nascimentos, natimortos e óbitos por causa em um período',
+    Componente: RelatorioNascimentos,
+  },
+];
 
 export function Relatorios() {
-  const [inicio, setInicio] = useState('');
-  const [fim, setFim] = useState('');
-  const [carregando, setCarregando] = useState(false);
-  const [erro, setErro] = useState('');
+  // O tipo fica na URL (?tipo=...) para o botão "voltar" do navegador funcionar
+  const [parametros, setParametros] = useSearchParams();
+  const tipoAtual = TIPOS.find((tipo) => tipo.id === parametros.get('tipo'));
 
-  const [nascimentos, setNascimentos] = useState<NascimentoOuNatimorto[]>([]);
-  const [natimortos, setNatimortos] = useState<NascimentoOuNatimorto[]>([]);
-  const [obitosPorCausa, setObitosPorCausa] = useState<ObitoPorCausa[]>([]);
-  const [tratamentos, setTratamentos] = useState<TratamentoRelatorio[]>([]);
-
-  async function handleGerar(evento: FormEvent) {
-    evento.preventDefault();
-    setCarregando(true);
-    setErro('');
-
-    try {
-      const [resNascimentos, resNatimortos, resObitos, resTratamentos] = await Promise.all([
-        buscarNascimentos(inicio, fim),
-        buscarNatimortos(inicio, fim),
-        buscarObitosPorCausa(inicio, fim),
-        buscarTratamentosPorPeriodo(inicio, fim),
-      ]);
-
-      setNascimentos(resNascimentos);
-      setNatimortos(resNatimortos);
-      setObitosPorCausa(resObitos);
-      setTratamentos(resTratamentos);
-    } catch (erroRequisicao) {
-      setErro(mensagemDeErro(erroRequisicao, 'Não foi possível gerar os relatórios.'));
-    } finally {
-      setCarregando(false);
-    }
+  if (tipoAtual) {
+    const { Componente } = tipoAtual;
+    return (
+      <div>
+        <header>
+          <h1>{tipoAtual.titulo}</h1>
+          <button type="button" className="botao-link" onClick={() => setParametros({})}>
+            Outros relatórios
+          </button>
+        </header>
+        <Componente />
+      </div>
+    );
   }
 
   return (
@@ -52,63 +72,20 @@ export function Relatorios() {
       <header>
         <h1>Relatórios</h1>
       </header>
-
-      <form onSubmit={handleGerar}>
-        <label htmlFor="inicio">De</label>
-        <input id="inicio" type="date" value={inicio} onChange={(e) => setInicio(e.target.value)} required />
-        <label htmlFor="fim">Até</label>
-        <input id="fim" type="date" value={fim} onChange={(e) => setFim(e.target.value)} required />
-        <button type="submit">Gerar relatórios</button>
-      </form>
-
-      {carregando && <p>Carregando...</p>}
-      {erro && <Aviso tipo="erro">{erro}</Aviso>}
-
-      {!carregando && (
-        <>
-          <section>
-            <h2>Nascimentos ({nascimentos.length})</h2>
-            <ul>
-              {nascimentos.map((parto) => (
-                <li key={parto.id}>
-                  {formatarData(parto.data)} — {parto.crias?.length ?? 0} cria(s)
-                </li>
-              ))}
-            </ul>
-          </section>
-
-          <section>
-            <h2>Natimortos ({natimortos.length})</h2>
-            <ul>
-              {natimortos.map((parto) => (
-                <li key={parto.id}>{formatarData(parto.data)}</li>
-              ))}
-            </ul>
-          </section>
-
-          <section>
-            <h2>Óbitos por causa</h2>
-            <ul>
-              {obitosPorCausa.map((item) => (
-                <li key={item.motivo}>
-                  {item.motivo}: {item.total}
-                </li>
-              ))}
-            </ul>
-          </section>
-
-          <section>
-            <h2>Tratamentos ({tratamentos.length})</h2>
-            <ul>
-              {tratamentos.map((t) => (
-                <li key={t.id}>
-                  {formatarData(t.data)} — {t.produto} ({t.responsavel})
-                </li>
-              ))}
-            </ul>
-          </section>
-        </>
-      )}
+      <p>Escolha o relatório:</p>
+      <div className="opcoes-relatorio">
+        {TIPOS.map((tipo) => (
+          <button
+            key={tipo.id}
+            type="button"
+            className="cartao-opcao"
+            onClick={() => setParametros({ tipo: tipo.id })}
+          >
+            <strong>{tipo.titulo}</strong>
+            <span>{tipo.descricao}</span>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

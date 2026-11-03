@@ -56,6 +56,13 @@ export function formatarPeso(pesoKg: number | string): string {
   return `${Number(pesoKg).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} kg`;
 }
 
+// Peso vivo em arrobas, com o kg por arroba da categoria (Configurações).
+// Sem configuração para a categoria, vale 15 kg, igual à página pública.
+export function converterEmArrobas(pesoKg: number | string, kgPorArroba?: number | string | null) {
+  const referencia = Number(kgPorArroba) || 15;
+  return Math.round((Number(pesoKg) / referencia) * 10) / 10;
+}
+
 // Arrobas com uma casa decimal: 33.3 → "33,3 arrobas", 1 → "1 arroba"
 export function formatarArrobas(arrobas: number): string {
   const texto = arrobas.toLocaleString('pt-BR', { maximumFractionDigits: 1 });

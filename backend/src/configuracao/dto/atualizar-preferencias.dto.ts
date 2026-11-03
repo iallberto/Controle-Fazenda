@@ -1,4 +1,5 @@
-import { IsBoolean, IsOptional } from 'class-validator';
+import { IsBoolean, IsEnum, IsOptional } from 'class-validator';
+import { SomNotificacao } from '../entities/configuracao-fazenda.entity';
 
 export class AtualizarPreferenciasDto {
   @IsOptional()
@@ -8,4 +9,8 @@ export class AtualizarPreferenciasDto {
   @IsOptional()
   @IsBoolean()
   somAtivo?: boolean;
+
+  @IsOptional()
+  @IsEnum(SomNotificacao)
+  som?: SomNotificacao;
 }

@@ -110,7 +110,7 @@ export class AnimalService {
     return animal;
   }
 
-  async update(fazendaId: string, id: string, dto: UpdateAnimalDto) {
+  async update(fazendaId: string, usuarioLogadoId: string, id: string, dto: UpdateAnimalDto) {
     const animal = await this.findOne(fazendaId, id);
     if (dto.sexo || dto.categoria) {
       const sexoEfetivo = dto.sexo ?? animal.sexo;
@@ -122,11 +122,13 @@ export class AnimalService {
     }
     await this.validarVinculos(fazendaId, dto);
     Object.assign(animal, dto);
+    animal.atualizadoPorId = usuarioLogadoId;
     return this.animalRepository.save(animal);
   }
 
   async alterarStatus(
     fazendaId: string,
+    usuarioLogadoId: string,
     id: string,
     novoStatus: StatusAnimal,
     motivo: string,
@@ -153,6 +155,7 @@ export class AnimalService {
       animal.dataStatus = data;
       animal.pastoAtualId = null;
       animal.pastoAtual = undefined;
+      animal.atualizadoPorId = usuarioLogadoId;
       return manager.save(animal);
     });
   }

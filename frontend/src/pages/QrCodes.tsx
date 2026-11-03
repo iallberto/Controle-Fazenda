@@ -135,6 +135,12 @@ export function QrCodes() {
         <h1>QR Codes</h1>
       </header>
 
+      <p className="nao-imprimir">
+        Os códigos <strong>disponíveis</strong> são escolhidos no cadastro de cada animal novo.
+        Se um animal perdeu o brinco, reemita o código na página dele, em vez de usar um
+        código daqui. Imprima as etiquetas em material resistente ao sol e à chuva.
+      </p>
+
       <form onSubmit={handleGerarLote} className="nao-imprimir">
         <label htmlFor="quantidade">Gerar mais códigos</label>
         <input

@@ -55,7 +55,11 @@ export class MovimentacaoPastoService {
       });
       const movimentacaoSalva = await manager.save(novaMovimentacao);
 
-      await manager.update(Animal, { id: animal.id }, { pastoAtualId: pasto.id });
+      await manager.update(
+        Animal,
+        { id: animal.id },
+        { pastoAtualId: pasto.id, atualizadoPorId: usuarioLogadoId },
+      );
 
       return movimentacaoSalva;
     });

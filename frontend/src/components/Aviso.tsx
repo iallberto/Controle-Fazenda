@@ -1,4 +1,6 @@
 import { useEffect, useRef, type ReactNode } from 'react';
+import { usePreferencias } from '../contexts/usePreferencias';
+import { tocarSom } from '../utils/sons';
 
 export type TipoAviso = 'sucesso' | 'erro' | 'atencao';
 
@@ -21,6 +23,18 @@ interface AvisoProps {
 // separam sucesso de erro, e o leitor de tela anuncia o texto (role alert/status).
 export function Aviso({ tipo, children, aoFechar }: AvisoProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const preferencias = usePreferencias();
+  const somAtivo = preferencias?.somAtivo ?? false;
+  const som = preferencias?.som ?? 'SINO';
+
+  // Som de confirmação (M14): útil no curral, sem olhar para a tela.
+  // Só quando o aviso aparece ou muda de texto, não a cada renderização.
+  useEffect(() => {
+    if (!somAtivo) return;
+    if (tipo === 'sucesso') tocarSom(som);
+    if (tipo === 'erro') tocarSom('ERRO');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [children]);
 
   // No celular o aviso pode surgir fora da tela (ex.: salvou um campo lá embaixo).
   // "nearest" só rola quando ele não está visível.

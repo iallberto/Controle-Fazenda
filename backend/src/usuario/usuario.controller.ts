@@ -26,6 +26,12 @@ export class UsuarioController {
     return this.usuarioService.findAll(user.fazendaId);
   }
 
+  // Antes de ':id' para não ser capturada como um id
+  @Get('aplicadores')
+  listarAplicadores(@CurrentUser() user: JwtPayload) {
+    return this.usuarioService.listarAplicadores(user.fazendaId);
+  }
+
   @Get(':id')
   findOne(@CurrentUser() user: JwtPayload, @Param('id', ParseUUIDPipe) id: string) {
     return this.usuarioService.findOne(user.fazendaId, id);
@@ -38,7 +44,7 @@ export class UsuarioController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateUsuarioDto,
   ) {
-    return this.usuarioService.update(user.fazendaId, id, dto);
+    return this.usuarioService.update(user.fazendaId, user.sub, id, dto);
   }
 
   @Roles(PapelUsuario.DONO)

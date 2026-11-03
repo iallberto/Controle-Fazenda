@@ -216,6 +216,140 @@ a:hover {
   align-self: center;
 }
 
+/* Configurações: escolha do som, com o botão de ouvir ao lado */
+.linha-som {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.linha-som label {
+  font-weight: 600;
+}
+
+.dica {
+  margin: 8px 0 0;
+  font-size: 0.85rem;
+}
+
+/* Relatórios: escolha do tipo em cartões */
+.opcoes-relatorio {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.opcoes-relatorio .cartao-opcao {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  width: 100%;
+  min-height: 88px;
+  padding: 16px;
+  text-align: left;
+  background: var(--cor-card);
+  color: var(--cor-texto);
+  border: 1px solid var(--cor-borda);
+  font-weight: 400;
+}
+
+.opcoes-relatorio .cartao-opcao:hover {
+  background: #eef2ee;
+  border-color: var(--cor-primaria);
+}
+
+.cartao-opcao strong {
+  font-size: 1.05rem;
+  color: var(--cor-primaria-escura);
+}
+
+.cartao-opcao span {
+  font-size: 0.9rem;
+  color: var(--cor-texto-suave);
+}
+
+/* Botão com cara de link, para ações secundárias */
+button.botao-link,
+button.botao-link:hover {
+  background: none;
+  color: var(--cor-primaria);
+  padding: 4px 0;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.filtro-linha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.filtro-linha label {
+  font-weight: 600;
+}
+
+/* Manejo em lote */
+.passo {
+  margin: 0;
+  font-weight: 700;
+  color: var(--cor-primaria-escura);
+}
+
+.form-lote {
+  max-width: 640px;
+}
+
+.acoes-marcacao {
+  display: flex;
+  gap: 16px;
+}
+
+.lista-lote li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin-bottom: 6px;
+}
+
+.lista-lote label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+  font-weight: 600;
+  color: var(--cor-texto);
+}
+
+.lista-lote input[type='checkbox'] {
+  width: 22px;
+  height: 22px;
+}
+
+.lista-lote li.desmarcado {
+  background: #fff8e1;
+  border-color: #ffe08a;
+}
+
+.lista-lote li.desmarcado input:not([type='checkbox']) {
+  flex: 1;
+  min-width: 200px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
 /* --- Avisos (V3) -------------------------------------------------------------
    Mensagens depois de salvar, carregar ou buscar: separadas do conteúdo,
    com cor e ícone para distinguir sucesso, erro e atenção. */
@@ -321,9 +455,14 @@ a:hover {
 }
 
 .barra-topo .marca {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   color: white;
   font-size: 1.05rem;
   flex: 1;
+  /* Logo branca sobre a barra verde: os recortes ficam na cor da barra */
+  --cor-fundo-logo: var(--cor-primaria);
 }
 
 .barra-topo .marca:hover {
@@ -395,6 +534,9 @@ a:hover {
 }
 
 .menu-marca {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin: 4px 8px 0;
   font-size: 1.1rem;
   font-weight: 700;
@@ -485,6 +627,21 @@ a:hover {
 /* --- Página pública do animal (QR da etiqueta) ----------------------------
    Pensada para o celular de quem escaneia: o essencial primeiro e os
    históricos recolhidos em <details>. */
+
+.login-titulo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--cor-texto);
+}
+
+.login-titulo .logo {
+  color: var(--cor-primaria);
+}
+
+.menu-marca .logo {
+  color: var(--cor-primaria);
+}
 
 .pagina-publica {
   max-width: 560px;

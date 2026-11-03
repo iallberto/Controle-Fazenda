@@ -136,9 +136,10 @@ export class PartoService {
     return parto;
   }
 
-  async update(fazendaId: string, id: string, dto: UpdatePartoDto) {
+  async update(fazendaId: string, usuarioLogadoId: string, id: string, dto: UpdatePartoDto) {
     const parto = await this.findOne(fazendaId, id);
     Object.assign(parto, dto);
+    parto.atualizadoPorId = usuarioLogadoId;
     return this.partoRepository.save(parto);
   }
 }

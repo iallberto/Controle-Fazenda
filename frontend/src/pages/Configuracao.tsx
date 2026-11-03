@@ -9,6 +9,8 @@ import { mensagemDeErro } from '../api/client';
 import { useAuth } from '../contexts/useAuth';
 import { formatarCategoria } from '../utils/formatadores';
 import { Aviso } from '../components/Aviso';
+import { usePreferencias } from '../contexts/usePreferencias';
+import { ROTULOS_SOM, tocarSom, type NomeSom } from '../utils/sons';
 
 export function Configuracao() {
   const [config, setConfig] = useState<ConfiguracaoType | null>(null);
@@ -32,11 +34,15 @@ export function Configuracao() {
       .catch((erroRequisicao) => setErro(mensagemDeErro(erroRequisicao)));
   }
 
+  const preferencias = usePreferencias();
+
   async function salvar(acao: () => Promise<unknown>) {
     setErro('');
     setSucesso('');
     try {
       await acao();
+      // Atualiza antes do aviso, para ele já tocar com o som novo
+      await preferencias?.recarregar();
       setSucesso('Configuração salva.');
       carregar();
     } catch (erroRequisicao) {
@@ -96,6 +102,32 @@ export function Configuracao() {
           />
           Som ativo
         </label>
+
+        <div className="linha-som">
+          <label htmlFor="som">Som de confirmação</label>
+          <select
+            id="som"
+            value={config.som}
+            disabled={somenteLeitura || !config.somAtivo}
+            onChange={(e) => {
+              const som = e.target.value as NomeSom;
+              // O aviso "Configuração salva." já toca o som escolhido
+              salvar(() => atualizarPreferencias({ som }));
+            }}
+          >
+            {(Object.keys(ROTULOS_SOM) as NomeSom[]).map((som) => (
+              <option key={som} value={som}>
+                {ROTULOS_SOM[som]}
+              </option>
+            ))}
+          </select>
+          <button type="button" onClick={() => tocarSom(config.som)}>
+            Ouvir
+          </button>
+        </div>
+        <p className="dica">
+          Toca ao salvar um registro com sucesso. Em caso de erro, toca um som grave diferente.
+        </p>
       </section>
 
       <section>

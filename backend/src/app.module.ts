@@ -21,6 +21,7 @@ import { RelatorioModule } from './relatorio/relatorio.module';
 import { VeterinarioModule } from './veterinario/veterinario.module';
 import { PesagemModule } from './pesagem/pesagem.module';
 import { ConsultaPublicaModule } from './consulta-publica/consulta-publica.module';
+import { ManejoLoteModule } from './manejo-lote/manejo-lote.module';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { ConsultaPublicaModule } from './consulta-publica/consulta-publica.modul
     VeterinarioModule,
     PesagemModule,
     ConsultaPublicaModule,
+    ManejoLoteModule,
   ],
   controllers: [AppController],
   providers: [

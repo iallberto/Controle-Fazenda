@@ -44,4 +44,8 @@ export class MovimentacaoPasto {
 
   @CreateDateColumn({ name: 'criado_em' })
   criadoEm: Date;
+
+  // Preenchido quando o registro veio de uma sessão de manejo em lote (M4)
+  @Column({ name: 'sessao_manejo_id', type: 'uuid', nullable: true })
+  sessaoManejoId: string | null;
 }

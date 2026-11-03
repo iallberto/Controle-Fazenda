@@ -3,6 +3,7 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  UpdateDateColumn,
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
@@ -51,4 +52,15 @@ export class Usuario {
 
   @CreateDateColumn({ name: 'criado_em' })
   criadoEm: Date;
+
+  // Auditoria (M8): quem fez a última alteração e quando
+  @UpdateDateColumn({ name: 'atualizado_em' })
+  atualizadoEm: Date;
+
+  @ManyToOne(() => Usuario, { nullable: true })
+  @JoinColumn({ name: 'atualizado_por' })
+  atualizadoPor?: Usuario;
+
+  @Column({ name: 'atualizado_por', type: 'uuid', nullable: true })
+  atualizadoPorId: string | null;
 }

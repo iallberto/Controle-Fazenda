@@ -152,13 +152,13 @@ describe('AnimalService', () => {
 
     it('aceita promover novilha para matriz', async () => {
       await expect(
-        service.update(fazendaId, 'animal-1', { categoria: CategoriaAnimal.MATRIZ } as any),
+        service.update(fazendaId, 'usuario-1', 'animal-1', { categoria: CategoriaAnimal.MATRIZ } as any),
       ).resolves.toBeDefined();
     });
 
     it('rejeita mudar categoria de femea para TOURO', async () => {
       await expect(
-        service.update(fazendaId, 'animal-1', { categoria: CategoriaAnimal.TOURO } as any),
+        service.update(fazendaId, 'usuario-1', 'animal-1', { categoria: CategoriaAnimal.TOURO } as any),
       ).rejects.toThrow(BadRequestException);
     });
   });
@@ -208,13 +208,13 @@ describe('AnimalService', () => {
       mockRepository.findOne.mockResolvedValue({ id: 'a1', fazendaId, brinco: '7', status: 'MORTO' });
 
       await expect(
-        service.alterarStatus(fazendaId, 'a1', 'VENDIDO' as any, 'venda', '2026-01-01'),
+        service.alterarStatus(fazendaId, 'usuario-1', 'a1', 'VENDIDO' as any, 'venda', '2026-01-01'),
       ).rejects.toThrow(BadRequestException);
     });
 
     it('rejeita voltar um animal para ATIVO', async () => {
       await expect(
-        service.alterarStatus(fazendaId, 'a1', 'ATIVO' as any, 'engano', '2026-01-01'),
+        service.alterarStatus(fazendaId, 'usuario-1', 'a1', 'ATIVO' as any, 'engano', '2026-01-01'),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -226,11 +226,12 @@ describe('AnimalService', () => {
         id: 'a1', fazendaId, brinco: '7', status: 'ATIVO', pastoAtualId: 'pasto-1',
       });
 
-      const resultado = await service.alterarStatus(fazendaId, 'a1', 'MORTO' as any, 'raio', '2026-03-10');
+      const resultado = await service.alterarStatus(fazendaId, 'usuario-1', 'a1', 'MORTO' as any, 'raio', '2026-03-10');
 
       expect(movimentacaoAberta.dataSaida).toBe('2026-03-10');
       expect(resultado.pastoAtualId).toBeNull();
       expect(resultado.status).toBe('MORTO');
+      expect(resultado.atualizadoPorId).toBe('usuario-1');
     });
   });
 });

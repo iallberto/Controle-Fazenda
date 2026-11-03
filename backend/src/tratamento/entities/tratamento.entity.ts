@@ -5,6 +5,7 @@ import {
   ManyToOne,
   JoinColumn,
   CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Animal } from '../../animal/entities/animal.entity';
 import { Usuario } from '../../usuario/entities/usuario.entity';
@@ -65,4 +66,19 @@ export class Tratamento {
 
   @CreateDateColumn({ name: 'criado_em' })
   criadoEm: Date;
+
+  // Preenchido quando o registro veio de uma sessão de manejo em lote (M4)
+  @Column({ name: 'sessao_manejo_id', type: 'uuid', nullable: true })
+  sessaoManejoId: string | null;
+
+  // Auditoria (M8): quem fez a última alteração e quando
+  @UpdateDateColumn({ name: 'atualizado_em' })
+  atualizadoEm: Date;
+
+  @ManyToOne(() => Usuario, { nullable: true })
+  @JoinColumn({ name: 'atualizado_por' })
+  atualizadoPor?: Usuario;
+
+  @Column({ name: 'atualizado_por', type: 'uuid', nullable: true })
+  atualizadoPorId: string | null;
 }

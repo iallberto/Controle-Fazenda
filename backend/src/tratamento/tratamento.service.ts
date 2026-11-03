@@ -57,11 +57,20 @@ export class TratamentoService {
     return this.tratamentoRepository.save(tratamento);
   }
 
-  findAll(fazendaId: string, animalId?: string) {
+  async findAll(fazendaId: string, animalId?: string) {
     const where = animalId
       ? { animalId, animal: { fazendaId } }
       : { animal: { fazendaId } };
-    return this.tratamentoRepository.find({ where });
+    const tratamentos = await this.tratamentoRepository.find({
+      where,
+      relations: { aplicadoPorUsuario: true, aplicadoPorVeterinario: true },
+      order: { data: 'DESC', criadoEm: 'DESC' },
+    });
+    // Só o nome de quem aplicou: não devolve o usuário inteiro (e-mail, papel)
+    return tratamentos.map(({ aplicadoPorUsuario, aplicadoPorVeterinario, ...tratamento }) => ({
+      ...tratamento,
+      responsavel: nomeDoResponsavel(aplicadoPorUsuario, aplicadoPorVeterinario),
+    }));
   }
 
   async findOne(fazendaId: string, id: string) {
@@ -75,7 +84,7 @@ export class TratamentoService {
     return tratamento;
   }
 
-  async update(fazendaId: string, id: string, dto: UpdateTratamentoDto) {
+  async update(fazendaId: string, usuarioLogadoId: string, id: string, dto: UpdateTratamentoDto) {
     const tratamento = await this.findOne(fazendaId, id);
     const { aplicadoPorTipo, aplicadoPorUsuarioId, aplicadoPorVeterinarioId, ...demais } = dto;
 
@@ -102,10 +111,12 @@ export class TratamentoService {
     const novaRecorrencia = dto.recorrenciaDias ?? tratamento.recorrenciaDias;
     tratamento.proximaDataPrevista = this.calcularProximaData(novaData, novaRecorrencia);
 
+    tratamento.atualizadoPorId = usuarioLogadoId;
     return this.tratamentoRepository.save(tratamento);
   }
 
-  private async validarAplicador(
+  // Público para o manejo em lote validar o aplicador uma vez só
+  async validarAplicador(
     fazendaId: string,
     tipo: AplicadoPorTipo,
     usuarioId?: string,
@@ -129,7 +140,7 @@ export class TratamentoService {
     }
   }
 
-  private calcularProximaData(data: string, recorrenciaDias?: number | null): string | null {
+  calcularProximaData(data: string, recorrenciaDias?: number | null): string | null {
     if (!recorrenciaDias) {
       return null;
     }
@@ -137,4 +148,12 @@ export class TratamentoService {
     base.setDate(base.getDate() + recorrenciaDias);
     return formatarDataLocal(base);
   }
+}
+
+export function nomeDoResponsavel(
+  usuario?: { nome: string } | null,
+  veterinario?: { nome: string } | null,
+): string | null {
+  if (veterinario) return `${veterinario.nome} (veterinário)`;
+  return usuario?.nome ?? null;
 }

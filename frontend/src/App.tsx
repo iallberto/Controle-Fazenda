@@ -17,6 +17,7 @@ import { NovoVeterinario } from './pages/NovoVeterinario';
 import { NovaPesagem } from './pages/NovaPesagem';
 import { Manejo } from './pages/Manejo';
 import { ConsultaAnimal } from './pages/ConsultaAnimal';
+import { ManejoLote } from './pages/ManejoLote';
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
         <Route path="/veterinarios/novo" element={<NovoVeterinario />} />
         <Route path="/pesagens/novo" element={<NovaPesagem />} />
         <Route path="/manejo" element={<Manejo />} />
+        <Route path="/manejo/lote" element={<ManejoLote />} />
       </Route>
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>

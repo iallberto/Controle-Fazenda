@@ -33,6 +33,6 @@ export class PartoController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdatePartoDto,
   ) {
-    return this.partoService.update(user.fazendaId, id, dto);
+    return this.partoService.update(user.fazendaId, user.sub, id, dto);
   }
 }

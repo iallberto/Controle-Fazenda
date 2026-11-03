@@ -20,6 +20,18 @@ export async function listarUsuarios(): Promise<Usuario[]> {
   return resposta.data;
 }
 
+export interface Aplicador {
+  id: string;
+  nome: string;
+  papel: 'DONO' | 'FUNCIONARIO';
+}
+
+// Usuários ativos da fazenda, para escolher quem aplicou um tratamento (qualquer papel)
+export async function listarAplicadores(): Promise<Aplicador[]> {
+  const resposta = await apiClient.get<Aplicador[]>('/usuario/aplicadores');
+  return resposta.data;
+}
+
 export async function criarUsuario(dto: CriarUsuarioDto) {
   const resposta = await apiClient.post('/usuario', dto);
   return resposta.data;

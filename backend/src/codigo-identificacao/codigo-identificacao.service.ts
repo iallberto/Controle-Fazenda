@@ -215,6 +215,7 @@ export class CodigoIdentificacaoService {
       const codigoSalvo = await manager.save(novoRegistro);
 
       animal.brinco = String(proximoNumero);
+      animal.atualizadoPorId = usuarioLogadoId;
       await manager.save(animal);
 
       const historico = manager.create(HistoricoNumero, {

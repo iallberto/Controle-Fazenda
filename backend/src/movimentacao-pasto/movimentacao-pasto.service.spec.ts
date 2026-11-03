@@ -96,7 +96,11 @@ describe('MovimentacaoPastoService', () => {
 
       await service.mover(fazendaId, 'u1', { animalId: 'animal-1', pastoId: 'pasto-2' } as any);
 
-      expect(mockManager.update).toHaveBeenCalledWith(Animal, { id: 'animal-1' }, { pastoAtualId: 'pasto-2' });
+      expect(mockManager.update).toHaveBeenCalledWith(
+        Animal,
+        { id: 'animal-1' },
+        { pastoAtualId: 'pasto-2', atualizadoPorId: 'u1' },
+      );
     });
 
     it('rejeita mover um animal que nao esta ativo', async () => {

@@ -18,6 +18,7 @@ export function NovoAnimal() {
   const [erro, setErro] = useState('');
 
   const [codigoId, setCodigoId] = useState('');
+  const [filtroCodigo, setFiltroCodigo] = useState('');
   const [sexo, setSexo] = useState<'M' | 'F'>('F');
   const [categoria, setCategoria] = useState<
     'BEZERRO' | 'NOVILHA' | 'MATRIZ' | 'GARROTE' | 'BOI' | 'TOURO'
@@ -38,9 +39,31 @@ export function NovoAnimal() {
   useEffect(() => {
     listarAnimais('MATRIZ').then(setMatrizes);
     listarRacas().then(setRacas);
-    listarDisponiveis().then(setCodigosDisponiveis);
+    carregarCodigos();
     listarPastos().then(setPastos);
   }, []);
+
+  // Os brincos costumam ser aplicados em ordem: já deixa o menor código disponível
+  // escolhido. A lista vem do backend em ordem crescente de número.
+  function carregarCodigos() {
+    listarDisponiveis().then((lista) => {
+      setCodigosDisponiveis(lista);
+      setCodigoId(lista[0]?.id ?? '');
+    });
+  }
+
+  // "0187" e "187" encontram o mesmo código
+  const termoCodigo = filtroCodigo.trim().replace(/^0+(?=\d)/, '');
+  const codigosFiltrados = termoCodigo
+    ? codigosDisponiveis.filter((c) => String(c.numero).includes(termoCodigo))
+    : codigosDisponiveis;
+
+  function handleFiltroCodigo(valor: string) {
+    setFiltroCodigo(valor);
+    const termo = valor.trim().replace(/^0+(?=\d)/, '');
+    const primeiro = codigosDisponiveis.find((c) => !termo || String(c.numero).includes(termo));
+    setCodigoId(primeiro?.id ?? '');
+  }
 
   // A categoria padrão acompanha o sexo escolhido
   function handleSexoChange(novoSexo: 'M' | 'F') {
@@ -72,6 +95,10 @@ async function handleSubmit(evento: FormEvent) {
       });
       navigate('/animais', { state: { aviso: `${rotuloBrinco(novo.brinco)} cadastrado.` } });
     } catch (erroRequisicao) {
+      // 409: outra pessoa usou este código enquanto a tela estava aberta
+      if (axios.isAxiosError(erroRequisicao) && erroRequisicao.response?.status === 409) {
+        carregarCodigos();
+      }
       const mensagem =
         axios.isAxiosError(erroRequisicao) && erroRequisicao.response?.data?.message
           ? erroRequisicao.response.data.message
@@ -96,6 +123,17 @@ async function handleSubmit(evento: FormEvent) {
 
       <form onSubmit={handleSubmit}>
         <div>
+          <label htmlFor="filtro-codigo">Buscar código pelo número</label>
+          <input
+            id="filtro-codigo"
+            inputMode="numeric"
+            placeholder="Ex.: 187"
+            value={filtroCodigo}
+            onChange={(e) => handleFiltroCodigo(e.target.value)}
+          />
+        </div>
+
+        <div>
           <label htmlFor="codigo">Código (brinco)</label>
           <select
             id="codigo"
@@ -103,8 +141,12 @@ async function handleSubmit(evento: FormEvent) {
             onChange={(e) => setCodigoId(e.target.value)}
             required
           >
-            <option value="">Selecione o código</option>
-            {codigosDisponiveis.map((c) => (
+            <option value="">
+              {codigosFiltrados.length === 0 && filtroCodigo
+                ? 'Nenhum código disponível com esse número'
+                : 'Selecione o código'}
+            </option>
+            {codigosFiltrados.map((c) => (
               <option key={c.id} value={c.id}>
                 {formatarBrinco(c.numero)}
               </option>

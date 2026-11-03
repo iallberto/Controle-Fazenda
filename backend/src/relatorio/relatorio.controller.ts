@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Query } from '@nestjs/common';
+import { Controller, DefaultValuePipe, Get, ParseIntPipe, Query } from '@nestjs/common';
 import { RelatorioService } from './relatorio.service';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { JwtPayload } from '../auth/auth.service';
@@ -16,7 +16,7 @@ export class RelatorioController {
     return this.relatorioService.painelInicial(user.fazendaId);
   }
 
-    @Get('nascimentos')
+  @Get('nascimentos')
   nascimentos(
     @CurrentUser() user: JwtPayload,
     @Query('inicio') inicio: string,
@@ -41,6 +41,21 @@ export class RelatorioController {
     @Query('fim') fim: string,
   ) {
     return this.relatorioService.obitosPorCausa(user.fazendaId, inicio, fim);
+  }
+
+  @Get('proximos-tratamentos')
+  proximosTratamentos(
+    @CurrentUser() user: JwtPayload,
+    @Query('dias', new DefaultValuePipe(30), ParseIntPipe) dias: number,
+  ) {
+    // Janela de 0 a 365 dias à frente; os atrasados aparecem sempre
+    const janela = Math.min(Math.max(dias, 0), 365);
+    return this.relatorioService.proximosTratamentos(user.fazendaId, janela);
+  }
+
+  @Get('por-raca')
+  porRaca(@CurrentUser() user: JwtPayload) {
+    return this.relatorioService.porRaca(user.fazendaId);
   }
 
   @Get('tratamentos')

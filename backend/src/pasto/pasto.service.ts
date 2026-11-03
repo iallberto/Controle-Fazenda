@@ -33,12 +33,13 @@ export class PastoService {
     return pasto;
   }
 
-  async update(fazendaId: string, id: string, dto: UpdatePastoDto) {
+  async update(fazendaId: string, usuarioLogadoId: string, id: string, dto: UpdatePastoDto) {
     const pasto = await this.findOne(fazendaId, id);
     if (dto.nome && dto.nome !== pasto.nome) {
       await this.garantirNomeDisponivel(fazendaId, dto.nome);
     }
     Object.assign(pasto, dto);
+    pasto.atualizadoPorId = usuarioLogadoId;
     return this.pastoRepository.save(pasto);
   }
 

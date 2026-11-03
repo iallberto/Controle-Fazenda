@@ -4,7 +4,8 @@ import { Repository } from 'typeorm';
 import { Animal, StatusAnimal } from '../animal/entities/animal.entity';
 import { Parto, ResultadoParto } from '../parto/entities/parto.entity';
 import { Tratamento } from '../tratamento/entities/tratamento.entity';
-import { formatarDataLocal } from '../common/datas';
+import { nomeDoResponsavel } from '../tratamento/tratamento.service';
+import { formatarDataLocal, hojeLocal } from '../common/datas';
 
 
 @Injectable()
@@ -95,11 +96,81 @@ export class RelatorioService {
   }
 
   async tratamentosPorPeriodo(fazendaId: string, inicio: string, fim: string) {
-    return this.tratamentoRepository
+    const tratamentos = await this.tratamentoRepository
       .createQueryBuilder('tratamento')
-      .innerJoin('tratamento.animal', 'animal')
+      .innerJoinAndSelect('tratamento.animal', 'animal')
+      .leftJoinAndSelect('tratamento.aplicadoPorUsuario', 'usuario')
+      .leftJoinAndSelect('tratamento.aplicadoPorVeterinario', 'veterinario')
       .where('animal.fazendaId = :fazendaId', { fazendaId })
       .andWhere('tratamento.data BETWEEN :inicio AND :fim', { inicio, fim })
+      .orderBy('tratamento.data', 'DESC')
       .getMany();
+
+    return tratamentos.map((tratamento) => ({
+      id: tratamento.id,
+      produto: tratamento.produto,
+      data: tratamento.data,
+      animal: { id: tratamento.animal.id, brinco: tratamento.animal.brinco },
+      responsavel: nomeDoResponsavel(tratamento.aplicadoPorUsuario, tratamento.aplicadoPorVeterinario),
+    }));
+  }
+
+  // Tratamentos recorrentes cuja próxima dose vence em até `dias` dias, ou já venceu.
+  // Considera só a aplicação mais recente de cada produto em cada animal: se a dose
+  // seguinte já foi dada, a anterior não aparece mais como pendente.
+  async proximosTratamentos(fazendaId: string, dias: number) {
+    const hoje = hojeLocal();
+    const limite = new Date(`${hoje}T00:00:00`);
+    limite.setDate(limite.getDate() + dias);
+
+    const tratamentos = await this.tratamentoRepository
+      .createQueryBuilder('tratamento')
+      .innerJoinAndSelect('tratamento.animal', 'animal')
+      .where('animal.fazendaId = :fazendaId', { fazendaId })
+      .andWhere('animal.status = :status', { status: StatusAnimal.ATIVO })
+      .andWhere('tratamento.proximaDataPrevista IS NOT NULL')
+      .andWhere('tratamento.proximaDataPrevista <= :limite', { limite: formatarDataLocal(limite) })
+      .andWhere(
+        `NOT EXISTS (
+          SELECT 1 FROM tratamentos posterior
+          WHERE posterior.animal_id = tratamento.animal_id
+            AND LOWER(posterior.produto) = LOWER(tratamento.produto)
+            AND posterior.data > tratamento.data
+        )`,
+      )
+      .orderBy('tratamento.proximaDataPrevista', 'ASC')
+      .getMany();
+
+    return tratamentos.map((tratamento) => ({
+      id: tratamento.id,
+      produto: tratamento.produto,
+      ultimaAplicacao: tratamento.data,
+      proximaData: tratamento.proximaDataPrevista!,
+      atrasado: tratamento.proximaDataPrevista! < hoje,
+      animal: { id: tratamento.animal.id, brinco: tratamento.animal.brinco },
+    }));
+  }
+
+  // Animais ativos agrupados por raça, com a divisão entre fêmeas e machos
+  async porRaca(fazendaId: string) {
+    const linhas = await this.animalRepository
+      .createQueryBuilder('animal')
+      .leftJoin('animal.raca', 'raca')
+      .select('raca.nome', 'raca')
+      .addSelect('COUNT(*)', 'total')
+      .addSelect("COUNT(*) FILTER (WHERE animal.sexo = 'F')", 'femeas')
+      .addSelect("COUNT(*) FILTER (WHERE animal.sexo = 'M')", 'machos')
+      .where('animal.fazendaId = :fazendaId', { fazendaId })
+      .andWhere('animal.status = :status', { status: StatusAnimal.ATIVO })
+      .groupBy('raca.nome')
+      .orderBy('total', 'DESC')
+      .getRawMany<{ raca: string | null; total: string; femeas: string; machos: string }>();
+
+    return linhas.map((linha) => ({
+      raca: linha.raca ?? 'Sem raça informada',
+      total: Number(linha.total),
+      femeas: Number(linha.femeas),
+      machos: Number(linha.machos),
+    }));
   }
 }

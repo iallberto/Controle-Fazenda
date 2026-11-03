@@ -11,5 +11,6 @@ import { Veterinario } from '../veterinario/entities/veterinario.entity';
   imports: [TypeOrmModule.forFeature([Tratamento, Animal, Usuario, Veterinario])],
   controllers: [TratamentoController],
   providers: [TratamentoService],
+  exports: [TratamentoService],
 })
 export class TratamentoModule {}

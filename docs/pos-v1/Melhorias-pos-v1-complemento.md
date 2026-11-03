@@ -7,7 +7,7 @@
 |---|---|
 | **Documento base** | `MELHORIAS_POS_V1.md` (M1–M16, decisões D1–D10) |
 | **Origem** | Novo uso da V1 em protótipo |
-| **Status** | Itens registrados · diagnóstico de M17 pendente |
+| **Status** | M18 concluído · M17 concluído exceto QR/PDF, que aguardam o domínio definitivo |
 | **Legenda** | 🔴 Alta · 🟡 Média · 🟢 Baixa |
 
 ---
@@ -29,26 +29,28 @@ Dois pontos ligados ao fluxo de **códigos/brincos** (M1 do documento base):
 
 **Diagnóstico pendente** (define o tamanho da correção):
 
-- [ ] O PDF **não é gerado/baixado** ao criar o lote (falha de implementação), ou
-- [ ] O PDF é gerado, mas **não existe tela para rever os lotes** depois (falha de fluxo).
+- [x] O PDF **não é gerado/baixado** ao criar o lote (falha de implementação), ou
+- [x] O PDF é gerado, mas **não existe tela para rever os lotes** depois (falha de fluxo).
+
+> **Diagnóstico (03/11/2026):** as duas coisas. Não havia PDF nem tela de conferência. A tela de QR codes foi criada (lista, filtros e impressão dos números); o QR e o PDF entram quando houver domínio definitivo, porque o link fica gravado na etiqueta.
 
 **Escopo proposto:**
 
-- [ ] **Lista de lotes gerados:** data, quantidade, faixa de números (ex.: `#0001–#0100`), contagem de disponíveis e vinculados.
-- [ ] **Visualização do lote:** grade com cada QR e o **número em destaque** ao lado, para conferência visual.
-- [ ] **Download/reimpressão do PDF** do lote completo.
-- [ ] **Reimpressão apenas dos códigos disponíveis** (útil quando parte do lote já foi usada).
-- [ ] Manter o **aviso de impressão em material plástico/resistente às intempéries** (requisito 15 da V1).
-- [ ] No PDF, o **número curto** (código = brinco, decisão D1) aparece grande junto ao QR, legível de longe.
+- [x] **Lista de lotes gerados:** atendida pelo filtro por **faixa de números e status** na tela de QR codes (ex.: `#0001` a `#0100`, só disponíveis), com paginação. Ao gerar um lote, a tela já mostra a faixa criada.
+- [ ] **Visualização do lote:** grade com cada QR e o **número em destaque** ao lado. ⏸️ Aguarda o domínio (layout da etiqueta já definido em `Etiqueta-e-consulta-publica.md`).
+- [ ] **Download/reimpressão do PDF** do lote completo. ⏸️ Aguarda o domínio e o formato pedido pela gráfica.
+- [x] **Reimpressão apenas dos códigos disponíveis:** filtro de status + "Imprimir todos" imprime só o que está filtrado.
+- [x] Manter o **aviso de impressão em material plástico/resistente às intempéries** (requisito 15 da V1).
+- [x] O **número curto** aparece grande junto ao QR: decidido no layout da etiqueta (sem zeros à esquerda, cerca de 16 mm).
 
 **Cenários de teste**
 
-- [ ] Gerar lote de 100 disponibiliza o PDF para download imediatamente.
-- [ ] Reabrir a tela depois lista o lote criado, com faixa e contagens corretas.
-- [ ] Visualização do lote mostra 100 QRs, cada um com seu número.
-- [ ] Reimpressão de "somente disponíveis" exclui os já vinculados.
-- [ ] QR do PDF aponta para `/f/{fazenda}/animal/{codigo}` e resolve pelo UUID.
-- [ ] Lotes de uma fazenda não aparecem para outra (isolamento de dados).
+- [ ] Gerar lote de 100 disponibiliza o PDF para download imediatamente. ⏸️ Aguarda o domínio.
+- [x] Reabrir a tela depois lista o lote criado, com faixa e contagens corretas (pelo filtro de faixa).
+- [ ] Visualização do lote mostra 100 QRs, cada um com seu número. ⏸️ Aguarda o domínio.
+- [x] Reimpressão de "somente disponíveis" exclui os já vinculados.
+- [x] QR aponta para a página pública e resolve pelo código. **Mudança:** o endereço ficou `/a/{codigo}` (sem a fazenda no caminho), porque o código já é único em todo o sistema.
+- [x] Lotes de uma fazenda não aparecem para outra (isolamento de dados).
 
 ---
 
@@ -60,11 +62,11 @@ Dois pontos ligados ao fluxo de **códigos/brincos** (M1 do documento base):
 
 **Propostas de detalhe** *(a confirmar)*:
 
-- [ ] **Campo filtrável:** lista só com códigos de status **disponível**, filtrada enquanto se digita (ex.: "0187" mostra só ele). Evita rolar uma lista longa.
-- [ ] **Sugestão do próximo código disponível** pré-selecionado, já que os brincos costumam ser aplicados em ordem.
-- [ ] **Validação no backend ao salvar:** se o código já foi vinculado por outro usuário no intervalo, responder **409** e atualizar a lista, sem confiar apenas no que a tela carregou.
-- [ ] Ao vincular, o código passa de **disponível** para **vinculado** na mesma transação do cadastro do animal.
-- [ ] Evolução futura (já prevista na V3): **escanear o QR do brinco** pela câmera para preencher o código.
+- [x] **Campo filtrável:** "Buscar código pelo número" filtra a lista enquanto se digita ("0187" e "187" encontram o mesmo código).
+- [x] **Sugestão do próximo código disponível** pré-selecionado (o menor número disponível).
+- [x] **Validação no backend ao salvar:** a reserva do código é atômica e responde **409** se outro usuário o usou; a tela recarrega a lista.
+- [x] Ao vincular, o código passa de **disponível** para **vinculado** na mesma transação do cadastro do animal.
+- [ ] Evolução futura (já prevista na V3): **escanear o QR do brinco** pela câmera para preencher o código. ⏸️ Futuro.
 
 **Regras de negócio**
 
@@ -74,13 +76,13 @@ Dois pontos ligados ao fluxo de **códigos/brincos** (M1 do documento base):
 
 **Cenários de teste**
 
-- [ ] A lista mostra somente códigos disponíveis da fazenda do usuário.
-- [ ] Filtro por parte do número retorna os códigos correspondentes.
-- [ ] Salvar o animal muda o código para vinculado.
-- [ ] Falha na criação do animal mantém o código disponível (rollback).
-- [ ] Dois usuários escolhendo o mesmo código: o segundo recebe 409 e a lista é atualizada.
-- [ ] Código desativado por reemissão não aparece na lista.
-- [ ] Sem códigos disponíveis: a tela orienta a gerar um novo lote (link para M17).
+- [x] A lista mostra somente códigos disponíveis da fazenda do usuário.
+- [x] Filtro por parte do número retorna os códigos correspondentes.
+- [x] Salvar o animal muda o código para vinculado.
+- [x] Falha na criação do animal mantém o código disponível (rollback).
+- [x] Dois usuários escolhendo o mesmo código: o segundo recebe 409 e a lista é atualizada.
+- [x] Código desativado por reemissão não aparece na lista.
+- [x] Sem códigos disponíveis: a tela orienta a gerar um novo lote (link para M17).
 
 ---
 

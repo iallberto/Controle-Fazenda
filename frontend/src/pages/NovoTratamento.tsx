@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { criarTratamento } from '../api/tratamentos';
 import { listarAnimais, type Animal } from '../api/animais';
-import { listarUsuarios, type Usuario } from '../api/usuarios';
+import { listarAplicadores, type Aplicador } from '../api/usuarios';
 import { listarVeterinarios, type Veterinario } from '../api/veterinarios';
 import { useAuth } from '../contexts/useAuth';
 import { rotuloBrinco } from '../utils/formatadores';
@@ -25,12 +25,12 @@ export function NovoTratamento() {
   const [aplicadoPorVeterinarioId, setAplicadoPorVeterinarioId] = useState('');
 
   const [animais, setAnimais] = useState<Animal[]>([]);
-  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+  const [usuarios, setUsuarios] = useState<Aplicador[]>([]);
   const [veterinarios, setVeterinarios] = useState<Veterinario[]>([]);
 
   useEffect(() => {
     listarAnimais().then(setAnimais);
-    listarUsuarios().then(setUsuarios);
+    listarAplicadores().then(setUsuarios);
     listarVeterinarios().then((lista) => setVeterinarios(lista.filter((v) => v.ativo)));
   }, []);
 
@@ -114,6 +114,7 @@ export function NovoTratamento() {
               {usuarios.map((u) => (
                 <option key={u.id} value={u.id}>
                   {u.nome}
+                  {u.papel === 'DONO' ? ' (dono)' : ''}
                 </option>
               ))}
             </select>

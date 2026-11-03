@@ -83,7 +83,7 @@ describe('UsuarioService', () => {
         .mockResolvedValueOnce({ id: 'outro' });
 
       await expect(
-        service.update('fazenda-1', 'dono-1', { email: 'outro@teste.com' }),
+        service.update('fazenda-1', 'dono-1', 'dono-1', { email: 'outro@teste.com' }),
       ).rejects.toThrow(ConflictException);
     });
 
@@ -92,7 +92,7 @@ describe('UsuarioService', () => {
       repository.find!.mockResolvedValue([dono]);
 
       await expect(
-        service.update('fazenda-1', 'dono-1', { papel: PapelUsuario.FUNCIONARIO }),
+        service.update('fazenda-1', 'dono-1', 'dono-1', { papel: PapelUsuario.FUNCIONARIO }),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -112,6 +112,23 @@ describe('UsuarioService', () => {
       const resultado = await service.alterarAtivo('fazenda-1', 'dono-1', 'func-1', false);
 
       expect(resultado.ativo).toBe(false);
+      expect(resultado.atualizadoPorId).toBe('dono-1');
+    });
+  });
+
+  describe('listarAplicadores', () => {
+    it('lista so usuarios ativos da fazenda, sem e-mail', async () => {
+      repository.find!.mockResolvedValue([
+        { id: 'u1', nome: 'Ana', email: 'ana@teste.com', papel: PapelUsuario.DONO, senhaHash: 'x' },
+      ]);
+
+      const resultado = await service.listarAplicadores('fazenda-1');
+
+      expect(repository.find).toHaveBeenCalledWith({
+        where: { fazendaId: 'fazenda-1', ativo: true },
+        order: { nome: 'ASC' },
+      });
+      expect(resultado).toEqual([{ id: 'u1', nome: 'Ana', papel: PapelUsuario.DONO }]);
     });
   });
 });

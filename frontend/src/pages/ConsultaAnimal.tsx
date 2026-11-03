@@ -38,6 +38,14 @@ export function ConsultaAnimal() {
       .finally(() => setCarregando(false));
   }, [codigo]);
 
+  useEffect(() => {
+    if (consulta?.animal) {
+      document.title = `Brinco ${formatarNumeroEtiqueta(consulta.animal.brinco)} · ${consulta.fazenda.nome}`;
+    } else {
+      document.title = 'Consulta de animal';
+    }
+  }, [consulta]);
+
   if (carregando) {
     return (
       <div className="pagina-publica">

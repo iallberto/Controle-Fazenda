@@ -9,7 +9,21 @@ import {
   listarHistoricoNumero,
   type HistoricoNumero,
 } from '../api/codigos';
-import { formatarBrinco, formatarCategoria, formatarData, formatarMomento, formatarOrigem, formatarResultadoParto, formatarSexo, formatarStatusAnimal, formatarTipoParto } from '../utils/formatadores';
+import {
+  converterEmArrobas,
+  formatarArrobas,
+  formatarBrinco,
+  formatarCategoria,
+  formatarData,
+  formatarMomento,
+  formatarOrigem,
+  formatarPeso,
+  formatarResultadoParto,
+  formatarSexo,
+  formatarStatusAnimal,
+  formatarTipoParto,
+} from '../utils/formatadores';
+import { obterConfiguracao, type ValorArroba } from '../api/configuracao';
 import { Aviso, type EstadoAviso } from '../components/Aviso';
 
 interface PartoComIntervalo extends Parto {
@@ -39,6 +53,7 @@ export function AnimalDetalhe() {
   const [partos, setPartos] = useState<PartoComIntervalo[]>([]);
   const [pesagens, setPesagens] = useState<Pesagem[]>([]);
   const [historicoNumeros, setHistoricoNumeros] = useState<HistoricoNumero[]>([]);
+  const [valoresArroba, setValoresArroba] = useState<ValorArroba[]>([]);
 
   const [mostrarReemissao, setMostrarReemissao] = useState(false);
   const [motivoReemissao, setMotivoReemissao] = useState('');
@@ -59,6 +74,7 @@ export function AnimalDetalhe() {
     listarPesagensPorAnimal(id).then(setPesagens);
     listarTratamentosPorAnimal(id).then(setTratamentos);
     listarHistoricoNumero(id).then(setHistoricoNumeros);
+    obterConfiguracao().then((config) => setValoresArroba(config.valoresArroba));
   }, [id]);
 
   async function handleReemitir(evento: FormEvent) {
@@ -87,6 +103,8 @@ export function AnimalDetalhe() {
   if (!animal) {
     return <p>Carregando...</p>;
   }
+
+  const kgPorArroba = valoresArroba.find((v) => v.categoria === animal.categoria)?.pesoReferenciaKg;
 
   return (
     <div>
@@ -136,8 +154,13 @@ export function AnimalDetalhe() {
         {mostrarReemissao && (
           <form onSubmit={handleReemitir}>
             <p>
-              O animal receberá um novo número e o atual será desativado. Essa ação não
-              pode ser desfeita.
+              Use só quando o brinco deste animal foi <strong>perdido, quebrou ou ficou
+              ilegível</strong>. Para identificar um animal novo, use "Cadastrar animal" e
+              escolha um código disponível.
+            </p>
+            <p>
+              O animal receberá um novo número e o atual será desativado. A busca pelo número
+              antigo continua levando a este animal. Essa ação não pode ser desfeita.
             </p>
             <input
               placeholder="Motivo (opcional)"
@@ -182,9 +205,10 @@ export function AnimalDetalhe() {
         <ul>
           {pesagens.map((pesagem) => (
             <li key={pesagem.id}>
-              {formatarData(pesagem.data)} — {pesagem.pesoKg} kg
+              {formatarData(pesagem.data)} — {formatarPeso(pesagem.pesoKg)} (
+              {formatarArrobas(converterEmArrobas(pesagem.pesoKg, kgPorArroba))})
               {pesagem.gmdDesdeAnterior !== null && (
-                <> — GMD: {pesagem.gmdDesdeAnterior} kg/dia</>
+                <> — GMD: {pesagem.gmdDesdeAnterior.toLocaleString('pt-BR')} kg/dia</>
               )}
             </li>
           ))}
@@ -197,7 +221,8 @@ export function AnimalDetalhe() {
         <ul>
           {tratamentos.map((tratamento) => (
             <li key={tratamento.id}>
-              {formatarData(tratamento.data)} — {tratamento.produto} ({tratamento.responsavel})
+              {formatarData(tratamento.data)} — {tratamento.produto}
+              {tratamento.responsavel && <> · aplicado por {tratamento.responsavel}</>}
               {tratamento.proximaDataPrevista && (
                   <> — próxima aplicação prevista: {formatarData(tratamento.proximaDataPrevista)}</>
             )}

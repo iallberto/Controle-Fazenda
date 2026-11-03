@@ -1,7 +1,8 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/useAuth';
 import { mensagemDeErro } from '../api/client';
+import { Logo } from '../components/Logo';
 import { Aviso } from '../components/Aviso';
 
 export function Login() {
@@ -10,6 +11,10 @@ export function Login() {
   const [erro, setErro] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    document.title = 'Entrar · Controle Fazenda';
+  }, []);
 
   async function handleSubmit(evento: FormEvent) {
     evento.preventDefault();
@@ -31,7 +36,10 @@ export function Login() {
 
   return (
     <div className="pagina-login">
-      <h1>Controle Fazenda</h1>
+      <h1 className="login-titulo">
+        <Logo tamanho={40} />
+        Controle Fazenda
+      </h1>
       <form onSubmit={handleSubmit}>
         <div>
           <label htmlFor="email">E-mail</label>
