@@ -20,13 +20,7 @@ export function Animais() {
     <div>
       <header>
         <h1>Animais</h1>
-        <Link to="/animais/novo">Cadastrar animal</Link><br></br>
-        <Link to="/partos/novo">Registrar parto</Link><br></br>
-        <Link to="/tratamentos/novo">Registrar tratamento</Link><br></br>
-        <Link to="/animais/mover">Mover animal</Link><br></br>
-        <Link to="/qrcodes">QR Codes</Link><br></br>
-        <Link to="/">Voltar ao painel</Link>
-        <Link to="/pesagens/novo">Registrar pesagem</Link>
+        <Link to="/animais/novo">Cadastrar animal</Link>
       </header>
 
       {carregando && <p>Carregando...</p>}
@@ -35,30 +29,32 @@ export function Animais() {
       {!carregando && !erro && animais.length === 0 && <p>Nenhum animal cadastrado ainda.</p>}
 
       {animais.length > 0 && (
-        <table>
-          <thead>
-            <tr>
-              <th>Brinco</th>
-              <th>Sexo</th>
-              <th>Categoria</th>
-              <th>Status</th>
-              <th>Nascimento</th>
-            </tr>
-          </thead>
-          <tbody>
-            {animais.map((animal) => (
-              <tr key={animal.id}>
-                <td>
-                  <Link to={`/animais/${animal.id}`}>{formatarBrinco(animal.brinco)}</Link>
-                </td>
-                <td>{formatarSexo(animal.sexo)}</td>
-                <td>{formatarCategoria(animal.categoria)}</td>
-                <td>{formatarStatusAnimal(animal.status)}</td>
-                <td>{formatarData(animal.dataNascimento)}</td>
+        <div className="tabela-rolavel">
+          <table>
+            <thead>
+              <tr>
+                <th>Brinco</th>
+                <th>Sexo</th>
+                <th>Categoria</th>
+                <th>Status</th>
+                <th>Nascimento</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {animais.map((animal) => (
+                <tr key={animal.id}>
+                  <td>
+                    <Link to={`/animais/${animal.id}`}>{formatarBrinco(animal.brinco)}</Link>
+                  </td>
+                  <td>{formatarSexo(animal.sexo)}</td>
+                  <td>{formatarCategoria(animal.categoria)}</td>
+                  <td>{formatarStatusAnimal(animal.status)}</td>
+                  <td>{formatarData(animal.dataNascimento)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

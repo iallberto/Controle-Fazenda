@@ -1,5 +1,4 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
 import { listarPastos, criarPasto, type Pasto } from '../api/pastos';
 
 export function Pastos() {
@@ -32,7 +31,6 @@ export function Pastos() {
     <div>
       <header>
         <h1>Pastos</h1>
-        <Link to="/">Voltar ao painel</Link>
       </header>
 
       <form onSubmit={handleSubmit}>

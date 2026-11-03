@@ -129,7 +129,6 @@ export function Manejo() {
     <div>
       <header>
         <h1>Manejo</h1>
-        <Link to="/animais">Voltar</Link>
       </header>
 
       <form onSubmit={handleBuscar}>

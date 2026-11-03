@@ -132,7 +132,6 @@ export function QrCodes() {
     <div>
       <header className="nao-imprimir">
         <h1>QR Codes</h1>
-        <Link to="/animais">Voltar</Link>
       </header>
 
       <form onSubmit={handleGerarLote} className="nao-imprimir">

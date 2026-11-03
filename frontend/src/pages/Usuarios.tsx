@@ -1,5 +1,4 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
 import {
   listarUsuarios,
   criarUsuario,
@@ -60,7 +59,6 @@ export function Usuarios() {
     <div>
       <header>
         <h1>Usuários</h1>
-        <Link to="/">Voltar ao painel</Link>
       </header>
 
       <form onSubmit={handleSubmit}>

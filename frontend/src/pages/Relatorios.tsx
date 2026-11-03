@@ -1,5 +1,4 @@
 import { useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
 import {
   buscarNascimentos,
   buscarNatimortos,
@@ -51,7 +50,6 @@ export function Relatorios() {
     <div>
       <header>
         <h1>Relatórios</h1>
-        <Link to="/">Voltar ao painel</Link>
       </header>
 
       <form onSubmit={handleGerar}>

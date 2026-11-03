@@ -29,7 +29,7 @@ export function Login() {
   }
 
   return (
-    <div>
+    <div className="pagina-login">
       <h1>Controle Fazenda</h1>
       <form onSubmit={handleSubmit}>
         <div>

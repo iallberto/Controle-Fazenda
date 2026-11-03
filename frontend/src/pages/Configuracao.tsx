@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import {
   obterConfiguracao,
   atualizarPreferencias,
@@ -66,7 +65,6 @@ export function Configuracao() {
     <div>
       <header>
         <h1>Configurações</h1>
-        <Link to="/">Voltar ao painel</Link>
       </header>
 
       {erro && <p role="alert">{erro}</p>}
