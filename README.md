@@ -10,6 +10,8 @@ Melhorias de visibilidade parciais: [docs/pos-v1/Mudancas-de-visibilidade-parcia
 
 Etiqueta do brinco e consulta pública: [docs/pos-v1/Etiqueta-e-consulta-publica.md](docs/pos-v1/Etiqueta-e-consulta-publica.md)
 
+Planejamento dos módulos (Leite, Financeiro e Nutrição): [docs/modulos/Planejamento-modulos.md](docs/modulos/Planejamento-modulos.md)
+
 📄 Documentação completa: [enunciado do projeto](docs/enunciado-controle-fazenda.md) e [modelagem do sistema](docs/modelagem-controle-fazenda.md).
 
 
