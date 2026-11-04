@@ -10,4 +10,9 @@ export class Fazenda {
 
   @CreateDateColumn()
   criadoEm: Date;
+
+  // Suspensa pelo administrador (spec 002, FR-025): ninguém da fazenda entra.
+  // Atalho da suspensão aberta em fazenda_suspensoes.
+  @Column({ default: false })
+  suspensa: boolean;
 }

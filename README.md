@@ -45,7 +45,8 @@ Planejamento dos módulos (Leite, Financeiro e Nutrição): [docs/modulos/Planej
 Pré-requisitos: Docker Desktop instalado.
 
 1. Copie o `.env.example` da raiz para `.env` e preencha ao menos `JWT_SECRET` e `DB_PASSWORD`.
-   Em produção, use `DB_SYNCHRONIZE=false` e `SWAGGER_ENABLED=false`.
+   Em produção, use `SWAGGER_ENABLED=false`. As tabelas são criadas e atualizadas pelas migrations
+   ao subir o backend (veja `backend/README.md`).
 
 2. Suba tudo:
 
@@ -71,7 +72,7 @@ Pré-requisitos: Node.js 24+, Docker (para o banco de dados).
  - npm install
  - npm run start:dev
 
-Crie um `.env` dentro de `backend/`, com `DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD`, `DB_DATABASE`, `JWT_SECRET` e `DB_SYNCHRONIZE=true` (para criar as tabelas em desenvolvimento).
+Crie um `.env` dentro de `backend/`, com `DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD`, `DB_DATABASE` e `JWT_SECRET`. As tabelas vêm das migrations, aplicadas ao subir o backend.
 
 **Front-end** (pasta `frontend/`):
 

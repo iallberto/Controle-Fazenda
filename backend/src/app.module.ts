@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
+import { opcoesBanco } from './database/data-source';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -23,25 +24,25 @@ import { PesagemModule } from './pesagem/pesagem.module';
 import { ConsultaPublicaModule } from './consulta-publica/consulta-publica.module';
 import { ManejoLoteModule } from './manejo-lote/manejo-lote.module';
 import { ReproducaoModule } from './reproducao/reproducao.module';
+import { AcessoModule } from './modulos/acesso/acesso.module';
+import { ModuloGuard } from './modulos/acesso/modulo.guard';
+import { LeiteModule } from './modulos/leite/leite.module';
+import { FinanceiroModule } from './modulos/financeiro/financeiro.module';
+import { NutricaoModule } from './modulos/nutricao/nutricao.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    // O schema evolui só por migrations, em todos os ambientes; as pendentes são
+    // aplicadas ao subir, numa transação (spec 002, research R1).
+    // forRootAsync: as variáveis do .env já foram carregadas pelo ConfigModule
     TypeOrmModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        type: 'postgres',
-        host: config.get<string>('DB_HOST'),
-        port: config.get<number>('DB_PORT'),
-        username: config.get<string>('DB_USERNAME'),
-        password: config.get<string>('DB_PASSWORD'),
-        database: config.get<string>('DB_DATABASE'),
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        // Em produção o schema deve evoluir por migrations: o synchronize pode
-        // apagar colunas quando uma entidade muda. Ligue só em desenvolvimento.
-        synchronize: config.get<string>('DB_SYNCHRONIZE') === 'true',
+      useFactory: () => ({
+        ...opcoesBanco(),
+        migrationsRun: true,
+        migrationsTransactionMode: 'all',
       }),
     }),
     FazendaModule,
@@ -61,6 +62,11 @@ import { ReproducaoModule } from './reproducao/reproducao.module';
     ConsultaPublicaModule,
     ManejoLoteModule,
     ReproducaoModule,
+    // Fase 0: acesso aos módulos pagos e os módulos (por ora, só rotas de exemplo)
+    AcessoModule,
+    LeiteModule,
+    FinanceiroModule,
+    NutricaoModule,
   ],
   controllers: [AppController],
   providers: [
@@ -72,6 +78,11 @@ import { ReproducaoModule } from './reproducao/reproducao.module';
     {
       provide: APP_GUARD,
       useClass: RolesGuard,
+    },
+    // Depois do login e do papel: bloqueia rotas de módulo pago (spec 002)
+    {
+      provide: APP_GUARD,
+      useExisting: ModuloGuard,
     },
   ],
 })
