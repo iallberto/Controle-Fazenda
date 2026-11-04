@@ -27,7 +27,15 @@ export function FinanceiroInicio() {
         <header>
           <h1>Financeiro</h1>
         </header>
-        <p>Os valores do Financeiro ficam com o dono da fazenda.</p>
+        <p>Os valores do Financeiro ficam com o dono da fazenda. Aqui você anota o que foi usado ou trazido.</p>
+        {!soConsulta && (
+          <section className="atalhos-financeiro">
+            <Link className="botao" to="/modulos/financeiro/usos/novo">
+              Registrar uso
+            </Link>
+          </section>
+        )}
+        <Link to="/modulos/financeiro/usos">Ver os registros da fazenda</Link>
       </div>
     );
   }

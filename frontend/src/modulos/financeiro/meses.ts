@@ -39,3 +39,8 @@ export function somarMeses(mes: string, quantidade: number) {
   const total = ano * 12 + (m - 1) + quantidade;
   return `${Math.floor(total / 12)}-${String((total % 12) + 1).padStart(2, '0')}`;
 }
+
+// 40 → "40"; 2.5 → "2,5" (quantidade dos registros de uso)
+export function formatarQuantidade(quantidade: number) {
+  return quantidade.toLocaleString('pt-BR', { maximumFractionDigits: 2 });
+}

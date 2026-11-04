@@ -103,14 +103,14 @@ ao lado do arquivo; cálculos em funções puras testadas sem banco.
 
 **Independent Test**: quickstart.md, cenários 3 e 4
 
-- [ ] T030 [P] [US4] Testes do `UsosService`: funcionário registra; lista da fazenda sem campo de valor em nenhum item; valorar cria a despesa com descrição "Item — quantidade unidade" e muda para LANCADO; descartar exige motivo; valorar ou descartar só AGUARDANDO; categoria de receita → 400; em backend/src/modulos/financeiro/usos.service.spec.ts
-- [ ] T031 [P] [US4] Testes do `ComprasService`: compra com valor > 0 cria animal, compra e despesa na mesma transação; 0,00 cria animal e compra sem despesa; compras sem valor = comprados por funcionário depois da primeira liberação e sem compra; informar valor de pendente; animal já com compra → 409; em backend/src/modulos/financeiro/compras.service.spec.ts
-- [ ] T032 [US4] Implementar `UsosService` e `UsosController` (listar e registrar para todos; valorar e descartar com `@Roles(DONO)` no método) até T030 passar
-- [ ] T033 [US4] Implementar `ComprasService` e `ComprasController` (usa `criarAnimal`) e `GET /pendencias` até T031 passar
-- [ ] T034 [P] [US4] Telas `RegistrarUso` (item, quantidade, unidade com sugestões, categoria, data, animal/pasto) e `Usos` (lista da fazenda com quem registrou e situação, sem valores) em frontend/src/modulos/financeiro/
-- [ ] T035 [P] [US4] Tela `Pendencias` do dono: usos aguardando valor (valorar ou descartar) e compras sem valor (informar valor ou 0,00) em frontend/src/modulos/financeiro/Pendencias.tsx
-- [ ] T036 [US4] Cadastro de animal: para o dono com o Financeiro ativo e origem "Comprado", campos valor pago (obrigatório, aceita 0,00) e vendedor, enviando para `POST /modulos/financeiro/compras` (FR-016b), em frontend/src/pages/NovoAnimal.tsx
-- [ ] T037 [US4] Aviso no painel inicial do dono, com o Financeiro ativo e compras sem valor: "Funcionários cadastraram N animais comprados sem valor · informe o valor de compra para o balanço da fazenda", com link para Pendências, a cada login (FR-016c), em frontend/src/pages/Dashboard.tsx
+- [X] T030 [P] [US4] Testes do `UsosService`: funcionário registra; lista da fazenda sem campo de valor em nenhum item; valorar cria a despesa com descrição "Item — quantidade unidade" e muda para LANCADO; descartar exige motivo; valorar ou descartar só AGUARDANDO; categoria de receita → 400; em backend/src/modulos/financeiro/usos.service.spec.ts
+- [X] T031 [P] [US4] Testes do `ComprasService`: compra com valor > 0 cria animal, compra e despesa na mesma transação; 0,00 cria animal e compra sem despesa; compras sem valor = comprados por funcionário depois da primeira liberação e sem compra; informar valor de pendente; animal já com compra → 409; em backend/src/modulos/financeiro/compras.service.spec.ts
+- [X] T032 [US4] Implementar `UsosService` e `UsosController` (listar e registrar para todos; valorar e descartar com `@Roles(DONO)` no método) até T030 passar
+- [X] T033 [US4] Implementar `ComprasService` e `ComprasController` (usa `criarAnimal`) e `GET /pendencias` até T031 passar
+- [X] T034 [P] [US4] Telas `RegistrarUso` (item, quantidade, unidade com sugestões, categoria, data, animal/pasto) e `Usos` (lista da fazenda com quem registrou e situação, sem valores) em frontend/src/modulos/financeiro/
+- [X] T035 [P] [US4] Tela `Pendencias` do dono: usos aguardando valor (valorar ou descartar) e compras sem valor (informar valor ou 0,00) em frontend/src/modulos/financeiro/Pendencias.tsx
+- [X] T036 [US4] Cadastro de animal: para o dono com o Financeiro ativo e origem "Comprado", campos valor pago (obrigatório, aceita 0,00) e vendedor, enviando para `POST /modulos/financeiro/compras` (FR-016b), em frontend/src/pages/NovoAnimal.tsx
+- [X] T037 [US4] Aviso no painel inicial do dono, com o Financeiro ativo e compras sem valor: "Funcionários cadastraram N animais comprados sem valor · informe o valor de compra para o balanço da fazenda", com link para Pendências, a cada login (FR-016c), em frontend/src/pages/Dashboard.tsx
 
 **Checkpoint**: funcionário participa sem ver dinheiro; nenhuma compra fica sem valor sem o dono saber
 
@@ -122,10 +122,10 @@ ao lado do arquivo; cálculos em funções puras testadas sem banco.
 
 **Independent Test**: quickstart.md, cenário 5
 
-- [ ] T038 [P] [US3] Testes das agregações puras: lucro por mês, totais do período, percentuais somando 100%, preço médio da arroba só com itens com peso, cancelados fora; em backend/src/modulos/financeiro/dominio/resultado.spec.ts
-- [ ] T039 [US3] Implementar `resultado.ts` e o `ResultadoService`/`ResultadoController` (mensal, despesas por categoria, vendas; período padrão 12 meses, máximo 36) até T038 passar
-- [ ] T040 [P] [US3] Gráficos em SVG (barras agrupadas receita × despesa com lucro; linha do preço médio da arroba; barras horizontais por categoria), legíveis em 375 px e com a tabela de números abaixo, em frontend/src/modulos/financeiro/graficos/
-- [ ] T041 [US3] Tela `Resultado` com período e as três seções em frontend/src/modulos/financeiro/Resultado.tsx
+- [X] T038 [P] [US3] Testes das agregações puras: lucro por mês, totais do período, percentuais somando 100%, preço médio da arroba só com itens com peso, cancelados fora; em backend/src/modulos/financeiro/dominio/resultado.spec.ts
+- [X] T039 [US3] Implementar `resultado.ts` e o `ResultadoService`/`ResultadoController` (mensal, despesas por categoria, vendas; período padrão 12 meses, máximo 36) até T038 passar
+- [X] T040 [P] [US3] Gráficos em SVG (barras agrupadas receita × despesa com lucro; linha do preço médio da arroba; barras horizontais por categoria), legíveis em 375 px e com a tabela de números abaixo, em frontend/src/modulos/financeiro/graficos/
+- [X] T041 [US3] Tela `Resultado` com período e as três seções em frontend/src/modulos/financeiro/Resultado.tsx
 
 **Checkpoint**: todas as histórias funcionando
 
@@ -133,10 +133,10 @@ ao lado do arquivo; cálculos em funções puras testadas sem banco.
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
-- [ ] T042 [P] Teste de papéis: percorre os controllers do Financeiro e exige `@Roles(DONO)` em toda rota, exceto `GET /usos`, `GET /usos/categorias` e `POST /usos` (R7, SC-006), em backend/src/modulos/financeiro/papeis.spec.ts
-- [ ] T043 [P] Marcar a seção 5 de docs/modulos/Planejamento-modulos.md como concluída, com as decisões do clarify
-- [ ] T044 Prettier nos arquivos novos do backend; `npm test`, `tsc --noEmit`, `lint`, `tsc -b`, `eslint src`
-- [ ] T045 Executar o quickstart.md completo em 375 px, em fazenda de teste na cópia, registrando aqui o que não pôde ser verificado
+- [X] T042 [P] Teste de papéis: percorre os controllers do Financeiro e exige `@Roles(DONO)` em toda rota, exceto `GET /usos`, `GET /usos/categorias` e `POST /usos` (R7, SC-006), em backend/src/modulos/financeiro/papeis.spec.ts
+- [X] T043 [P] Marcar a seção 5 de docs/modulos/Planejamento-modulos.md como concluída, com as decisões do clarify
+- [X] T044 Prettier nos arquivos novos do backend; `npm test`, `tsc --noEmit`, `lint`, `tsc -b`, `eslint src`
+- [X] T045 Executar o quickstart.md completo em 375 px, em fazenda de teste na cópia, registrando aqui o que não pôde ser verificado
 
 ---
 
@@ -197,3 +197,22 @@ Task: "T007 Entidades CompraAnimal e RegistroUso"
   403 do funcionário, 404 de outra fazenda) e, nas telas em 375 px, despesa "1.350,50", venda a
   partir da página do animal com peso sugerido, prévia, lembrete do brinco antes e depois, venda
   na página do animal (dono) e só a data para o funcionário.
+
+## Registro de US4, US3 e acabamento (T030–T045, 2026-11-04)
+
+- 347 testes no backend (19 novos: usos, compras, resultado e o teste de papéis, que percorre
+  todas as rotas do Financeiro e exige DONO em todas, menos `GET /usos`, `GET /usos/categorias`
+  e `POST /usos`).
+- Quickstart na cópia, cenários 3 a 6, pela API (19 verificações): usos sem valor para o
+  funcionário, dono valoriza ("Diesel — 40 litros") e descarta; compra com valor e com 0,00;
+  2 compras do funcionário pendentes e resolvidas; resultado de 12 meses batendo com os
+  lançamentos, percentuais somando 100%, preço médio da arroba conferido à mão
+  ((9.000,00 + 9.061,30) ÷ 59,23 @ = R$ 304,93); desativado = só consulta para o dono e sem
+  registro de uso para o funcionário.
+- Nas telas, em 375 px: aviso de pendências no painel do dono; Pendências com valor da compra
+  "2.400,00" e do uso "85,90"; Resultado com 12 barras, categorias e a linha da arroba, sem
+  rolagem lateral; campo "Valor pago" no cadastro só para o dono; funcionário registra "Sal
+  mineral, 10 sacos" sem ver nenhum R$.
+- Não verificado: aparência visual dos gráficos (a janela do Claude estava oculta; as telas foram
+  conferidas pelo texto e pela estrutura da página).
+- Desvio: o cadastro de compra usa o campo "Procedência" do formulário como vendedor.

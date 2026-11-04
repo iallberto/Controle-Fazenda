@@ -201,3 +201,128 @@ export async function buscarVendaDoAnimal(animalId: string) {
   const resposta = await apiClient.get<VendaDoAnimal>(`${BASE}/vendas/animal/${animalId}`);
   return resposta.data;
 }
+
+// --- Registros de uso (sem valores; dono e funcionário) ------------------------
+
+export type SituacaoUso = 'AGUARDANDO' | 'LANCADO' | 'DESCARTADO';
+
+export interface RegistroUso {
+  id: string;
+  data: string;
+  item: string;
+  quantidade: number;
+  unidade: string;
+  categoria: string | null;
+  animal: { id: string; brinco: string } | null;
+  pasto: { id: string; nome: string } | null;
+  registradoPor: string | null;
+  situacao: SituacaoUso;
+  motivoDescarte: string | null;
+}
+
+export interface NovoUso {
+  data: string;
+  item: string;
+  quantidade: number;
+  unidade: string;
+  categoriaId: string;
+  animalId?: string;
+  pastoId?: string;
+}
+
+export async function listarUsos(situacao?: SituacaoUso) {
+  const resposta = await apiClient.get<RegistroUso[]>(`${BASE}/usos`, { params: { situacao } });
+  return resposta.data;
+}
+
+export async function categoriasParaUso() {
+  const resposta = await apiClient.get<{ id: string; nome: string }[]>(`${BASE}/usos/categorias`);
+  return resposta.data;
+}
+
+export async function registrarUso(dados: NovoUso) {
+  await apiClient.post(`${BASE}/usos`, dados);
+}
+
+export async function valorarUso(id: string, valorCentavos: number) {
+  await apiClient.post(`${BASE}/usos/${id}/valorar`, { valorCentavos });
+}
+
+export async function descartarUso(id: string, motivo: string) {
+  await apiClient.post(`${BASE}/usos/${id}/descartar`, { motivo });
+}
+
+// --- Compras de animais e pendências (dono) ------------------------------------
+
+export interface CompraSemValor {
+  animalId: string;
+  brinco: string;
+  categoria: Categoria;
+  dataCompra: string | null;
+  procedencia: string | null;
+  cadastradoPor: string | null;
+  cadastradoEm: string;
+}
+
+export async function listarComprasSemValor() {
+  const resposta = await apiClient.get<CompraSemValor[]>(`${BASE}/compras/sem-valor`);
+  return resposta.data;
+}
+
+export async function informarValorCompra(animalId: string, valorCentavos: number, vendedor?: string) {
+  await apiClient.post(`${BASE}/compras/animal/${animalId}`, { valorCentavos, vendedor });
+}
+
+// Cadastro do animal comprado com o valor (FR-016b); devolve o animal criado
+export async function cadastrarAnimalComprado<T extends object>(
+  dadosAnimal: T,
+  valorCentavos: number,
+  vendedor?: string,
+) {
+  const resposta = await apiClient.post<{ id: string; brinco: string }>(`${BASE}/compras`, {
+    ...dadosAnimal,
+    valorCentavos,
+    vendedor,
+  });
+  return resposta.data;
+}
+
+export async function buscarPendencias() {
+  const resposta = await apiClient.get<{ usosAguardando: number; comprasSemValor: number }>(
+    `${BASE}/pendencias`,
+  );
+  return resposta.data;
+}
+
+// --- Resultado (dono) --------------------------------------------------------------
+
+export interface ResultadoMensal {
+  de: string;
+  ate: string;
+  meses: { mes: string; receitaCentavos: number; despesaCentavos: number; lucroCentavos: number }[];
+  totais: { receitaCentavos: number; despesaCentavos: number; lucroCentavos: number };
+}
+
+export interface DespesasPorCategoria {
+  de: string;
+  ate: string;
+  categorias: { categoria: string; valorCentavos: number; percentual: number }[];
+}
+
+export interface ResultadoVendas {
+  de: string;
+  ate: string;
+  totalCentavos: number;
+  animais: number;
+  porCategoria: { categoria: Categoria; animais: number; valorCentavos: number }[];
+  arrobaPorMes: { mes: string; precoMedioArrobaCentavos: number | null; arrobas: number }[];
+}
+
+export async function buscarResultado(periodo: { de: string; ate: string }) {
+  const [mensal, despesas, vendas] = await Promise.all([
+    apiClient.get<ResultadoMensal>(`${BASE}/resultado/mensal`, { params: periodo }),
+    apiClient.get<DespesasPorCategoria>(`${BASE}/resultado/despesas-por-categoria`, { params: periodo }),
+    apiClient.get<ResultadoVendas>(`${BASE}/resultado/vendas`, { params: periodo }),
+  ]);
+  return { mensal: mensal.data, despesas: despesas.data, vendas: vendas.data };
+}

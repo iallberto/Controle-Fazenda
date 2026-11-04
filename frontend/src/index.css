@@ -741,6 +741,116 @@ a.botao {
   font-weight: 700;
 }
 
+/* Gráficos do resultado (SVG próprio, research R11) */
+.grafico {
+  margin: 8px 0;
+}
+
+.grafico-rolagem {
+  overflow-x: auto;
+}
+
+.grafico-eixo {
+  stroke: var(--cor-borda);
+}
+
+.grafico-rotulo {
+  font-size: 10px;
+  fill: var(--cor-texto-suave);
+}
+
+.barra-receita {
+  fill: var(--cor-primaria);
+}
+
+.barra-despesa {
+  fill: var(--cor-erro);
+}
+
+.linha-arroba {
+  fill: none;
+  stroke: var(--cor-primaria);
+  stroke-width: 2;
+}
+
+.ponto-arroba {
+  fill: var(--cor-primaria-escura);
+}
+
+.grafico-legenda {
+  display: flex;
+  gap: 16px;
+  font-size: 0.85rem;
+}
+
+.legenda-receita::before,
+.legenda-despesa::before {
+  content: '';
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 6px;
+  border-radius: 2px;
+}
+
+.legenda-receita::before {
+  background: var(--cor-primaria);
+}
+
+.legenda-despesa::before {
+  background: var(--cor-erro);
+}
+
+.tabela-resultado {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.tabela-resultado th,
+.tabela-resultado td {
+  padding: 6px 8px;
+  text-align: right;
+  border-bottom: 1px solid var(--cor-borda);
+  white-space: nowrap;
+}
+
+.tabela-resultado th:first-child,
+.tabela-resultado td:first-child {
+  text-align: left;
+}
+
+.barras-categorias li {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.barra-fundo {
+  height: 10px;
+  border-radius: 5px;
+  background: var(--cor-fundo);
+  overflow: hidden;
+}
+
+.barra-preenchida {
+  height: 100%;
+  background: var(--cor-erro);
+}
+
+/* Quantidade e unidade lado a lado no registro de uso */
+.linha-quantidade {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.linha-quantidade > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 button.botao-confirmar {
   width: 100%;
   min-height: 52px;

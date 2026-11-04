@@ -5,6 +5,7 @@ import { mensagemDeErro } from '../api/client';
 import { formatarCategoria } from '../utils/formatadores';
 import { Aviso } from '../components/Aviso';
 import { AvisosDeVencimento } from '../modulos/vitrine/AvisosDeVencimento';
+import { AvisoPendencias } from '../modulos/financeiro/AvisoPendencias';
 
 export function Dashboard() {
   const { usuario } = useAuth();
@@ -28,6 +29,7 @@ export function Dashboard() {
 
       <main>
         <AvisosDeVencimento />
+        <AvisoPendencias />
         {carregando && <p>Carregando...</p>}
         {erro && <Aviso tipo="erro">{erro}</Aviso>}
 

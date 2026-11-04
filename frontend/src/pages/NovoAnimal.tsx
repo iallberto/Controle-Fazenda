@@ -12,6 +12,10 @@ import {
   rotuloBrinco,
 } from '../utils/formatadores';
 import { Aviso } from '../components/Aviso';
+import { useAuth } from '../contexts/useAuth';
+import { useModulos } from '../contexts/useModulos';
+import { cadastrarAnimalComprado } from '../modulos/financeiro/api';
+import { centavosDeTexto, formatarReais } from '../utils/formatadores';
 
 export function NovoAnimal() {
   const navigate = useNavigate();
@@ -29,6 +33,11 @@ export function NovoAnimal() {
   const [maeId, setMaeId] = useState('');
   const [dataCompra, setDataCompra] = useState('');
   const [procedencia, setProcedencia] = useState('');
+  // Financeiro ativo + dono: a compra já sai com o valor (spec 003, FR-016b)
+  const { usuario } = useAuth();
+  const { situacaoDe } = useModulos();
+  const comFinanceiro = usuario?.papel === 'DONO' && situacaoDe('FINANCEIRO')?.situacao === 'ATIVO';
+  const [valorCompra, setValorCompra] = useState('');
 
   const [codigosDisponiveis, setCodigosDisponiveis] = useState<Codigo[]>([]);
   const [matrizes, setMatrizes] = useState<Animal[]>([]);
@@ -80,8 +89,15 @@ async function handleSubmit(evento: FormEvent) {
   evento.preventDefault();
   setErro('');
 
+    const centavosCompra = centavosDeTexto(valorCompra);
+    const lancarCompra = origem === 'COMPRADO' && comFinanceiro;
+    if (lancarCompra && centavosCompra === null) {
+      setErro('Informe o valor pago (0,00 se não quiser lançar)');
+      return;
+    }
+
     try {
-      const novo = await criarAnimal({
+      const dadosAnimal = {
         codigoId,
         sexo,
         categoria,
@@ -91,9 +107,14 @@ async function handleSubmit(evento: FormEvent) {
         maeId: origem === 'NASCIDO_FAZENDA' ? maeId : undefined,
         dataCompra: origem === 'COMPRADO' ? dataCompra : undefined,
         procedencia: origem === 'COMPRADO' ? procedencia || undefined : undefined,
-        pastoAtualId: pastoAtualId || undefined, 
-      });
-      navigate('/animais', { state: { aviso: `${rotuloBrinco(novo.brinco)} cadastrado.` } });
+        pastoAtualId: pastoAtualId || undefined,
+      } as const;
+      const novo = lancarCompra
+        ? await cadastrarAnimalComprado(dadosAnimal, centavosCompra!, procedencia || undefined)
+        : await criarAnimal(dadosAnimal);
+      const compra =
+        lancarCompra && centavosCompra! > 0 ? ` Compra de ${formatarReais(centavosCompra!)} lançada no Financeiro.` : '';
+      navigate('/animais', { state: { aviso: `${rotuloBrinco(novo.brinco)} cadastrado.${compra}` } });
     } catch (erroRequisicao) {
       // 409: outra pessoa usou este código enquanto a tela estava aberta
       if (axios.isAxiosError(erroRequisicao) && erroRequisicao.response?.status === 409) {
@@ -257,6 +278,24 @@ async function handleSubmit(evento: FormEvent) {
                 onChange={(e) => setProcedencia(e.target.value)}
               />
             </div>
+            {comFinanceiro && (
+              <div>
+                <label htmlFor="valorCompra">Valor pago (R$)</label>
+                <input
+                  id="valorCompra"
+                  inputMode="decimal"
+                  placeholder="0,00 para não lançar"
+                  value={valorCompra}
+                  onChange={(e) => setValorCompra(e.target.value)}
+                  required
+                />
+                <small>
+                  {centavosDeTexto(valorCompra)
+                    ? `Lança uma despesa de ${formatarReais(centavosDeTexto(valorCompra))} em Compra de animais`
+                    : 'Com 0,00 o animal é cadastrado sem lançar a compra'}
+                </small>
+              </div>
+            )}
           </>
         )}
 

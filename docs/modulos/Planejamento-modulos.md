@@ -1,12 +1,12 @@
 # Controle Fazenda — Planejamento dos módulos
 
 > Como o sistema passa a ser vendido em partes: um pacote inicial e módulos adicionais liberados por cliente.
-> Este documento registra as decisões, o escopo de cada módulo e a ordem de execução. As seções 2 (infraestrutura, fase 0) e 3 (cobertura e inseminação) já foram implementadas; os módulos pagos ainda não.
+> Este documento registra as decisões, o escopo de cada módulo e a ordem de execução. As seções 2 (infraestrutura, fase 0), 3 (cobertura e inseminação) e 5 (Financeiro) já foram implementadas; Leite e Nutrição ainda não.
 
 | | |
 |---|---|
 | **Data** | 03/11/2026 |
-| **Status** | Decisões tomadas, sem questões em aberto · seção 3 concluída (spec 001) · fase 0 concluída (spec 002) · módulos pagos não iniciados |
+| **Status** | Decisões tomadas, sem questões em aberto · seção 3 concluída (spec 001) · fase 0 concluída (spec 002) · Financeiro concluído (spec 003) · Leite e Nutrição não iniciados |
 | **Base** | Versão atual (reprodução e rebanho), com o bloco pós-V1 concluído |
 | **Legenda** | ✅ Decidido · ❓ Em aberto · ⏸️ Depois · ✔️ Concluído |
 
@@ -159,7 +159,18 @@ Para fazendas com vacas de ordenha. Usa os animais, partos, tratamentos e a cobe
 
 ---
 
-## 5. Módulo Financeiro
+## 5. Módulo Financeiro ✔️ Concluído
+
+> **Concluído em 04/11/2026** pela spec `specs/003-modulo-financeiro`. Decisões do clarify:
+> - **só o dono vê valores**; o funcionário registra os itens usados ou trazidos, sem R$, e o
+>   dono informa o valor depois (vira despesa) ou descarta com motivo;
+> - venda de animais numa operação só (pesagem, saída do rebanho, receita), com lembrete de
+>   retirar o brinco só dos animais que embarcarem; cancelar a venda devolve os animais;
+> - com o Financeiro ativo, "Vendido" pela mudança de status é recusado: a venda é no Financeiro;
+> - compra de animal com valor (0,00 para não lançar); compras cadastradas pelo funcionário ficam
+>   pendentes, com aviso ao dono a cada login;
+> - valores em centavos inteiros; gráficos em SVG próprio, sem biblioteca nova.
+> - Integrações com Leite e Nutrição (5.4) ficam para quando esses módulos existirem.
 
 ### 5.1 Lançamentos
 - **Receitas e despesas** com data, valor, categoria, descrição e, quando fizer sentido, o animal ou lote ligado.
@@ -212,7 +223,7 @@ Pode ser feito em paralelo ao Leite.
 |---|---|---|
 | 0 | ✔️ Migrations · módulos por fazenda · bloqueio no backend e no menu · painel do administrador — concluída | — |
 | — | ✔️ **Cobertura e inseminação** no pacote inicial (monta natural, IA/IATF opcional, diagnóstico, previsão de parto) — concluída | Nada; pode entrar antes, durante ou depois da fase 0 |
-| 1 | **Financeiro** (lançamentos, venda de animais, gráficos) | Fase 0 |
+| 1 | ✔️ **Financeiro** (lançamentos, venda de animais, gráficos) — concluído | Fase 0 |
 | 2a | **Leite** (lactação, ordenha, carência, entregas) | Fase 0 e cobertura/inseminação |
 | 2b | **Nutrição** (insumos, silo, dietas, fornecimento) | Fase 0 |
 | 3 | Integrações com o Financeiro (leite → receita, compras → despesa) | 1 e 2 |

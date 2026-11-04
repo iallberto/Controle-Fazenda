@@ -19,6 +19,7 @@ import {
   Min,
   ValidateNested,
 } from 'class-validator';
+import { CreateAnimalDto } from '../../../animal/dto/create-animal.dto';
 import { TipoLancamento } from '../entities/categoria-financeira.entity';
 import { FormaPrecoVenda } from '../entities/venda-animais.entity';
 
@@ -209,5 +210,94 @@ export class FiltroPeriodoDto {
 
   @IsOptional()
   @IsDateString()
+  ate?: string;
+}
+
+// --- Registros de uso (sem valores) --------------------------------------------
+
+export class RegistrarUsoDto {
+  @IsDateString()
+  data: string;
+
+  @Transform(aparar)
+  @IsString()
+  @IsNotEmpty({ message: 'Informe o item' })
+  @MaxLength(120)
+  item: string;
+
+  @Type(() => Number)
+  @IsPositive({ message: 'A quantidade precisa ser maior que zero' })
+  @Max(99999999)
+  quantidade: number;
+
+  @Transform(aparar)
+  @IsString()
+  @IsNotEmpty({ message: 'Informe a unidade (sacos, litros, kg...)' })
+  @MaxLength(20)
+  unidade: string;
+
+  @IsUUID()
+  categoriaId: string;
+
+  @IsOptional()
+  @IsUUID()
+  animalId?: string;
+
+  @IsOptional()
+  @IsUUID()
+  pastoId?: string;
+}
+
+export class FiltroUsosDto {
+  @IsOptional()
+  @IsIn(['AGUARDANDO', 'LANCADO', 'DESCARTADO'])
+  situacao?: 'AGUARDANDO' | 'LANCADO' | 'DESCARTADO';
+}
+
+export class ValorarDto {
+  @IsInt()
+  @Min(1, { message: 'O valor precisa ser maior que zero' })
+  @Max(MAX_CENTAVOS)
+  valorCentavos: number;
+}
+
+// --- Compras de animais ---------------------------------------------------------
+
+// 0 = o dono não quis lançar (spec 003, FR-016b)
+export class ValorCompraDto {
+  @IsInt()
+  @Min(0)
+  @Max(MAX_CENTAVOS)
+  valorCentavos: number;
+
+  @IsOptional()
+  @Transform(aparar)
+  @IsString()
+  @MaxLength(120)
+  vendedor?: string;
+}
+
+// Cadastro do animal comprado + valor da compra, numa rota só (FR-016b)
+export class CompraComAnimalDto extends CreateAnimalDto {
+  @IsInt()
+  @Min(0)
+  @Max(MAX_CENTAVOS)
+  valorCentavos: number;
+
+  @IsOptional()
+  @Transform(aparar)
+  @IsString()
+  @MaxLength(120)
+  vendedor?: string;
+}
+
+// Período do resultado em meses AAAA-MM (padrão: 12 meses até o atual)
+export class FiltroResultadoDto {
+  @IsOptional()
+  @Matches(/^\d{4}-(0[1-9]|1[0-2])$/, { message: 'Mês no formato AAAA-MM' })
+  de?: string;
+
+  @IsOptional()
+  @Matches(/^\d{4}-(0[1-9]|1[0-2])$/, { message: 'Mês no formato AAAA-MM' })
   ate?: string;
 }
