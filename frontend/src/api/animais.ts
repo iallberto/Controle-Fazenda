@@ -10,6 +10,10 @@ export interface Animal {
   origem: 'NASCIDO_FAZENDA' | 'COMPRADO';
   dataNascimento: string;
   mae?: { id: string; brinco: string } | null;
+  // Pai: touro do rebanho ou, quando veio de inseminação, o sêmen
+  pai?: { id: string; brinco: string } | null;
+  paiSemen?: { id: string; nomeTouro: string } | null;
+  racaId?: string | null;
   pastoAtual?: { id: string; nome: string } | null;
 }
 

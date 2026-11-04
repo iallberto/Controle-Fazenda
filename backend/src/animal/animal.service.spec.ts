@@ -179,7 +179,7 @@ describe('AnimalService', () => {
 
       expect(mockRepository.findOne).toHaveBeenCalledWith({
         where: { id: 'animal-1' },
-        relations: { mae: true, pastoAtual: true },
+        relations: { mae: true, pai: true, paiSemen: true, pastoAtual: true },
       });
       expect(resultado.mae?.brinco).toBe('10');
     });

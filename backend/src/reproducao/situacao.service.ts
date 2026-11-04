@@ -6,6 +6,7 @@ import {
   CategoriaAnimal,
   Sexo,
   StatusAnimal,
+  StatusReprodutivo,
 } from '../animal/entities/animal.entity';
 import { Parto } from '../parto/entities/parto.entity';
 import { hojeLocal } from '../common/datas';
@@ -13,7 +14,13 @@ import { DIAS_DESCANSO_POS_PARTO, motivoInaptidao } from './dominio/aptidao';
 import { somarDias } from './dominio/datas';
 import { ExposicaoMonta } from './entities/exposicao-monta.entity';
 import { Inseminacao } from './entities/inseminacao.entity';
-import { DiagnosticoGestacao } from './entities/diagnostico-gestacao.entity';
+import {
+  DiagnosticoGestacao,
+  ResultadoDiagnostico,
+} from './entities/diagnostico-gestacao.entity';
+import { Raca } from '../raca/entities/raca.entity';
+import { BasePrevisao, calcularPrevisaoParto } from './dominio/previsao-parto';
+import { buscarCandidatosPai } from './candidatos';
 
 export interface FiltroFemeas {
   pastoId?: string;
@@ -34,7 +41,118 @@ export class SituacaoService {
     private readonly inseminacaoRepository: Repository<Inseminacao>,
     @InjectRepository(DiagnosticoGestacao)
     private readonly diagnosticoRepository: Repository<DiagnosticoGestacao>,
+    @InjectRepository(Raca)
+    private readonly racaRepository: Repository<Raca>,
   ) {}
+
+  // Prévia do pai antes de registrar o parto (mesma regra do parto, research R6)
+  async candidatosPai(
+    fazendaId: string,
+    maeId: string,
+    dataParto = hojeLocal(),
+  ) {
+    const mae = await this.animalRepository.findOneBy({ id: maeId });
+    if (!mae || mae.fazendaId !== fazendaId) {
+      throw new NotFoundException('Animal não encontrado');
+    }
+    const resultado = await buscarCandidatosPai(
+      this.animalRepository.manager,
+      mae,
+      dataParto,
+    );
+    return { touros: resultado.touros, semens: resultado.semens };
+  }
+
+  // Previsão de parto das fêmeas prenhes (FR-018), calculada na hora a partir
+  // dos registros válidos (research R5). Também devolve a cobertura considerada.
+  async previsoesParto(femeas: Animal[]) {
+    const resultado = new Map<
+      string,
+      { data: string; base: BasePrevisao; touros: string[]; semens: string[] }
+    >();
+    const prenhes = femeas.filter(
+      (femea) => femea.statusReprodutivo === StatusReprodutivo.PRENHE,
+    );
+    if (prenhes.length === 0) return resultado;
+    const ids = prenhes.map((femea) => femea.id);
+    const naoCancelado = { cancelamento: { cancelado: false } };
+
+    const [diagnosticos, inseminacoes, exposicoes, racas] = await Promise.all([
+      this.diagnosticoRepository.find({
+        where: {
+          femeaId: In(ids),
+          resultado: ResultadoDiagnostico.PRENHE,
+          ...naoCancelado,
+        },
+        order: { data: 'DESC', criadoEm: 'DESC' },
+      }),
+      this.inseminacaoRepository.find({
+        where: { femeaId: In(ids), ...naoCancelado },
+        relations: { semen: true },
+      }),
+      this.exposicaoRepository.find({
+        where: { femeaId: In(ids), ...naoCancelado },
+        relations: { estacao: { touro: true } },
+      }),
+      this.racaRepository.findBy({
+        id: In(
+          prenhes
+            .map((femea) => femea.racaId)
+            .filter((id): id is string => !!id),
+        ),
+      }),
+    ]);
+    const gestacaoPorRaca = new Map(
+      racas.map((raca) => [raca.id, raca.gestacaoMediaDias]),
+    );
+
+    for (const femea of prenhes) {
+      const diagnostico = diagnosticos.find(
+        (item) => item.femeaId === femea.id,
+      );
+      if (!diagnostico) continue;
+      const suasInseminacoes = inseminacoes.filter(
+        (item) => item.femeaId === femea.id && item.data <= diagnostico.data,
+      );
+      // Exposições de estações canceladas não contam
+      const suasExposicoes = exposicoes.filter(
+        (item) =>
+          item.femeaId === femea.id &&
+          item.dataInicio <= diagnostico.data &&
+          !item.estacao?.cancelamento.cancelado,
+      );
+      const previsao = calcularPrevisaoParto({
+        diagnostico: {
+          data: diagnostico.data,
+          idadeGestacionalDias: diagnostico.idadeGestacionalDias,
+        },
+        inseminacoes: suasInseminacoes,
+        exposicoes: suasExposicoes,
+        gestacaoMediaDias: femea.racaId
+          ? gestacaoPorRaca.get(femea.racaId)
+          : null,
+      });
+      if (!previsao) continue;
+      resultado.set(femea.id, {
+        ...previsao,
+        touros: [
+          ...new Set(
+            suasExposicoes
+              .map((item) => item.estacao?.touro?.brinco)
+              .filter((brinco): brinco is string => !!brinco),
+          ),
+        ],
+        semens: [
+          ...new Set(
+            suasInseminacoes
+              .map((item) => item.semen?.nomeTouro)
+              .filter((nome): nome is string => !!nome),
+          ),
+        ],
+      });
+    }
+    return resultado;
+  }
 
   // Situação reprodutiva de uma fêmea para o Manejo e o detalhe do animal (FR-027).
   // "Exposta" e "inseminada" são situações derivadas, não status (research R3).
@@ -69,6 +187,7 @@ export class SituacaoService {
         this.ultimosPartos([animalId]),
       ]);
     const ultimoParto = partos.get(animalId) ?? null;
+    const previsao = (await this.previsoesParto([animal])).get(animal.id);
     const motivo = motivoInaptidao(animal, ultimoParto, hoje);
     // Inseminação sem diagnóstico depois dela ainda está "aguardando diagnóstico"
     const inseminacaoPendente =
@@ -108,8 +227,9 @@ export class SituacaoService {
           }
         : null,
       ultimoParto,
-      // Preenchida pela previsão de parto (US3)
-      previsaoParto: null,
+      previsaoParto: previsao
+        ? { data: previsao.data, base: previsao.base }
+        : null,
     };
   }
 

@@ -6,8 +6,10 @@ import { Animal } from '../animal/entities/animal.entity';
 import { Parto } from '../parto/entities/parto.entity';
 import { Tratamento } from '../tratamento/entities/tratamento.entity';
 
+import { ReproducaoModule } from '../reproducao/reproducao.module';
+
 @Module({
-  imports: [TypeOrmModule.forFeature([Animal, Parto, Tratamento])],
+  imports: [TypeOrmModule.forFeature([Animal, Parto, Tratamento]), ReproducaoModule],
   controllers: [RelatorioController],
   providers: [RelatorioService],
 })

@@ -5,10 +5,17 @@ import { RelatorioTratamentos } from './relatorios/RelatorioTratamentos';
 import { RelatorioProximosTratamentos } from './relatorios/RelatorioProximosTratamentos';
 import { RelatorioPorRaca } from './relatorios/RelatorioPorRaca';
 import { RelatorioNascimentos } from './relatorios/RelatorioNascimentos';
+import { RelatorioVacasAParir } from './relatorios/RelatorioVacasAParir';
 
 // M10: primeiro a pessoa escolhe o tipo de relatório; as datas, quando
 // fazem sentido, vêm depois, dentro de cada relatório.
 const TIPOS = [
+  {
+    id: 'vacas-a-parir',
+    titulo: 'Vacas a parir',
+    descricao: 'Partos previstos nos próximos dias e os atrasados',
+    Componente: RelatorioVacasAParir,
+  },
   {
     id: 'proximos',
     titulo: 'Próximos tratamentos',

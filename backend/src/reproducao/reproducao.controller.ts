@@ -205,6 +205,15 @@ export class ReproducaoController {
 
   // --- Situação do animal -----------------------------------------------------
 
+  @Get('animais/:id/candidatos-pai')
+  candidatosPai(
+    @CurrentUser() user: JwtPayload,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query() filtro: FiltroAptasDto,
+  ) {
+    return this.situacaoService.candidatosPai(user.fazendaId, id, filtro.data);
+  }
+
   @Get('animais/:id/situacao')
   situacao(
     @CurrentUser() user: JwtPayload,

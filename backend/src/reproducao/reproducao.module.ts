@@ -13,6 +13,8 @@ import { DiagnosticoGestacao } from './entities/diagnostico-gestacao.entity';
 import { Animal } from '../animal/entities/animal.entity';
 import { Parto } from '../parto/entities/parto.entity';
 import { Pasto } from '../pasto/entities/pasto.entity';
+import { Raca } from '../raca/entities/raca.entity';
+import { PartoCandidatoPai } from './entities/parto-candidato-pai.entity';
 import { TratamentoModule } from '../tratamento/tratamento.module';
 
 // Cobertura e inseminação: parte do pacote inicial (sem @Modulo de módulo pago)
@@ -28,6 +30,8 @@ import { TratamentoModule } from '../tratamento/tratamento.module';
       Animal,
       Parto,
       Pasto,
+      Raca,
+      PartoCandidatoPai,
     ]),
     TratamentoModule,
   ],

@@ -3,9 +3,10 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { criarParto, type Cria } from '../api/partos';
 import { listarAnimais, type Animal } from '../api/animais';
+import { buscarCandidatosPai } from '../api/reproducao';
 import { listarDisponiveis, type Codigo } from '../api/codigos';
 import { listarPastos, type Pasto } from '../api/pastos';
-import { formatarBrinco, rotuloBrinco } from '../utils/formatadores';
+import { formatarBrinco, formatarCategoria, rotuloBrinco } from '../utils/formatadores';
 import { Aviso } from '../components/Aviso';
 
 export function NovoParto() {
@@ -20,15 +21,53 @@ export function NovoParto() {
   const [crias, setCrias] = useState<Cria[]>([{ codigoId: '', sexo: 'F' }]);
 
   const [matrizes, setMatrizes] = useState<Animal[]>([]);
+  const [paiPrevisto, setPaiPrevisto] = useState('');
   const [codigosDisponiveis, setCodigosDisponiveis] = useState<Codigo[]>([]);
   const [pastoAtualId, setPastoAtualId] = useState('');
   const [pastos, setPastos] = useState<Pasto[]>([]);
 
   useEffect(() => {
-    listarAnimais('MATRIZ').then(setMatrizes);
+    // Matrizes e novilhas ativas; novilha que pare vira matriz (FR-031). Prenhes primeiro.
+    listarAnimais().then((lista) =>
+      setMatrizes(
+        lista
+          .filter(
+            (animal) =>
+              animal.status === 'ATIVO' && (animal.categoria === 'MATRIZ' || animal.categoria === 'NOVILHA'),
+          )
+          .sort((a, b) => Number(b.statusReprodutivo === 'PRENHA') - Number(a.statusReprodutivo === 'PRENHA')),
+      ),
+    );
     listarDisponiveis().then(setCodigosDisponiveis);
     listarPastos().then(setPastos);
   }, []);
+
+  const maeSelecionada = matrizes.find((matriz) => matriz.id === maeId);
+
+  // Prévia do pai pela cobertura registrada, na data do parto (US4)
+  useEffect(() => {
+    if (!maeId || !data) return;
+    let ativo = true;
+    buscarCandidatosPai(maeId, data)
+      .then(({ touros, semens }) => {
+        if (!ativo) return;
+        const nomes = [
+          ...touros.map((touro) => (touro.brinco ? `touro ${formatarBrinco(touro.brinco)}` : 'touro')),
+          ...semens.map((semen) => `sêmen ${semen.nomeTouro ?? ''}`.trim()),
+        ];
+        setPaiPrevisto(
+          nomes.length === 0
+            ? ''
+            : nomes.length === 1
+              ? `Pai previsto pela cobertura: ${nomes[0]}.`
+              : `Pai: um destes (${nomes.join(', ')}). O dono define depois, na página da mãe.`,
+        );
+      })
+      .catch(() => ativo && setPaiPrevisto(''));
+    return () => {
+      ativo = false;
+    };
+  }, [maeId, data]);
 
   function adicionarCria() {
     setCrias([...crias, { codigoId: '', sexo: 'F' }]);
@@ -94,15 +133,20 @@ export function NovoParto() {
 
       <form onSubmit={handleSubmit}>
         <div>
-          <label htmlFor="mae">Matriz</label>
+          <label htmlFor="mae">Mãe</label>
           <select id="mae" value={maeId} onChange={(e) => setMaeId(e.target.value)} required>
-            <option value="">Selecione a matriz</option>
+            <option value="">Selecione a mãe</option>
             {matrizes.map((matriz) => (
               <option key={matriz.id} value={matriz.id}>
-                {rotuloBrinco(matriz.brinco)}
+                {rotuloBrinco(matriz.brinco)} · {formatarCategoria(matriz.categoria)}
+                {matriz.statusReprodutivo === 'PRENHA' ? ' · prenha' : ''}
               </option>
             ))}
           </select>
+          {maeSelecionada?.categoria === 'NOVILHA' && (
+            <p className="dica">Ao registrar o parto, a novilha passa a ser matriz.</p>
+          )}
+          {paiPrevisto && <p className="dica">{paiPrevisto}</p>}
         </div>
 
         <div>

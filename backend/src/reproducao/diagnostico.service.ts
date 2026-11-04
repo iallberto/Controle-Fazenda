@@ -20,6 +20,7 @@ import {
   ResultadoDiagnostico,
 } from './entities/diagnostico-gestacao.entity';
 import { SituacaoService } from './situacao.service';
+import { recalcularStatusReprodutivo } from './status';
 import {
   DiagnosticoDto,
   DiagnosticoLoteDto,
@@ -257,43 +258,8 @@ export class DiagnosticoService {
     }));
   }
 
-  // O status reprodutivo vem do evento válido mais recente entre diagnósticos e
-  // partos (research R3). No mesmo dia, o parto prevalece.
-  async recalcularStatus(
-    manager: EntityManager,
-    femeaId: string,
-    usuarioId: string,
-  ) {
-    const ultimoDiagnostico = await manager.findOne(DiagnosticoGestacao, {
-      where: { femeaId, cancelamento: { cancelado: false } },
-      order: { data: 'DESC', criadoEm: 'DESC' },
-    });
-    const ultimoParto = await manager.findOne(Parto, {
-      where: { maeId: femeaId },
-      order: { data: 'DESC', criadoEm: 'DESC' },
-    });
-
-    let status: StatusReprodutivo | null = null;
-    if (
-      ultimoParto &&
-      (!ultimoDiagnostico || ultimoParto.data >= ultimoDiagnostico.data)
-    ) {
-      status =
-        ultimoParto.resultado === ResultadoParto.VIVO
-          ? StatusReprodutivo.LACTANTE
-          : StatusReprodutivo.VAZIA;
-    } else if (ultimoDiagnostico) {
-      status =
-        ultimoDiagnostico.resultado === ResultadoDiagnostico.PRENHE
-          ? StatusReprodutivo.PRENHE
-          : StatusReprodutivo.VAZIA;
-    }
-    await manager.update(
-      Animal,
-      { id: femeaId },
-      { statusReprodutivo: status, atualizadoPorId: usuarioId },
-    );
-    return status;
+  recalcularStatus(manager: EntityManager, femeaId: string, usuarioId: string) {
+    return recalcularStatusReprodutivo(manager, femeaId, usuarioId);
   }
 
   private async ultimosDiagnosticos(femeaIds: string[]) {

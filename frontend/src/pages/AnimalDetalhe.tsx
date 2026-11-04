@@ -2,7 +2,8 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { buscarAnimal, type Animal } from '../api/animais';
 import { listarTratamentosPorAnimal, type Tratamento } from '../api/tratamentos';
-import { listarPartosPorMae, type Parto } from '../api/partos';
+import { definirPaiDoParto, listarPartosPorMae, type Parto } from '../api/partos';
+import { useAuth } from '../contexts/useAuth';
 import { listarPesagensPorAnimal, type Pesagem } from '../api/pesagens';
 import {
   reemitirCodigo,
@@ -14,6 +15,7 @@ import {
   formatarArrobas,
   formatarBrinco,
   formatarCategoria,
+  rotuloBrinco,
   formatarData,
   formatarMomento,
   formatarOrigem,
@@ -47,6 +49,7 @@ function calcularIntervalos(partos: Parto[]): PartoComIntervalo[] {
 }
 
 export function AnimalDetalhe() {
+  const { usuario } = useAuth();
   const { id } = useParams<{ id: string }>();
   const [animal, setAnimal] = useState<Animal | null>(null);
   const [tratamentos, setTratamentos] = useState<Tratamento[]>([]);
@@ -128,6 +131,12 @@ export function AnimalDetalhe() {
             </Link>
           </p>
         )}
+        {animal.pai && (
+          <p>
+            Pai: <Link to={`/animais/${animal.pai.id}`}>{rotuloBrinco(animal.pai.brinco)}</Link>
+          </p>
+        )}
+        {animal.paiSemen && <p>Pai: sêmen {animal.paiSemen.nomeTouro}</p>}
         <p>Pasto: {animal.pastoAtual?.nome ?? 'Não informado'}</p>
       </section>
 
@@ -193,6 +202,15 @@ export function AnimalDetalhe() {
                 {parto.crias.length > 0 && (
                   <> — crias: {parto.crias.map((c) => formatarBrinco(c.brinco)).join(', ')}</>
                 )}
+                <PaiDoParto
+                  parto={parto}
+                  ehDono={usuario?.papel === 'DONO'}
+                  aoDefinir={async (pai) => {
+                    await definirPaiDoParto(parto.id, pai);
+                    const dadosPartos = await listarPartosPorMae(animal.id);
+                    setPartos(calcularIntervalos(dadosPartos));
+                  }}
+                />
               </li>
             ))}
           </ul>
@@ -231,5 +249,68 @@ export function AnimalDetalhe() {
         </ul>
       </section>
     </div>
+  );
+}
+
+// Pai das crias de um parto (US4): definido, ou candidatos para o dono escolher (FR-021)
+function PaiDoParto({
+  parto,
+  ehDono,
+  aoDefinir,
+}: {
+  parto: Parto;
+  ehDono: boolean;
+  aoDefinir: (pai: { touroId?: string; semenId?: string }) => Promise<void>;
+}) {
+  const [escolha, setEscolha] = useState('');
+  const [erro, setErro] = useState('');
+  const candidatos = parto.candidatos ?? [];
+  const cria = parto.crias[0];
+  if (!cria || candidatos.length === 0) return null;
+
+  const nome = (candidato: (typeof candidatos)[number]) =>
+    candidato.touroId
+      ? `touro ${candidato.touro ? formatarBrinco(candidato.touro.brinco) : ''}`
+      : `sêmen ${candidato.semen?.nomeTouro ?? ''}`;
+  const definido = candidatos.find(
+    (candidato) =>
+      (candidato.touroId && candidato.touroId === cria.paiId) ||
+      (candidato.semenId && candidato.semenId === cria.paiSemenId),
+  );
+
+  if (definido) return <> — pai: {nome(definido)}</>;
+
+  return (
+    <>
+      {' '}— pai: um destes ({candidatos.map(nome).join(', ')})
+      {ehDono && (
+        <span className="cancelar-inline">
+          <select aria-label="Definir o pai" value={escolha} onChange={(e) => setEscolha(e.target.value)}>
+            <option value="">Definir pai</option>
+            {candidatos.map((candidato) => (
+              <option key={candidato.touroId ?? candidato.semenId} value={candidato.touroId ? `t:${candidato.touroId}` : `s:${candidato.semenId}`}>
+                {nome(candidato)}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            disabled={!escolha}
+            onClick={async () => {
+              setErro('');
+              const [tipo, id] = escolha.split(':');
+              try {
+                await aoDefinir(tipo === 't' ? { touroId: id } : { semenId: id });
+              } catch {
+                setErro('Não foi possível definir o pai.');
+              }
+            }}
+          >
+            Salvar
+          </button>
+        </span>
+      )}
+      {erro && <Aviso tipo="erro">{erro}</Aviso>}
+    </>
   );
 }

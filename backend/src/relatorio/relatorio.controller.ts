@@ -1,9 +1,14 @@
-import { Controller, DefaultValuePipe, Get, ParseIntPipe, Query } from '@nestjs/common';
+import {
+  Controller,
+  DefaultValuePipe,
+  Get,
+  ParseIntPipe,
+  Query,
+} from '@nestjs/common';
 import { RelatorioService } from './relatorio.service';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { JwtPayload } from '../auth/auth.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-
 
 @ApiTags('relatorio')
 @ApiBearerAuth()
@@ -22,7 +27,11 @@ export class RelatorioController {
     @Query('inicio') inicio: string,
     @Query('fim') fim: string,
   ) {
-    return this.relatorioService.nascimentosPorPeriodo(user.fazendaId, inicio, fim);
+    return this.relatorioService.nascimentosPorPeriodo(
+      user.fazendaId,
+      inicio,
+      fim,
+    );
   }
 
   @Get('natimortos')
@@ -53,6 +62,18 @@ export class RelatorioController {
     return this.relatorioService.proximosTratamentos(user.fazendaId, janela);
   }
 
+  @Get('vacas-a-parir')
+  vacasAParir(
+    @CurrentUser() user: JwtPayload,
+    @Query('dias', new DefaultValuePipe(30), ParseIntPipe) dias: number,
+  ) {
+    // Janela de 7 a 90 dias à frente; os atrasados aparecem sempre (FR-019)
+    return this.relatorioService.vacasAParir(
+      user.fazendaId,
+      Math.min(Math.max(dias, 7), 90),
+    );
+  }
+
   @Get('por-raca')
   porRaca(@CurrentUser() user: JwtPayload) {
     return this.relatorioService.porRaca(user.fazendaId);
@@ -64,6 +85,10 @@ export class RelatorioController {
     @Query('inicio') inicio: string,
     @Query('fim') fim: string,
   ) {
-    return this.relatorioService.tratamentosPorPeriodo(user.fazendaId, inicio, fim);
+    return this.relatorioService.tratamentosPorPeriodo(
+      user.fazendaId,
+      inicio,
+      fim,
+    );
   }
 }

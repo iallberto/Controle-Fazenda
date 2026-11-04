@@ -193,3 +193,12 @@ export async function buscarSituacaoReprodutiva(animalId: string) {
   const resposta = await apiClient.get<SituacaoReprodutiva>(`/reproducao/animais/${animalId}/situacao`);
   return resposta.data;
 }
+
+// Prévia do pai antes de registrar o parto (mesma regra do parto)
+export async function buscarCandidatosPai(maeId: string, data: string) {
+  const resposta = await apiClient.get<{
+    touros: { id: string; brinco: string | null }[];
+    semens: { id: string; nomeTouro: string | null }[];
+  }>(`/reproducao/animais/${maeId}/candidatos-pai`, { params: { data } });
+  return resposta.data;
+}

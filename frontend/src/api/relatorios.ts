@@ -57,6 +57,22 @@ export async function buscarProximosTratamentos(dias: number) {
   return resposta.data;
 }
 
+export interface VacaAParir {
+  animal: { id: string; brinco: string; categoria: string };
+  previsaoParto: string;
+  base: 'INSEMINACAO' | 'TOQUE' | 'ESTACAO';
+  atrasado: boolean;
+  touros: string[];
+  semens: string[];
+  pasto: string | null;
+}
+
+// Prenhes com parto previsto até hoje + dias, mais as atrasadas (FR-019)
+export async function buscarVacasAParir(dias: number) {
+  const resposta = await apiClient.get<VacaAParir[]>('/relatorio/vacas-a-parir', { params: { dias } });
+  return resposta.data;
+}
+
 export async function buscarPorRaca() {
   const resposta = await apiClient.get<LinhaPorRaca[]>('/relatorio/por-raca');
   return resposta.data;

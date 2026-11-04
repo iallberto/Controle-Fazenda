@@ -10,6 +10,8 @@ import {
 } from 'typeorm';
 import { Animal } from '../../animal/entities/animal.entity';
 import { Usuario } from '../../usuario/entities/usuario.entity';
+import { Inseminacao } from '../../reproducao/entities/inseminacao.entity';
+import { PartoCandidatoPai } from '../../reproducao/entities/parto-candidato-pai.entity';
 
 export enum ResultadoParto {
   VIVO = 'VIVO',
@@ -47,6 +49,18 @@ export class Parto {
 
   @OneToMany(() => Animal, (animal) => animal.parto)
   crias: Animal[];
+
+  // Inseminação que originou o parto, quando houver (research R6)
+  @ManyToOne(() => Inseminacao, { nullable: true })
+  @JoinColumn({ name: 'inseminacao_id' })
+  inseminacao?: Inseminacao;
+
+  @Column({ name: 'inseminacao_id', type: 'uuid', nullable: true })
+  inseminacaoId: string | null;
+
+  // Possíveis pais gravados no momento do parto
+  @OneToMany(() => PartoCandidatoPai, (candidato) => candidato.parto)
+  candidatos?: PartoCandidatoPai[];
 
   @ManyToOne(() => Usuario)
   @JoinColumn({ name: 'criado_por' })

@@ -13,6 +13,7 @@ import { Raca } from '../../raca/entities/raca.entity';
 import { Pasto } from '../../pasto/entities/pasto.entity';
 import { Parto } from '../../parto/entities/parto.entity';
 import { Usuario } from '../../usuario/entities/usuario.entity';
+import { Semen } from '../../reproducao/entities/semen.entity';
 
 export enum Sexo {
   M = 'M',
@@ -112,6 +113,14 @@ export class Animal {
 
   @Column({ name: 'pai_id', type: 'uuid', nullable: true })
   paiId: string | null;
+
+  // Pai quando a cria vem de inseminação: o touro do sêmen não está no rebanho
+  @ManyToOne(() => Semen, { nullable: true })
+  @JoinColumn({ name: 'pai_semen_id' })
+  paiSemen?: Semen;
+
+  @Column({ name: 'pai_semen_id', type: 'uuid', nullable: true })
+  paiSemenId: string | null;
 
   @ManyToOne(() => Pasto, { nullable: true })
   @JoinColumn({ name: 'pasto_atual_id' })

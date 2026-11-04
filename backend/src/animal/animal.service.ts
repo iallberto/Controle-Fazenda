@@ -95,7 +95,7 @@ export class AnimalService {
   async findOne(fazendaId: string, id: string) {
     const animal = await this.animalRepository.findOne({
       where: { id },
-      relations: { mae: true, pastoAtual: true },
+      relations: { mae: true, pai: true, paiSemen: true, pastoAtual: true },
     });
     if (!animal || animal.fazendaId !== fazendaId) {
       throw new NotFoundException(`Animal ${id} não encontrado`);

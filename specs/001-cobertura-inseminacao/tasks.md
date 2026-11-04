@@ -127,14 +127,14 @@ sozinha.
 
 ### Tests for User Story 3
 
-- [ ] T035 [P] [US3] Testes da previsão de parto (R5, FR-018): com inseminação usa a data dela + gestação; com idade gestacional usa diagnóstico − idade + gestação; sem idade usa o meio da união das exposições anteriores ao diagnóstico (exposição aberta termina no diagnóstico); raça sem gestação usa 285 dias; devolve a base usada; em backend/src/reproducao/dominio/previsao-parto.spec.ts
+- [X] T035 [P] [US3] Testes da previsão de parto (R5, FR-018): com inseminação usa a data dela + gestação; com idade gestacional usa diagnóstico − idade + gestação; sem idade usa o meio da união das exposições anteriores ao diagnóstico (exposição aberta termina no diagnóstico); raça sem gestação usa 285 dias; devolve a base usada; em backend/src/reproducao/dominio/previsao-parto.spec.ts
 
 ### Implementation for User Story 3
 
-- [ ] T036 [US3] Implementar a função pura `calcularPrevisaoParto(...)` até T035 passar, em backend/src/reproducao/dominio/previsao-parto.ts
-- [ ] T037 [US3] Incluir `previsaoParto: { data, base }` na resposta de `SituacaoService.situacao` em backend/src/reproducao/situacao.service.ts
-- [ ] T038 [US3] Implementar `RelatorioService.vacasAParir(fazendaId, dias)` (prenhes com previsão até hoje + dias e atrasadas, com touro/sêmen e pasto; janela limitada a 7–90) e a rota `GET /relatorio/vacas-a-parir` em backend/src/relatorio/relatorio.service.ts e backend/src/relatorio/relatorio.controller.ts, com teste em backend/src/relatorio/relatorio.service.spec.ts
-- [ ] T039 [US3] Criar o relatório "Vacas a parir" (janela 7/15/30/60/90 dias, atrasados destacados, base da previsão) em frontend/src/pages/relatorios/RelatorioVacasAParir.tsx e incluí-lo em `TIPOS` de frontend/src/pages/Relatorios.tsx
+- [X] T036 [US3] Implementar a função pura `calcularPrevisaoParto(...)` até T035 passar, em backend/src/reproducao/dominio/previsao-parto.ts
+- [X] T037 [US3] Incluir `previsaoParto: { data, base }` na resposta de `SituacaoService.situacao` em backend/src/reproducao/situacao.service.ts
+- [X] T038 [US3] Implementar `RelatorioService.vacasAParir(fazendaId, dias)` (prenhes com previsão até hoje + dias e atrasadas, com touro/sêmen e pasto; janela limitada a 7–90) e a rota `GET /relatorio/vacas-a-parir` em backend/src/relatorio/relatorio.service.ts e backend/src/relatorio/relatorio.controller.ts, com teste em backend/src/relatorio/relatorio.service.spec.ts
+- [X] T039 [US3] Criar o relatório "Vacas a parir" (janela 7/15/30/60/90 dias, atrasados destacados, base da previsão) em frontend/src/pages/relatorios/RelatorioVacasAParir.tsx e incluí-lo em `TIPOS` de frontend/src/pages/Relatorios.tsx
 
 **Checkpoint**: previsão visível no Manejo e no relatório
 
@@ -148,17 +148,17 @@ sozinha.
 
 ### Tests for User Story 4
 
-- [ ] T040 [P] [US4] Testes dos candidatos a pai (R6): coberturas cuja concepção estimada cai em `data do parto − gestação ± 21 dias`; ignora canceladas; devolve touros e sêmens; em backend/src/reproducao/dominio/candidatos-pai.spec.ts
-- [ ] T041 [P] [US4] Testes novos do `PartoService`: aceita Novilha e a muda para Matriz (FR-031); mãe com cria viva → Lactante, natimorto → Vazia (FR-022); um candidato preenche `paiId` (touro) ou `paiSemenId` (sêmen) nas crias; dois candidatos deixam o pai vazio e gravam os candidatos; dono define o pai só entre os candidatos (FR-021); em backend/src/parto/parto.service.spec.ts
+- [X] T040 [P] [US4] Testes dos candidatos a pai (R6): coberturas cuja concepção estimada cai em `data do parto − gestação ± 21 dias`; ignora canceladas; devolve touros e sêmens; em backend/src/reproducao/dominio/candidatos-pai.spec.ts
+- [X] T041 [P] [US4] Testes novos do `PartoService`: aceita Novilha e a muda para Matriz (FR-031); mãe com cria viva → Lactante, natimorto → Vazia (FR-022); um candidato preenche `paiId` (touro) ou `paiSemenId` (sêmen) nas crias; dois candidatos deixam o pai vazio e gravam os candidatos; dono define o pai só entre os candidatos (FR-021); em backend/src/parto/parto.service.spec.ts
 
 ### Implementation for User Story 4
 
-- [ ] T042 [P] [US4] Criar a entidade `PartoCandidatoPai` (`parto_candidatos_pai`: `partoId`, `touroId` nulo, `semenId` nulo, "um dos dois preenchido") em backend/src/reproducao/entities/parto-candidato-pai.entity.ts e registrá-la no módulo
-- [ ] T043 [US4] Adicionar `paiSemenId` (uuid → Semen, nulo) em backend/src/animal/entities/animal.entity.ts e `inseminacaoId` (uuid → Inseminacao, nulo) com a relação `candidatos` em backend/src/parto/entities/parto.entity.ts
-- [ ] T044 [US4] Implementar a função pura `encontrarCandidatosPai(...)` até T040 passar, em backend/src/reproducao/dominio/candidatos-pai.ts
-- [ ] T045 [US4] Alterar `PartoService.create` (novilha → matriz, status da mãe, candidatos, pai das crias, `inseminacaoId`) e adicionar `definirPai` até T041 passar, em backend/src/parto/parto.service.ts; rota `PATCH /parto/:id/pai` com `@Roles(DONO)` em backend/src/parto/parto.controller.ts; `GET /parto` devolvendo candidatos e pai
-- [ ] T046 [US4] Permitir escolher Novilha prenhe como mãe e mostrar o pai previsto antes de salvar em frontend/src/pages/NovoParto.tsx
-- [ ] T047 [US4] Mostrar o pai das crias e, quando indefinido, os candidatos com o botão "Definir pai" (só dono) em frontend/src/pages/AnimalDetalhe.tsx
+- [X] T042 [P] [US4] Criar a entidade `PartoCandidatoPai` (`parto_candidatos_pai`: `partoId`, `touroId` nulo, `semenId` nulo, "um dos dois preenchido") em backend/src/reproducao/entities/parto-candidato-pai.entity.ts e registrá-la no módulo
+- [X] T043 [US4] Adicionar `paiSemenId` (uuid → Semen, nulo) em backend/src/animal/entities/animal.entity.ts e `inseminacaoId` (uuid → Inseminacao, nulo) com a relação `candidatos` em backend/src/parto/entities/parto.entity.ts
+- [X] T044 [US4] Implementar a função pura `encontrarCandidatosPai(...)` até T040 passar, em backend/src/reproducao/dominio/candidatos-pai.ts
+- [X] T045 [US4] Alterar `PartoService.create` (novilha → matriz, status da mãe, candidatos, pai das crias, `inseminacaoId`) e adicionar `definirPai` até T041 passar, em backend/src/parto/parto.service.ts; rota `PATCH /parto/:id/pai` com `@Roles(DONO)` em backend/src/parto/parto.controller.ts; `GET /parto` devolvendo candidatos e pai
+- [X] T046 [US4] Permitir escolher Novilha prenhe como mãe e mostrar o pai previsto antes de salvar em frontend/src/pages/NovoParto.tsx
+- [X] T047 [US4] Mostrar o pai das crias e, quando indefinido, os candidatos com o botão "Definir pai" (só dono) em frontend/src/pages/AnimalDetalhe.tsx
 
 **Checkpoint**: ciclo completo cobertura → diagnóstico → parto
 

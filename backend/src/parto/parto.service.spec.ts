@@ -20,6 +20,10 @@ describe('PartoService', () => {
     create: jest.fn(),
     save: jest.fn(),
     findOne: jest.fn(),
+    // Cobertura e status da reprodução: sem coberturas registradas por padrão
+    find: jest.fn(async () => []),
+    findOneBy: jest.fn(async () => null),
+    insert: jest.fn(),
   };
 
   const mockPartoRepository = {
@@ -83,10 +87,10 @@ describe('PartoService', () => {
       status: StatusCodigo.DISPONIVEL,
     });
 
-    it('rejeita parto se a mae nao for MATRIZ', async () => {
+    it('rejeita parto se a mae nao for MATRIZ nem NOVILHA', async () => {
       mockAnimalRepository.findOneBy.mockResolvedValue({
         ...matriz,
-        categoria: CategoriaAnimal.NOVILHA,
+        categoria: CategoriaAnimal.BEZERRO,
       });
 
       const dto = {

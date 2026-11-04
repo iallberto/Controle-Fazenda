@@ -1,12 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Animal, StatusAnimal } from '../animal/entities/animal.entity';
+import {
+  Animal,
+  Sexo,
+  StatusAnimal,
+  StatusReprodutivo,
+} from '../animal/entities/animal.entity';
 import { Parto, ResultadoParto } from '../parto/entities/parto.entity';
 import { Tratamento } from '../tratamento/entities/tratamento.entity';
 import { nomeDoResponsavel } from '../tratamento/tratamento.service';
 import { formatarDataLocal, hojeLocal } from '../common/datas';
-
+import { SituacaoService } from '../reproducao/situacao.service';
+import { somarDias } from '../reproducao/dominio/datas';
 
 @Injectable()
 export class RelatorioService {
@@ -17,7 +23,47 @@ export class RelatorioService {
     private readonly partoRepository: Repository<Parto>,
     @InjectRepository(Tratamento)
     private readonly tratamentoRepository: Repository<Tratamento>,
+    private readonly situacaoService: SituacaoService,
   ) {}
+
+  // Fêmeas prenhes com parto previsto até hoje + dias, mais as atrasadas (FR-019)
+  async vacasAParir(fazendaId: string, dias: number) {
+    const hoje = hojeLocal();
+    const limite = somarDias(hoje, dias);
+    const prenhes = await this.animalRepository.find({
+      where: {
+        fazendaId,
+        status: StatusAnimal.ATIVO,
+        sexo: Sexo.F,
+        statusReprodutivo: StatusReprodutivo.PRENHE,
+      },
+      relations: { pastoAtual: true },
+    });
+    const previsoes = await this.situacaoService.previsoesParto(prenhes);
+
+    return prenhes
+      .filter((femea) => {
+        const previsao = previsoes.get(femea.id);
+        return previsao && previsao.data <= limite;
+      })
+      .map((femea) => {
+        const previsao = previsoes.get(femea.id)!;
+        return {
+          animal: {
+            id: femea.id,
+            brinco: femea.brinco,
+            categoria: femea.categoria,
+          },
+          previsaoParto: previsao.data,
+          base: previsao.base,
+          atrasado: previsao.data < hoje,
+          touros: previsao.touros,
+          semens: previsao.semens,
+          pasto: femea.pastoAtual?.nome ?? null,
+        };
+      })
+      .sort((a, b) => a.previsaoParto.localeCompare(b.previsaoParto));
+  }
 
   async painelInicial(fazendaId: string) {
     const primeiroDiaDoMes = new Date();
@@ -48,7 +94,9 @@ export class RelatorioService {
       .createQueryBuilder('cria')
       .innerJoin('cria.parto', 'parto')
       .where('cria.fazendaId = :fazendaId', { fazendaId })
-      .andWhere('parto.resultado = :resultado', { resultado: ResultadoParto.VIVO })
+      .andWhere('parto.resultado = :resultado', {
+        resultado: ResultadoParto.VIVO,
+      })
       .andWhere('parto.data >= :inicioMes', { inicioMes })
       .getCount();
 
@@ -68,7 +116,9 @@ export class RelatorioService {
       .innerJoin('parto.mae', 'mae')
       .leftJoinAndSelect('parto.crias', 'crias')
       .where('mae.fazendaId = :fazendaId', { fazendaId })
-      .andWhere('parto.resultado = :resultado', { resultado: ResultadoParto.VIVO })
+      .andWhere('parto.resultado = :resultado', {
+        resultado: ResultadoParto.VIVO,
+      })
       .andWhere('parto.data BETWEEN :inicio AND :fim', { inicio, fim })
       .getMany();
   }
@@ -78,7 +128,9 @@ export class RelatorioService {
       .createQueryBuilder('parto')
       .innerJoin('parto.mae', 'mae')
       .where('mae.fazendaId = :fazendaId', { fazendaId })
-      .andWhere('parto.resultado = :resultado', { resultado: ResultadoParto.NATIMORTO })
+      .andWhere('parto.resultado = :resultado', {
+        resultado: ResultadoParto.NATIMORTO,
+      })
       .andWhere('parto.data BETWEEN :inicio AND :fim', { inicio, fim })
       .getMany();
   }
@@ -111,7 +163,10 @@ export class RelatorioService {
       produto: tratamento.produto,
       data: tratamento.data,
       animal: { id: tratamento.animal.id, brinco: tratamento.animal.brinco },
-      responsavel: nomeDoResponsavel(tratamento.aplicadoPorUsuario, tratamento.aplicadoPorVeterinario),
+      responsavel: nomeDoResponsavel(
+        tratamento.aplicadoPorUsuario,
+        tratamento.aplicadoPorVeterinario,
+      ),
     }));
   }
 
@@ -129,7 +184,9 @@ export class RelatorioService {
       .where('animal.fazendaId = :fazendaId', { fazendaId })
       .andWhere('animal.status = :status', { status: StatusAnimal.ATIVO })
       .andWhere('tratamento.proximaDataPrevista IS NOT NULL')
-      .andWhere('tratamento.proximaDataPrevista <= :limite', { limite: formatarDataLocal(limite) })
+      .andWhere('tratamento.proximaDataPrevista <= :limite', {
+        limite: formatarDataLocal(limite),
+      })
       .andWhere(
         `NOT EXISTS (
           SELECT 1 FROM tratamentos posterior
@@ -164,7 +221,12 @@ export class RelatorioService {
       .andWhere('animal.status = :status', { status: StatusAnimal.ATIVO })
       .groupBy('raca.nome')
       .orderBy('total', 'DESC')
-      .getRawMany<{ raca: string | null; total: string; femeas: string; machos: string }>();
+      .getRawMany<{
+        raca: string | null;
+        total: string;
+        femeas: string;
+        machos: string;
+      }>();
 
     return linhas.map((linha) => ({
       raca: linha.raca ?? 'Sem raça informada',
