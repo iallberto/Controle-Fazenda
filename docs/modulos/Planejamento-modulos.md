@@ -1,12 +1,12 @@
 # Controle Fazenda — Planejamento dos módulos
 
 > Como o sistema passa a ser vendido em partes: um pacote inicial e módulos adicionais liberados por cliente.
-> Este documento registra as decisões, o escopo de cada módulo e a ordem de execução. A seção 3 (cobertura e inseminação) já foi implementada; o restante ainda não.
+> Este documento registra as decisões, o escopo de cada módulo e a ordem de execução. As seções 2 (infraestrutura, fase 0) e 3 (cobertura e inseminação) já foram implementadas; os módulos pagos ainda não.
 
 | | |
 |---|---|
 | **Data** | 03/11/2026 |
-| **Status** | Decisões tomadas, sem questões em aberto · seção 3 concluída (spec 001) · fase 0 e módulos pagos não iniciados |
+| **Status** | Decisões tomadas, sem questões em aberto · seção 3 concluída (spec 001) · fase 0 concluída (spec 002) · módulos pagos não iniciados |
 | **Base** | Versão atual (reprodução e rebanho), com o bloco pós-V1 concluído |
 | **Legenda** | ✅ Decidido · ❓ Em aberto · ⏸️ Depois · ✔️ Concluído |
 
@@ -37,9 +37,26 @@
 
 ---
 
-## 2. Infraestrutura de módulos (fase 0)
+## 2. Infraestrutura de módulos (fase 0) ✔️ Concluído
 
 É o que permite vender por partes. Vem antes de qualquer módulo.
+
+> **Concluído em 04/11/2026** pela spec `specs/002-infraestrutura-modulos`. Decisões novas em
+> relação ao rascunho abaixo (clarify da spec):
+> - módulo **desativado ou vencido fica "só consulta"**: a fazenda vê o que lançou, mas não lança;
+>   quem nunca contratou recebe "módulo não contratado";
+> - a situação do módulo é **calculada pelas datas** (sem job): ativo, só consulta ou não
+>   contratado; o cache é de 60 s e é limpo a cada ação do painel;
+> - por padrão, `GET` é consulta e o resto é lançamento; um teste exige `@Modulo` em todo
+>   controller de módulo e outro proíbe importações entre o pacote inicial e os módulos;
+> - **suspensão de fazenda** pelo painel: ninguém da fazenda entra, sessões abertas caem, a página
+>   pública do animal mostra só o básico, e nada é apagado;
+> - **administrador** em tabela própria, com token separado; senha de 12 caracteres ou mais e
+>   bloqueio de 15 minutos depois de 5 erros; conta criada por `npm run admin:criar`;
+> - vitrine para dono e funcionário; **aviso de vencimento** só para o dono, nos 10 dias antes, a
+>   cada login;
+> - `synchronize` desligado também em desenvolvimento, para o banco de dev não divergir do de
+>   produção.
 
 ### 2.1 Migrations
 - Desligar o `synchronize` e gerar a migration inicial a partir do banco atual.
@@ -193,7 +210,7 @@ Pode ser feito em paralelo ao Leite.
 
 | Fase | Entrega | Depende de |
 |---|---|---|
-| 0 | Migrations · módulos por fazenda · bloqueio no backend e no menu · painel do administrador | — |
+| 0 | ✔️ Migrations · módulos por fazenda · bloqueio no backend e no menu · painel do administrador — concluída | — |
 | — | ✔️ **Cobertura e inseminação** no pacote inicial (monta natural, IA/IATF opcional, diagnóstico, previsão de parto) — concluída | Nada; pode entrar antes, durante ou depois da fase 0 |
 | 1 | **Financeiro** (lançamentos, venda de animais, gráficos) | Fase 0 |
 | 2a | **Leite** (lactação, ordenha, carência, entregas) | Fase 0 e cobertura/inseminação |

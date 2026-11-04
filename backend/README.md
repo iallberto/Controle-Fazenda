@@ -21,6 +21,45 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
+## Banco de dados: migrations
+
+O schema evolui **só por migrations**, em todos os ambientes (spec 002). O `synchronize` do
+TypeORM fica desligado, porque ele pode apagar colunas quando uma entidade muda.
+
+- O backend aplica as migrations pendentes **ao subir**, numa transação. Num deploy, basta subir
+  a versão nova.
+- Mudou uma entidade? Gere a migration e revise o SQL antes de commitar:
+
+  ```bash
+  npm run migration:generate -- src/database/migrations/NomeDaMudanca
+  ```
+
+- Os comandos rodam sobre o código compilado (`dist/`) e leem o `backend/.env`:
+  `migration:generate`, `migration:run`, `migration:revert` e `migration:show`.
+- **Nunca rode uma migration nova pela primeira vez no banco original.** Faça um backup
+  (`pg_dump -Fc`), restaure numa cópia, aplique lá, confira as contagens e confira que
+  `migration:generate` responde "No changes". Só depois aplique no banco de verdade.
+- A migration `Inicial` reconhece um banco criado antes pelo `synchronize` e só se registra, sem
+  mexer em nada. Desfazer essa migration apaga tudo: não rode `migration:revert` nela.
+
+## Administrador do sistema
+
+O painel do dono do software fica em `/admin/login`, separado do login das fazendas. Não existe
+tela de cadastro de administrador: a conta é criada (ou tem a senha redefinida) por comando, no
+servidor:
+
+```bash
+docker compose exec -it backend npm run admin:criar
+```
+
+O comando pede e-mail, nome e senha (12 caracteres ou mais, com letras e números; não aparece na
+tela). Depois de 5 senhas erradas seguidas, o login do administrador fica bloqueado por 15 minutos.
+
+## Módulos pagos
+
+Leite, Financeiro e Nutrição ficam em `src/modulos/` e são liberados por fazenda no painel. Veja
+as regras de isolamento e do decorator `@Modulo` em [src/modulos/README.md](src/modulos/README.md).
+
 ## Description
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.

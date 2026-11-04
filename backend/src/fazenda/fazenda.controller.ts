@@ -34,7 +34,10 @@ export class FazendaController {
 
   @Roles(PapelUsuario.DONO)
   @Patch()
-  update(@CurrentUser() user: JwtPayload, @Body() updateFazendaDto: UpdateFazendaDto) {
+  update(
+    @CurrentUser() user: JwtPayload,
+    @Body() updateFazendaDto: UpdateFazendaDto,
+  ) {
     return this.fazendaService.update(user.fazendaId, updateFazendaDto);
   }
 }

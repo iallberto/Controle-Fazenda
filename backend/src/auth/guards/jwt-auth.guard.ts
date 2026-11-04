@@ -20,10 +20,10 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     }
     // Painel do administrador: quem confere o token é o AdminJwtGuard, que vem
     // junto do @AreaAdmin() no próprio controller (spec 002, R6)
-    const isAreaAdmin = this.reflector.getAllAndOverride<boolean>(IS_AREA_ADMIN, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
+    const isAreaAdmin = this.reflector.getAllAndOverride<boolean>(
+      IS_AREA_ADMIN,
+      [context.getHandler(), context.getClass()],
+    );
     if (isAreaAdmin) {
       return true;
     }

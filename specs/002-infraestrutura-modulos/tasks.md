@@ -154,11 +154,11 @@ arquivo; funções puras testadas sem banco. As migrations são validadas numa c
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
-- [ ] T048 [P] Teste ou checagem de fronteira: nenhum arquivo fora de `backend/src/modulos/` importa de `modulos/leite|financeiro|nutricao`, e módulos pagos não importam uns dos outros (FR-024), em backend/src/modulos/acesso/marcacao-modulos.spec.ts
-- [ ] T049 [P] Documentar no backend/README.md: como gerar e aplicar migrations, como criar o administrador e a regra "nunca rodar a primeira vez no banco original"
-- [ ] T050 [P] Atualizar a seção 2 de docs/modulos/Planejamento-modulos.md como concluída, com as decisões novas (suspensão de fazenda, só consulta, aviso de vencimento, login do administrador)
-- [ ] T051 Formatar com Prettier os arquivos novos do backend e conferir `npm test`, `npx tsc --noEmit`, `npm run lint` (backend) e `tsc -b`, `eslint src` (frontend)
-- [ ] T052 Executar o quickstart.md completo, em largura de celular, com fazendas de teste isoladas, registrando aqui o que não pôde ser verificado
+- [X] T048 [P] Teste ou checagem de fronteira: nenhum arquivo fora de `backend/src/modulos/` importa de `modulos/leite|financeiro|nutricao`, e módulos pagos não importam uns dos outros (FR-024), em backend/src/modulos/acesso/marcacao-modulos.spec.ts
+- [X] T049 [P] Documentar no backend/README.md: como gerar e aplicar migrations, como criar o administrador e a regra "nunca rodar a primeira vez no banco original"
+- [X] T050 [P] Atualizar a seção 2 de docs/modulos/Planejamento-modulos.md como concluída, com as decisões novas (suspensão de fazenda, só consulta, aviso de vencimento, login do administrador)
+- [X] T051 Formatar com Prettier os arquivos novos do backend e conferir `npm test`, `npx tsc --noEmit`, `npm run lint` (backend) e `tsc -b`, `eslint src` (frontend)
+- [X] T052 Executar o quickstart.md completo, em largura de celular, com fazendas de teste isoladas, registrando aqui o que não pôde ser verificado
 
 ---
 
@@ -272,3 +272,29 @@ Task: "T024 NutricaoModule com ExemploController em backend/src/modulos/nutricao
     e os três aparecem como "disponível" no menu; sem rolagem lateral.
 - A tela de cada módulo ativo, nesta fase, é uma página de espera com o teste de ligação
   (rotas de exemplo); sai quando as telas reais do módulo chegarem.
+
+## Registro do acabamento (T048–T052, 2026-11-04)
+
+- T048: teste de fronteira no `marcacao-modulos.spec.ts`: o pacote inicial não importa módulos
+  pagos (só o `app.module.ts` os registra), um módulo pago não importa outro, e um caso de
+  controle garante que a varredura enxerga as importações. 287 testes no backend.
+- T049: `backend/README.md` com migrations (incluindo a regra da cópia antes do original) e o
+  comando do administrador. T050: seção 2 do planejamento marcada como concluída.
+- T051: Prettier nos arquivos da fase 0; `npm test`, `tsc --noEmit`, `lint` (sem avisos novos),
+  `tsc -b` e `eslint src` limpos.
+- T052, quickstart cenário a cenário (todos na cópia `controle_fazenda_copia`, nunca na fazenda
+  real; contagens do banco de dev conferidas nas duas migrations):
+  1. migrations: baseline na cópia e no dev com contagens idênticas e diff vazio; banco vazio
+     criado só pelas migrations; **entidade alterada sem migration não muda o banco ao subir**
+     (coluna de teste não apareceu; alteração desfeita);
+  2. administrador: comando recusa senha fraca, cria com a forte, pergunta antes de redefinir;
+     6ª tentativa depois de 5 erros → 429; tokens não se cruzam (401 nos dois sentidos);
+  3. liberar, 409, 400, desativado só consulta, início futuro, fazenda sem módulo → 403;
+  4. menu, vitrine pela URL, só consulta, aviso de vencimento a cada login só para o dono,
+     Configurações; 375 px sem rolagem lateral;
+  5. suspensão: login e sessão aberta recusados com o aviso, página pública reduzida, reativação
+     sem perda de dados, Leite ainda ativo;
+  6. marcação e fronteira cobertas por teste automático.
+- Não verificado: a espera real de 15 minutos do bloqueio (coberta por teste unitário com o
+  relógio simulado). Parte dos cliques foi feita por script, porque a janela do Claude estava
+  oculta durante a validação.
