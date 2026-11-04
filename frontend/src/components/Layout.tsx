@@ -82,6 +82,7 @@ function tituloDaRota(caminho: string) {
   if (TITULOS[caminho]) return TITULOS[caminho];
   if (caminho.startsWith('/animais/')) return 'Animal';
   if (caminho.startsWith('/reproducao/estacoes/')) return 'Estação de monta';
+  if (caminho.startsWith('/modulos/financeiro')) return 'Financeiro';
   return null;
 }
 

@@ -5,7 +5,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IsNull, Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { Animal, CategoriaAnimal, Sexo, StatusAnimal } from './entities/animal.entity';
 import {
   CodigoIdentificacao,
@@ -15,7 +15,9 @@ import { MovimentacaoPasto } from '../movimentacao-pasto/entities/movimentacao-p
 import { Pasto } from '../pasto/entities/pasto.entity';
 import { CreateAnimalDto } from './dto/create-animal.dto';
 import { UpdateAnimalDto } from './dto/update-animal.dto';
-import { encerrarExposicoesPorSaida } from '../reproducao/saida';
+import { registrarSaidaDoRebanho } from './saida-do-rebanho';
+import { AcessoModulosService } from '../modulos/acesso/acesso-modulos.service';
+import { ModuloPago } from '../modulos/acesso/modulo-pago';
 import {
   garantirAnimalAtivo,
   garantirRacaDisponivel,
@@ -31,9 +33,18 @@ export class AnimalService {
     private readonly codigoRepository: Repository<CodigoIdentificacao>,
     @InjectRepository(Pasto)
     private readonly pastoRepository: Repository<Pasto>,
+    private readonly acessoModulos: AcessoModulosService,
   ) {}
 
-  async create(fazendaId: string, usuarioLogadoId: string, dto: CreateAnimalDto) {
+  // `depoisDeCriar` roda dentro da mesma transação do cadastro: o Financeiro usa
+  // para registrar a compra e a despesa junto com o animal (spec 003, FR-016b),
+  // sem que o pacote inicial precise conhecer o Financeiro.
+  async create(
+    fazendaId: string,
+    usuarioLogadoId: string,
+    dto: CreateAnimalDto,
+    depoisDeCriar?: (manager: EntityManager, animal: Animal) => Promise<void>,
+  ) {
     this.validarSexoCategoria(dto.sexo, dto.categoria);
 
     const codigo = await this.codigoRepository.findOneBy({ id: dto.codigoId });
@@ -83,6 +94,7 @@ export class AnimalService {
         await manager.save(movimentacao);
       }
 
+      if (depoisDeCriar) await depoisDeCriar(manager, animalSalvo);
       return animalSalvo;
     });
   }
@@ -138,35 +150,31 @@ export class AnimalService {
     if (novoStatus === StatusAnimal.ATIVO) {
       throw new BadRequestException('Use um status de saída (vendido, morto ou descartado)');
     }
+    // Com o Financeiro ativo, a venda é registrada lá, com valor e receita
+    // (spec 003, FR-016a). Só consulta a situação do módulo: o pacote inicial
+    // não conhece o Financeiro.
+    if (
+      novoStatus === StatusAnimal.VENDIDO &&
+      (await this.acessoModulos.situacao(fazendaId, ModuloPago.FINANCEIRO)) === 'ATIVO'
+    ) {
+      throw new ConflictException({
+        statusCode: 409,
+        codigo: 'VENDA_PELO_FINANCEIRO',
+        message: 'Com o Financeiro ativo, a venda é registrada no Financeiro',
+      });
+    }
     const animal = await this.findOne(fazendaId, id);
     garantirAnimalAtivo(animal);
 
-    return this.animalRepository.manager.transaction(async (manager) => {
-      // O animal sai do rebanho: fecha a permanência no pasto atual
-      const movimentacaoAberta = await manager.findOne(MovimentacaoPasto, {
-        where: { animalId: animal.id, dataSaida: IsNull() },
-      });
-      if (movimentacaoAberta) {
-        movimentacaoAberta.dataSaida = data;
-        await manager.save(movimentacaoAberta);
-      }
-
-      animal.status = novoStatus;
-      animal.motivoStatus = motivo;
-      animal.dataStatus = data;
-      animal.pastoAtualId = null;
-      animal.pastoAtual = undefined;
-      animal.atualizadoPorId = usuarioLogadoId;
-
-      // Saiu do rebanho: encerra exposições (fêmea) ou a estação (touro)
-      await encerrarExposicoesPorSaida(manager, {
-        animalIds: [animal.id],
+    return this.animalRepository.manager.transaction((manager) =>
+      registrarSaidaDoRebanho(manager, {
+        animal,
+        status: novoStatus,
         data,
-        saida: 'REBANHO',
+        motivo,
         usuarioId: usuarioLogadoId,
-      });
-      return manager.save(animal);
-    });
+      }),
+    );
   }
 
   private async validarVinculos(

@@ -12,6 +12,7 @@ import { Aviso, type EstadoAviso } from '../../components/Aviso';
 import { useAuth } from '../../contexts/useAuth';
 import { useModulos } from '../../contexts/useModulos';
 import { formatarData, ROTULOS_MODULO } from '../../utils/formatadores';
+import { FinanceiroRotas } from '../financeiro/FinanceiroRotas';
 
 // O que cada módulo faz, para a vitrine (docs/modulos/Planejamento-modulos.md)
 const DESCRICOES: Record<ModuloPago, string[]> = {
@@ -51,6 +52,10 @@ export function RotaDeModulo() {
   const situacao = situacaoDe(modulo);
   if (!situacao || situacao.situacao === 'NAO_CONTRATADO') {
     return <Vitrine modulo={modulo} />;
+  }
+  // Módulos já construídos abrem as próprias telas; os outros, a página de espera
+  if (modulo === 'FINANCEIRO') {
+    return <FinanceiroRotas soConsulta={situacao.situacao === 'SO_CONSULTA'} />;
   }
   return <TelaDeEspera situacao={situacao} />;
 }

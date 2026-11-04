@@ -6,6 +6,7 @@ export interface Animal {
   sexo: 'M' | 'F';
   categoria: 'BEZERRO' | 'NOVILHA' | 'MATRIZ' | 'GARROTE' | 'BOI' | 'TOURO';
   status: 'ATIVO' | 'VENDIDO' | 'MORTO' | 'DESCARTADO';
+  dataStatus?: string | null;
   statusReprodutivo: 'PRENHA' | 'LACTANTE' | 'VAZIA' | null;
   origem: 'NASCIDO_FAZENDA' | 'COMPRADO';
   dataNascimento: string;

@@ -28,6 +28,7 @@ import {
 import { obterConfiguracao, type ValorArroba } from '../api/configuracao';
 import { Aviso, type EstadoAviso } from '../components/Aviso';
 import { LinhaDoTempoReprodutiva } from './reproducao/LinhaDoTempoReprodutiva';
+import { BlocoVendaDoAnimal } from '../modulos/financeiro/BlocoVendaDoAnimal';
 
 interface PartoComIntervalo extends Parto {
   diasDesdeUltimoParto: number | null;
@@ -140,6 +141,8 @@ export function AnimalDetalhe() {
         {animal.paiSemen && <p>Pai: sêmen {animal.paiSemen.nomeTouro}</p>}
         <p>Pasto: {animal.pastoAtual?.nome ?? 'Não informado'}</p>
       </section>
+
+      <BlocoVendaDoAnimal animal={animal} />
 
       <section>
         <h2>Identificação</h2>

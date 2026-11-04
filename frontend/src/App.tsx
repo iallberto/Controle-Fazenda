@@ -66,7 +66,7 @@ function App() {
         <Route path="/reproducao/inseminacao" element={<Inseminacao />} />
         <Route path="/reproducao/semens" element={<Semens />} />
         {/* Módulos pagos: vitrine, só consulta ou ativo (spec 002) */}
-        <Route path="/modulos/:modulo" element={<RotaDeModulo />} />
+        <Route path="/modulos/:modulo/*" element={<RotaDeModulo />} />
       </Route>
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>

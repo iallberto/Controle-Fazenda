@@ -197,3 +197,35 @@ export const formatarSituacaoModulo = rotular({
   SO_CONSULTA: 'Só consulta',
   NAO_CONTRATADO: 'Não contratado',
 });
+
+// --- Dinheiro (Financeiro, spec 003) -----------------------------------------
+// A API trabalha com centavos inteiros: R$ 1.250,00 = 125000.
+
+const MOEDA = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+
+export function formatarReais(centavos: number | null | undefined): string {
+  if (centavos === null || centavos === undefined) return '';
+  return MOEDA.format(centavos / 100);
+}
+
+// Texto digitado → centavos. Aceita "1250", "1.250,00", "1250,5" e "1250.50".
+// Devolve null quando não dá para entender o número.
+export function centavosDeTexto(texto: string): number | null {
+  const limpo = texto.trim().replace(/^R\$\s*/, '');
+  if (!limpo) return null;
+  let normalizado: string;
+  if (limpo.includes(',')) {
+    normalizado = limpo.replace(/\./g, '').replace(',', '.');
+  } else if (/^\d{1,3}(\.\d{3})+$/.test(limpo)) {
+    normalizado = limpo.replace(/\./g, '');
+  } else {
+    normalizado = limpo;
+  }
+  if (!/^\d+(\.\d{1,2})?$/.test(normalizado)) return null;
+  return Math.round(Number(normalizado) * 100);
+}
+
+// Centavos → texto para preencher um campo de edição ("1250,00")
+export function textoDeCentavos(centavos: number): string {
+  return (centavos / 100).toFixed(2).replace('.', ',');
+}

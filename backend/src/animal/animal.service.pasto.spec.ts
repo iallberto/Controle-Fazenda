@@ -2,6 +2,7 @@ import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { NotFoundException } from '@nestjs/common';
 import { AnimalService } from './animal.service';
+import { AcessoModulosService } from '../modulos/acesso/acesso-modulos.service';
 import { Animal, CategoriaAnimal, Sexo } from './entities/animal.entity';
 import {
   CodigoIdentificacao,
@@ -12,6 +13,7 @@ import { Pasto } from '../pasto/entities/pasto.entity';
 import { CreateAnimalDto } from './dto/create-animal.dto';
 
 describe('AnimalService - pasto no cadastro (M9)', () => {
+  const acessoModulos = { situacao: jest.fn().mockResolvedValue('NAO_CONTRATADO') };
   let service: AnimalService;
 
   const manager = { create: jest.fn(), save: jest.fn(), update: jest.fn(async () => ({ affected: 1 })) };
@@ -50,6 +52,7 @@ describe('AnimalService - pasto no cadastro (M9)', () => {
         { provide: getRepositoryToken(Animal), useValue: animalRepository },
         { provide: getRepositoryToken(CodigoIdentificacao), useValue: codigoRepository },
         { provide: getRepositoryToken(Pasto), useValue: pastoRepository },
+        { provide: AcessoModulosService, useValue: acessoModulos },
       ],
     }).compile();
 

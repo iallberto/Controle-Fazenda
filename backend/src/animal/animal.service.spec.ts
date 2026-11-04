@@ -2,12 +2,14 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { AnimalService } from './animal.service';
+import { AcessoModulosService } from '../modulos/acesso/acesso-modulos.service';
 import { Animal, CategoriaAnimal, OrigemAnimal, Sexo } from './entities/animal.entity';
 import { CodigoIdentificacao, StatusCodigo } from '../codigo-identificacao/entities/codigo-identificacao.entity';
 import { MovimentacaoPasto } from '../movimentacao-pasto/entities/movimentacao-pasto.entity';
 import { Pasto } from '../pasto/entities/pasto.entity';
 
 describe('AnimalService', () => {
+  const acessoModulos = { situacao: jest.fn().mockResolvedValue('NAO_CONTRATADO') };
   let service: AnimalService;
 
   const mockManager = {
@@ -46,6 +48,7 @@ describe('AnimalService', () => {
         { provide: getRepositoryToken(Animal), useValue: mockRepository },
         { provide: getRepositoryToken(CodigoIdentificacao), useValue: mockCodigoRepository },
         { provide: getRepositoryToken(Pasto), useValue: pastoRepository },
+        { provide: AcessoModulosService, useValue: acessoModulos },
       ],
     }).compile();
 
@@ -212,6 +215,20 @@ describe('AnimalService', () => {
       await expect(
         service.alterarStatus(fazendaId, 'usuario-1', 'a1', 'VENDIDO' as any, 'venda', '2026-01-01'),
       ).rejects.toThrow(BadRequestException);
+    });
+
+    it('com o Financeiro ativo, VENDIDO vai para o Financeiro (409); MORTO continua (spec 003, FR-016a)', async () => {
+      acessoModulos.situacao.mockResolvedValue('ATIVO');
+      mockRepository.findOne.mockResolvedValue({ id: 'a1', fazendaId, brinco: '7', status: 'ATIVO' });
+
+      await expect(
+        service.alterarStatus(fazendaId, 'usuario-1', 'a1', 'VENDIDO' as any, 'venda', '2026-01-01'),
+      ).rejects.toMatchObject({
+        status: 409,
+        response: expect.objectContaining({ codigo: 'VENDA_PELO_FINANCEIRO' }),
+      });
+      expect(acessoModulos.situacao).toHaveBeenCalledWith(fazendaId, 'FINANCEIRO');
+      acessoModulos.situacao.mockResolvedValue('NAO_CONTRATADO');
     });
 
     it('rejeita voltar um animal para ATIVO', async () => {
