@@ -4,6 +4,8 @@ import { ReproducaoController } from './reproducao.controller';
 import { EstacaoService } from './estacao.service';
 import { DiagnosticoService } from './diagnostico.service';
 import { SituacaoService } from './situacao.service';
+import { InseminacaoService } from './inseminacao.service';
+import { IndicadoresService } from './indicadores.service';
 import { EstacaoMonta } from './entities/estacao-monta.entity';
 import { ExposicaoMonta } from './entities/exposicao-monta.entity';
 import { ExcecaoEstacao } from './entities/excecao-estacao.entity';
@@ -36,7 +38,13 @@ import { TratamentoModule } from '../tratamento/tratamento.module';
     TratamentoModule,
   ],
   controllers: [ReproducaoController],
-  providers: [EstacaoService, SituacaoService, DiagnosticoService],
-  exports: [SituacaoService],
+  providers: [
+    EstacaoService,
+    SituacaoService,
+    DiagnosticoService,
+    InseminacaoService,
+    IndicadoresService,
+  ],
+  exports: [SituacaoService, IndicadoresService],
 })
 export class ReproducaoModule {}

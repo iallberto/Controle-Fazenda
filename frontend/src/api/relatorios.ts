@@ -1,4 +1,5 @@
 import { apiClient } from './client';
+import type { Categoria } from '../utils/formatadores';
 
 export interface PainelInicial {
   porCategoria: { categoria: string; total: string }[];
@@ -103,5 +104,58 @@ export async function buscarTratamentosPorPeriodo(inicio: string, fim: string) {
   const resposta = await apiClient.get<TratamentoRelatorio[]>('/relatorio/tratamentos', {
     params: { inicio, fim },
   });
+  return resposta.data;
+}
+// --- Indicadores reprodutivos (US6) -----------------------------------------
+
+export interface TaxaPrenhez {
+  cobertas: number;
+  prenhes: number;
+  vazias: number;
+  semDiagnostico: number;
+  sairam: number;
+  // prenhes ÷ (prenhes + vazias); null sem nenhuma diagnosticada
+  taxa: number | null;
+}
+
+export interface IndicadoresReprodutivos {
+  estacoes: (TaxaPrenhez & {
+    id: string;
+    touro: { id: string; brinco: string | null };
+    pasto: string | null;
+    dataEntrada: string;
+    dataSaida: string | null;
+  })[];
+  touros: (TaxaPrenhez & { touro: { id: string; brinco: string | null }; estacoes: number })[];
+  semens: (TaxaPrenhez & { semen: { id: string; nomeTouro: string | null } })[];
+  intervaloPartos: {
+    mediaRebanhoDias: number | null;
+    porMatriz: {
+      animal: { id: string; brinco: string };
+      partos: number;
+      ultimoIntervaloDias: number;
+      mediaDias: number;
+    }[];
+  };
+}
+
+export interface VacaVazia {
+  animal: { id: string; brinco: string; categoria: Categoria };
+  pasto: string | null;
+  ultimoParto: string | null;
+  diasDesdeParto: number | null;
+  ultimaCobertura: string | null;
+  ultimoDiagnostico: string | null;
+}
+
+// Taxa de prenhez por estação, touro e sêmen e intervalo entre partos (FR-028, FR-029)
+export async function buscarIndicadoresReprodutivos() {
+  const resposta = await apiClient.get<IndicadoresReprodutivos>('/relatorio/indicadores-reprodutivos');
+  return resposta.data;
+}
+
+// Fêmeas vazias para nova cobertura ou descarte (FR-030)
+export async function buscarVacasVazias() {
+  const resposta = await apiClient.get<VacaVazia[]>('/relatorio/vacas-vazias');
   return resposta.data;
 }

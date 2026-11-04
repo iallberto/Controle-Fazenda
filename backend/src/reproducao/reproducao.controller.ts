@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
   Param,
   ParseUUIDPipe,
   Patch,
@@ -16,6 +18,7 @@ import type { JwtPayload } from '../auth/auth.service';
 import { EstacaoService } from './estacao.service';
 import { SituacaoService } from './situacao.service';
 import { DiagnosticoService } from './diagnostico.service';
+import { InseminacaoService } from './inseminacao.service';
 import {
   AbrirEstacaoDto,
   CancelarDto,
@@ -32,6 +35,13 @@ import {
   FiltroGrupoDiagnosticoDto,
   PerdaDto,
 } from './dto/diagnostico.dto';
+import {
+  EditarInseminacaoDto,
+  EntradaDosesDto,
+  FiltroInseminacoesDto,
+  InseminacaoDto,
+  SemenDto,
+} from './dto/inseminacao.dto';
 
 @ApiTags('reproducao')
 @ApiBearerAuth()
@@ -41,6 +51,7 @@ export class ReproducaoController {
     private readonly estacaoService: EstacaoService,
     private readonly situacaoService: SituacaoService,
     private readonly diagnosticoService: DiagnosticoService,
+    private readonly inseminacaoService: InseminacaoService,
   ) {}
 
   // --- Estações de monta (US1) -----------------------------------------------
@@ -203,6 +214,87 @@ export class ReproducaoController {
     );
   }
 
+  // --- Sêmen e inseminação (US5) -----------------------------------------------
+
+  @Get('semens')
+  listarSemens(@CurrentUser() user: JwtPayload) {
+    return this.inseminacaoService.listarSemens(user.fazendaId);
+  }
+
+  @Post('semens')
+  cadastrarSemen(@CurrentUser() user: JwtPayload, @Body() dto: SemenDto) {
+    return this.inseminacaoService.cadastrarSemen(
+      user.fazendaId,
+      user.sub,
+      dto,
+    );
+  }
+
+  @Post('semens/:id/entrada')
+  entradaDoses(
+    @CurrentUser() user: JwtPayload,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: EntradaDosesDto,
+  ) {
+    return this.inseminacaoService.entradaDoses(
+      user.fazendaId,
+      user.sub,
+      id,
+      dto,
+    );
+  }
+
+  @Roles(PapelUsuario.DONO)
+  @Delete('semens/:id')
+  @HttpCode(204)
+  async excluirSemen(
+    @CurrentUser() user: JwtPayload,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    await this.inseminacaoService.excluirSemen(user.fazendaId, id);
+  }
+
+  @Get('inseminacoes')
+  listarInseminacoes(
+    @CurrentUser() user: JwtPayload,
+    @Query() filtro: FiltroInseminacoesDto,
+  ) {
+    return this.inseminacaoService.listar(user.fazendaId, filtro.femeaId);
+  }
+
+  @Post('inseminacoes')
+  registrarInseminacao(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: InseminacaoDto,
+  ) {
+    return this.inseminacaoService.registrar(user.fazendaId, user.sub, dto);
+  }
+
+  @Roles(PapelUsuario.DONO)
+  @Patch('inseminacoes/:id')
+  editarInseminacao(
+    @CurrentUser() user: JwtPayload,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: EditarInseminacaoDto,
+  ) {
+    return this.inseminacaoService.editar(user.fazendaId, user.sub, id, dto);
+  }
+
+  @Roles(PapelUsuario.DONO)
+  @Post('inseminacoes/:id/cancelar')
+  cancelarInseminacao(
+    @CurrentUser() user: JwtPayload,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: CancelarDto,
+  ) {
+    return this.inseminacaoService.cancelar(
+      user.fazendaId,
+      user.sub,
+      id,
+      dto.motivo,
+    );
+  }
+
   // --- Situação do animal -----------------------------------------------------
 
   @Get('animais/:id/candidatos-pai')
@@ -212,6 +304,14 @@ export class ReproducaoController {
     @Query() filtro: FiltroAptasDto,
   ) {
     return this.situacaoService.candidatosPai(user.fazendaId, id, filtro.data);
+  }
+
+  @Get('animais/:id/historico')
+  historico(
+    @CurrentUser() user: JwtPayload,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.situacaoService.historico(user.fazendaId, id);
   }
 
   @Get('animais/:id/situacao')

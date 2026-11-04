@@ -32,6 +32,8 @@ const GRUPOS_MENU: { titulo: string; itens: ItemMenu[] }[] = [
     itens: [
       { rotulo: 'Estações de monta', destino: '/reproducao/estacoes' },
       { rotulo: 'Diagnóstico de gestação', destino: '/reproducao/diagnostico' },
+      { rotulo: 'Inseminação', destino: '/reproducao/inseminacao' },
+      { rotulo: 'Sêmen', destino: '/reproducao/semens' },
     ],
   },
   {

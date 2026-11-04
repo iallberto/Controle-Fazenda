@@ -5,6 +5,7 @@ import { Animal } from '../animal/entities/animal.entity';
 import { Parto } from '../parto/entities/parto.entity';
 import { Tratamento } from '../tratamento/entities/tratamento.entity';
 import { SituacaoService } from '../reproducao/situacao.service';
+import { IndicadoresService } from '../reproducao/indicadores.service';
 
 describe('RelatorioService', () => {
   let service: RelatorioService;
@@ -23,6 +24,7 @@ describe('RelatorioService', () => {
         { provide: getRepositoryToken(Parto), useValue: mockRepository },
         { provide: getRepositoryToken(Tratamento), useValue: mockRepository },
         { provide: SituacaoService, useValue: situacaoService },
+        { provide: IndicadoresService, useValue: {} },
       ],
     }).compile();
 
@@ -41,16 +43,30 @@ describe('RelatorioService', () => {
 
     it('lista as prenhes com previsão até a janela, em ordem, marcando as atrasadas', async () => {
       mockRepository.find.mockResolvedValue([
-        { id: 'a', brinco: '2', categoria: 'MATRIZ', pastoAtual: { nome: 'Pasto Monta' } },
+        {
+          id: 'a',
+          brinco: '2',
+          categoria: 'MATRIZ',
+          pastoAtual: { nome: 'Pasto Monta' },
+        },
         { id: 'b', brinco: '4', categoria: 'MATRIZ', pastoAtual: null },
         { id: 'c', brinco: '5', categoria: 'NOVILHA', pastoAtual: null },
       ]);
       situacaoService.previsoesParto.mockResolvedValue(
         new Map([
-          ['a', { data: '2026-11-20', base: 'TOQUE', touros: ['1'], semens: [] }],
-          ['b', { data: '2026-10-30', base: 'ESTACAO', touros: ['1'], semens: [] }],
+          [
+            'a',
+            { data: '2026-11-20', base: 'TOQUE', touros: ['1'], semens: [] },
+          ],
+          [
+            'b',
+            { data: '2026-10-30', base: 'ESTACAO', touros: ['1'], semens: [] },
+          ],
           // fora da janela de 30 dias
-          ['c', { data: '2027-02-01', base: 'ESTACAO', touros: [], semens: [] }],
+          [
+            'c',
+            { data: '2027-02-01', base: 'ESTACAO', touros: [], semens: [] },
+          ],
         ]),
       );
 
@@ -58,7 +74,11 @@ describe('RelatorioService', () => {
 
       expect(resultado.map((item) => item.animal.brinco)).toEqual(['4', '2']);
       expect(resultado[0]).toMatchObject({ atrasado: true, base: 'ESTACAO' });
-      expect(resultado[1]).toMatchObject({ atrasado: false, pasto: 'Pasto Monta', touros: ['1'] });
+      expect(resultado[1]).toMatchObject({
+        atrasado: false,
+        pasto: 'Pasto Monta',
+        touros: ['1'],
+      });
     });
   });
 });

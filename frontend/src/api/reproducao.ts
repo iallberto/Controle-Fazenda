@@ -202,3 +202,104 @@ export async function buscarCandidatosPai(maeId: string, data: string) {
   }>(`/reproducao/animais/${maeId}/candidatos-pai`, { params: { data } });
   return resposta.data;
 }
+
+// --- Sêmen e inseminação (US5) ----------------------------------------------
+
+export type TipoInseminacao = 'IA' | 'IATF';
+
+export interface Semen {
+  id: string;
+  nomeTouro: string;
+  raca: { id: string; nome: string } | null;
+  central: string | null;
+  doses: number;
+}
+
+export interface Aplicacao {
+  aplicadoPorTipo: 'USUARIO' | 'VETERINARIO';
+  aplicadoPorUsuarioId?: string;
+  aplicadoPorVeterinarioId?: string;
+}
+
+export interface InseminacaoRegistro {
+  id: string;
+  data: string;
+  tipo: TipoInseminacao;
+  femea: { id: string; brinco: string };
+  semen: { id: string; nomeTouro: string };
+  aplicadoPorUsuario: { nome: string } | null;
+  aplicadoPorVeterinario: { nome: string } | null;
+  cancelamento: Cancelamento;
+}
+
+export async function listarSemens() {
+  const resposta = await apiClient.get<Semen[]>('/reproducao/semens');
+  return resposta.data;
+}
+
+export async function cadastrarSemen(dados: { nomeTouro: string; racaId?: string; central?: string; doses: number }) {
+  const resposta = await apiClient.post<Semen>('/reproducao/semens', dados);
+  return resposta.data;
+}
+
+export async function entradaDoses(id: string, doses: number) {
+  const resposta = await apiClient.post<Semen>(`/reproducao/semens/${id}/entrada`, { doses });
+  return resposta.data;
+}
+
+export async function excluirSemen(id: string) {
+  await apiClient.delete(`/reproducao/semens/${id}`);
+}
+
+export async function listarInseminacoes(femeaId?: string) {
+  const resposta = await apiClient.get<InseminacaoRegistro[]>('/reproducao/inseminacoes', {
+    params: { femeaId },
+  });
+  return resposta.data;
+}
+
+export async function registrarInseminacao(
+  dados: Aplicacao & { femeaId: string; data: string; tipo: TipoInseminacao; semenId: string },
+) {
+  const resposta = await apiClient.post('/reproducao/inseminacoes', dados);
+  return resposta.data;
+}
+
+export async function cancelarInseminacao(id: string, motivo: string) {
+  await apiClient.post(`/reproducao/inseminacoes/${id}/cancelar`, { motivo });
+}
+
+// --- Histórico reprodutivo (FR-023) ------------------------------------------
+
+interface EventoBase {
+  id: string;
+  data: string;
+  cancelado: boolean;
+  motivoCancelamento: string | null;
+}
+
+export type EventoReprodutivo = EventoBase &
+  (
+    | {
+        tipo: 'EXPOSICAO';
+        estacaoId: string;
+        touroBrinco: string | null;
+        pasto: string | null;
+        dataFim: string | null;
+        motivoFim: MotivoFimExposicao | null;
+      }
+    | { tipo: 'INSEMINACAO'; tipoInseminacao: TipoInseminacao; semen: string | null }
+    | {
+        tipo: 'DIAGNOSTICO';
+        resultado: ResultadoDiagnostico;
+        metodo: MetodoDiagnostico | null;
+        idadeGestacionalDias: number | null;
+      }
+    | { tipo: 'PERDA'; motivo: string | null }
+    | { tipo: 'PARTO'; resultado: 'VIVO' | 'NATIMORTO'; tipoParto: string }
+  );
+
+export async function buscarHistoricoReprodutivo(animalId: string) {
+  const resposta = await apiClient.get<EventoReprodutivo[]>(`/reproducao/animais/${animalId}/historico`);
+  return resposta.data;
+}

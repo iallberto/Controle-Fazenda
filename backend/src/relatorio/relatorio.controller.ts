@@ -74,6 +74,16 @@ export class RelatorioController {
     );
   }
 
+  @Get('indicadores-reprodutivos')
+  indicadoresReprodutivos(@CurrentUser() user: JwtPayload) {
+    return this.relatorioService.indicadoresReprodutivos(user.fazendaId);
+  }
+
+  @Get('vacas-vazias')
+  vacasVazias(@CurrentUser() user: JwtPayload) {
+    return this.relatorioService.vacasVazias(user.fazendaId);
+  }
+
   @Get('por-raca')
   porRaca(@CurrentUser() user: JwtPayload) {
     return this.relatorioService.porRaca(user.fazendaId);

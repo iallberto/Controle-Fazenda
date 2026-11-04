@@ -13,6 +13,7 @@ import {
 } from '../../api/reproducao';
 import { mensagemDeErro } from '../../api/client';
 import { useAuth } from '../../contexts/useAuth';
+import { BotaoCancelar } from '../../components/BotaoCancelar';
 import { Aviso, type EstadoAviso } from '../../components/Aviso';
 import { hojeLocal } from '../../utils/datas';
 import {
@@ -182,7 +183,7 @@ export function EstacaoDetalhe() {
                     ` · cancelada: ${exposicao.cancelamento.motivoCancelamento}`}
                 </small>
                 {ehDono && !exposicao.cancelamento.cancelado && !estacao.cancelamento.cancelado && (
-                  <BotaoCancelarExposicao
+                  <BotaoCancelar
                     aoConfirmar={(motivo) =>
                       executar(() => cancelarExposicao(exposicao.id, motivo), 'Exposição cancelada.')
                     }
@@ -403,31 +404,5 @@ function PainelMotivo({
         </button>
       </div>
     </form>
-  );
-}
-
-function BotaoCancelarExposicao({ aoConfirmar }: { aoConfirmar: (motivo: string) => void }) {
-  const [aberto, setAberto] = useState(false);
-  const [motivo, setMotivo] = useState('');
-  if (!aberto) {
-    return (
-      <button type="button" className="botao-link" onClick={() => setAberto(true)}>
-        Cancelar
-      </button>
-    );
-  }
-  return (
-    <span className="cancelar-inline">
-      <input
-        aria-label="Motivo do cancelamento"
-        placeholder="Motivo"
-        maxLength={200}
-        value={motivo}
-        onChange={(e) => setMotivo(e.target.value)}
-      />
-      <button type="button" disabled={!motivo.trim()} onClick={() => aoConfirmar(motivo)}>
-        Confirmar
-      </button>
-    </span>
   );
 }

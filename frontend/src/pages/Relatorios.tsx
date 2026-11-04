@@ -6,6 +6,8 @@ import { RelatorioProximosTratamentos } from './relatorios/RelatorioProximosTrat
 import { RelatorioPorRaca } from './relatorios/RelatorioPorRaca';
 import { RelatorioNascimentos } from './relatorios/RelatorioNascimentos';
 import { RelatorioVacasAParir } from './relatorios/RelatorioVacasAParir';
+import { RelatorioIndicadoresReprodutivos } from './relatorios/RelatorioIndicadoresReprodutivos';
+import { RelatorioVacasVazias } from './relatorios/RelatorioVacasVazias';
 
 // M10: primeiro a pessoa escolhe o tipo de relatório; as datas, quando
 // fazem sentido, vêm depois, dentro de cada relatório.
@@ -15,6 +17,18 @@ const TIPOS = [
     titulo: 'Vacas a parir',
     descricao: 'Partos previstos nos próximos dias e os atrasados',
     Componente: RelatorioVacasAParir,
+  },
+  {
+    id: 'indicadores-reprodutivos',
+    titulo: 'Indicadores reprodutivos',
+    descricao: 'Taxa de prenhez por estação, touro e sêmen e intervalo entre partos',
+    Componente: RelatorioIndicadoresReprodutivos,
+  },
+  {
+    id: 'vacas-vazias',
+    titulo: 'Vacas vazias',
+    descricao: 'Fêmeas vazias para nova cobertura ou descarte',
+    Componente: RelatorioVacasVazias,
   },
   {
     id: 'proximos',

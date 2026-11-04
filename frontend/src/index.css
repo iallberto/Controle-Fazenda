@@ -422,6 +422,84 @@ button.resultado.ativo-vazia {
   width: 72px;
 }
 
+/* Sêmen (US5): doses em estoque e entrada de doses na própria linha */
+.lista-semens li {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.semen-cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.doses {
+  font-weight: 600;
+}
+
+.doses.sem-estoque {
+  color: var(--cor-erro);
+}
+
+form.entrada-doses {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+}
+
+.entrada-doses input {
+  width: 96px;
+}
+
+/* Indicadores reprodutivos (US6) */
+.lista-indicadores li {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.indicador-cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.indicador-cabecalho .taxa {
+  font-size: 1.15rem;
+  color: var(--cor-primaria-escura);
+}
+
+.indicador-cabecalho .taxa-vazia {
+  color: var(--cor-texto-suave);
+}
+
+/* Linha do tempo reprodutiva (FR-023): cancelados riscados, com o motivo embaixo */
+.linha-do-tempo li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.linha-do-tempo .cancelado {
+  text-decoration: line-through;
+}
+
+.motivo-cancelado {
+  color: var(--cor-texto-suave);
+}
+
 /* --- Avisos (V3) -------------------------------------------------------------
    Mensagens depois de salvar, carregar ou buscar: separadas do conteúdo,
    com cor e ícone para distinguir sucesso, erro e atenção. */

@@ -22,6 +22,8 @@ import { Estacoes } from './pages/reproducao/Estacoes';
 import { NovaEstacao } from './pages/reproducao/NovaEstacao';
 import { EstacaoDetalhe } from './pages/reproducao/EstacaoDetalhe';
 import { DiagnosticoLote } from './pages/reproducao/DiagnosticoLote';
+import { Semens } from './pages/reproducao/Semens';
+import { Inseminacao } from './pages/reproducao/Inseminacao';
 
 function App() {
   return (
@@ -50,6 +52,8 @@ function App() {
         <Route path="/reproducao/estacoes/nova" element={<NovaEstacao />} />
         <Route path="/reproducao/estacoes/:id" element={<EstacaoDetalhe />} />
         <Route path="/reproducao/diagnostico" element={<DiagnosticoLote />} />
+        <Route path="/reproducao/inseminacao" element={<Inseminacao />} />
+        <Route path="/reproducao/semens" element={<Semens />} />
       </Route>
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>

@@ -27,6 +27,7 @@ import {
 } from '../utils/formatadores';
 import { obterConfiguracao, type ValorArroba } from '../api/configuracao';
 import { Aviso, type EstadoAviso } from '../components/Aviso';
+import { LinhaDoTempoReprodutiva } from './reproducao/LinhaDoTempoReprodutiva';
 
 interface PartoComIntervalo extends Parto {
   diasDesdeUltimoParto: number | null;
@@ -187,6 +188,8 @@ export function AnimalDetalhe() {
         )}
         {avisoReemissao && <Aviso tipo={avisoReemissao.tipo}>{avisoReemissao.texto}</Aviso>}
       </section>
+
+      {animal.sexo === 'F' && <LinhaDoTempoReprodutiva animalId={animal.id} />}
 
       {animal.categoria === 'MATRIZ' && (
         <section>

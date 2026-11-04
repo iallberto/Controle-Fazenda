@@ -1,14 +1,14 @@
 # Controle Fazenda — Planejamento dos módulos
 
 > Como o sistema passa a ser vendido em partes: um pacote inicial e módulos adicionais liberados por cliente.
-> Este documento registra as decisões, o escopo de cada módulo e a ordem de execução. Nada daqui foi implementado ainda.
+> Este documento registra as decisões, o escopo de cada módulo e a ordem de execução. A seção 3 (cobertura e inseminação) já foi implementada; o restante ainda não.
 
 | | |
 |---|---|
 | **Data** | 03/11/2026 |
-| **Status** | Decisões tomadas, sem questões em aberto · implementação não iniciada |
+| **Status** | Decisões tomadas, sem questões em aberto · seção 3 concluída (spec 001) · fase 0 e módulos pagos não iniciados |
 | **Base** | Versão atual (reprodução e rebanho), com o bloco pós-V1 concluído |
-| **Legenda** | ✅ Decidido · ❓ Em aberto · ⏸️ Depois |
+| **Legenda** | ✅ Decidido · ❓ Em aberto · ⏸️ Depois · ✔️ Concluído |
 
 ---
 
@@ -83,7 +83,18 @@ frontend/src/
 
 ---
 
-## 3. Cobertura e inseminação (pacote inicial)
+## 3. Cobertura e inseminação (pacote inicial) ✔️ Concluído
+
+> **Concluído em 03/11/2026** pela spec `specs/001-cobertura-inseminacao` (especificação, plano, contratos e
+> tarefas lá). O que mudou em relação ao rascunho abaixo, por decisão no clarify:
+> - um touro por estação, e abrir a estação leva o touro para o pasto;
+> - depois do parto a vaca fica **Lactante** e volta a ser apta 45 dias depois; novilha que pare vira matriz;
+> - idade gestacional informada em meses e dias no toque;
+> - só o dono edita ou cancela registros de reprodução, sempre com motivo, e nada é excluído;
+> - a previsão de parto usa, nesta ordem, a inseminação, a idade gestacional do toque ou o meio da estação;
+> - relatórios entregues: vacas a parir, indicadores reprodutivos (taxa de prenhez por estação, touro e sêmen;
+>   intervalo entre partos) e vacas vazias; a página do animal ganhou a linha do tempo reprodutiva.
+> - Protocolo de IATF por etapas e registro de cio continuam fora (⏸️ depois).
 
 Parte nova da Reprodução, disponível para **todas** as fazendas (D8). Pode ser feita a qualquer momento, sem depender da fase 0, porque não é módulo pago.
 
@@ -183,7 +194,7 @@ Pode ser feito em paralelo ao Leite.
 | Fase | Entrega | Depende de |
 |---|---|---|
 | 0 | Migrations · módulos por fazenda · bloqueio no backend e no menu · painel do administrador | — |
-| — | **Cobertura e inseminação** no pacote inicial (monta natural, IA/IATF opcional, diagnóstico, previsão de parto) | Nada; pode entrar antes, durante ou depois da fase 0 |
+| — | ✔️ **Cobertura e inseminação** no pacote inicial (monta natural, IA/IATF opcional, diagnóstico, previsão de parto) — concluída | Nada; pode entrar antes, durante ou depois da fase 0 |
 | 1 | **Financeiro** (lançamentos, venda de animais, gráficos) | Fase 0 |
 | 2a | **Leite** (lactação, ordenha, carência, entregas) | Fase 0 e cobertura/inseminação |
 | 2b | **Nutrição** (insumos, silo, dietas, fornecimento) | Fase 0 |

@@ -22,6 +22,39 @@ import { Raca } from '../raca/entities/raca.entity';
 import { BasePrevisao, calcularPrevisaoParto } from './dominio/previsao-parto';
 import { buscarCandidatosPai } from './candidatos';
 
+interface EventoBase {
+  id: string;
+  data: string;
+  criadoEm: Date;
+  cancelado: boolean;
+  motivoCancelamento: string | null;
+}
+
+type EventoHistorico = EventoBase &
+  (
+    | {
+        tipo: 'EXPOSICAO';
+        estacaoId: string;
+        touroBrinco: string | null;
+        pasto: string | null;
+        dataFim: string | null;
+        motivoFim: ExposicaoMonta['motivoFim'];
+      }
+    | {
+        tipo: 'INSEMINACAO';
+        tipoInseminacao: Inseminacao['tipo'];
+        semen: string | null;
+      }
+    | {
+        tipo: 'DIAGNOSTICO';
+        resultado: ResultadoDiagnostico;
+        metodo: DiagnosticoGestacao['metodo'];
+        idadeGestacionalDias: number | null;
+      }
+    | { tipo: 'PERDA'; motivo: string | null }
+    | { tipo: 'PARTO'; resultado: Parto['resultado']; tipoParto: Parto['tipo'] }
+  );
+
 export interface FiltroFemeas {
   pastoId?: string;
   categoria?: CategoriaAnimal;
@@ -231,6 +264,104 @@ export class SituacaoService {
         ? { data: previsao.data, base: previsao.base }
         : null,
     };
+  }
+
+  // Linha do tempo reprodutiva da fêmea, do mais recente ao mais antigo (FR-023).
+  // Registros cancelados aparecem marcados, com o motivo.
+  async historico(fazendaId: string, animalId: string) {
+    const animal = await this.animalRepository.findOneBy({ id: animalId });
+    if (!animal || animal.fazendaId !== fazendaId) {
+      throw new NotFoundException('Animal não encontrado');
+    }
+    if (animal.sexo !== Sexo.F) return [];
+
+    const [exposicoes, inseminacoes, diagnosticos, partos] = await Promise.all([
+      this.exposicaoRepository.find({
+        where: { femeaId: animalId },
+        relations: { estacao: { touro: true, pasto: true } },
+      }),
+      this.inseminacaoRepository.find({
+        where: { femeaId: animalId },
+        relations: { semen: true },
+      }),
+      this.diagnosticoRepository.find({ where: { femeaId: animalId } }),
+      this.partoRepository.find({ where: { maeId: animalId } }),
+    ]);
+
+    const eventos: EventoHistorico[] = [
+      ...exposicoes.map((exposicao) => {
+        const estacaoCancelada = !!exposicao.estacao?.cancelamento.cancelado;
+        return {
+          tipo: 'EXPOSICAO' as const,
+          id: exposicao.id,
+          data: exposicao.dataInicio,
+          criadoEm: exposicao.criadoEm,
+          estacaoId: exposicao.estacaoId,
+          touroBrinco: exposicao.estacao?.touro?.brinco ?? null,
+          pasto: exposicao.estacao?.pasto?.nome ?? null,
+          dataFim: exposicao.dataFim,
+          motivoFim: exposicao.motivoFim,
+          cancelado: exposicao.cancelamento.cancelado || estacaoCancelada,
+          motivoCancelamento: exposicao.cancelamento.cancelado
+            ? exposicao.cancelamento.motivoCancelamento
+            : estacaoCancelada
+              ? exposicao.estacao!.cancelamento.motivoCancelamento
+              : null,
+        };
+      }),
+      ...inseminacoes.map((inseminacao) => ({
+        tipo: 'INSEMINACAO' as const,
+        id: inseminacao.id,
+        data: inseminacao.data,
+        criadoEm: inseminacao.criadoEm,
+        tipoInseminacao: inseminacao.tipo,
+        semen: inseminacao.semen?.nomeTouro ?? null,
+        cancelado: inseminacao.cancelamento.cancelado,
+        motivoCancelamento: inseminacao.cancelamento.motivoCancelamento,
+      })),
+      ...diagnosticos.map((diagnostico) =>
+        diagnostico.resultado === ResultadoDiagnostico.PERDA
+          ? {
+              tipo: 'PERDA' as const,
+              id: diagnostico.id,
+              data: diagnostico.data,
+              criadoEm: diagnostico.criadoEm,
+              motivo: diagnostico.motivo,
+              cancelado: diagnostico.cancelamento.cancelado,
+              motivoCancelamento: diagnostico.cancelamento.motivoCancelamento,
+            }
+          : {
+              tipo: 'DIAGNOSTICO' as const,
+              id: diagnostico.id,
+              data: diagnostico.data,
+              criadoEm: diagnostico.criadoEm,
+              resultado: diagnostico.resultado,
+              metodo: diagnostico.metodo,
+              idadeGestacionalDias: diagnostico.idadeGestacionalDias,
+              cancelado: diagnostico.cancelamento.cancelado,
+              motivoCancelamento: diagnostico.cancelamento.motivoCancelamento,
+            },
+      ),
+      ...partos.map((parto) => ({
+        tipo: 'PARTO' as const,
+        id: parto.id,
+        data: parto.data,
+        criadoEm: parto.criadoEm,
+        resultado: parto.resultado,
+        tipoParto: parto.tipo,
+        cancelado: false,
+        motivoCancelamento: null,
+      })),
+    ];
+
+    // Mais recente primeiro; no mesmo dia, o lançado por último vem antes
+    return eventos
+      .sort(
+        (a, b) =>
+          b.data.localeCompare(a.data) ||
+          new Date(b.criadoEm).getTime() - new Date(a.criadoEm).getTime(),
+      )
+      .map(({ criadoEm: _criadoEm, ...evento }) => evento);
   }
 
   // Fêmeas ativas do grupo que podem entrar em cobertura na data (FR-003)

@@ -12,6 +12,7 @@ import { Tratamento } from '../tratamento/entities/tratamento.entity';
 import { nomeDoResponsavel } from '../tratamento/tratamento.service';
 import { formatarDataLocal, hojeLocal } from '../common/datas';
 import { SituacaoService } from '../reproducao/situacao.service';
+import { IndicadoresService } from '../reproducao/indicadores.service';
 import { somarDias } from '../reproducao/dominio/datas';
 
 @Injectable()
@@ -24,7 +25,18 @@ export class RelatorioService {
     @InjectRepository(Tratamento)
     private readonly tratamentoRepository: Repository<Tratamento>,
     private readonly situacaoService: SituacaoService,
+    private readonly indicadoresService: IndicadoresService,
   ) {}
+
+  // Taxa de prenhez por estação, touro e sêmen e intervalo entre partos (FR-028, FR-029)
+  indicadoresReprodutivos(fazendaId: string) {
+    return this.indicadoresService.indicadores(fazendaId);
+  }
+
+  // Fêmeas vazias para nova cobertura ou descarte (FR-030)
+  vacasVazias(fazendaId: string) {
+    return this.indicadoresService.vacasVazias(fazendaId);
+  }
 
   // Fêmeas prenhes com parto previsto até hoje + dias, mais as atrasadas (FR-019)
   async vacasAParir(fazendaId: string, dias: number) {

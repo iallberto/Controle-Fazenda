@@ -9,7 +9,10 @@ import { Tratamento } from '../tratamento/entities/tratamento.entity';
 import { ReproducaoModule } from '../reproducao/reproducao.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Animal, Parto, Tratamento]), ReproducaoModule],
+  imports: [
+    TypeOrmModule.forFeature([Animal, Parto, Tratamento]),
+    ReproducaoModule,
+  ],
   controllers: [RelatorioController],
   providers: [RelatorioService],
 })

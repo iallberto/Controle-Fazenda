@@ -172,16 +172,16 @@ sozinha.
 
 ### Tests for User Story 5
 
-- [ ] T048 [P] [US5] Testes do `InseminacaoService`: baixa uma dose; sêmen sem dose → 409 (FR-011); recusa fêmea não apta; aplicador validado na fazenda; entrada de doses > 0 (FR-012); dono cancela e a dose volta; dono exclui sêmen nunca usado e recebe 409 se já usado; em backend/src/reproducao/inseminacao.service.spec.ts
+- [X] T048 [P] [US5] Testes do `InseminacaoService`: baixa uma dose; sêmen sem dose → 409 (FR-011); recusa fêmea não apta; aplicador validado na fazenda; entrada de doses > 0 (FR-012); dono cancela e a dose volta; dono exclui sêmen nunca usado e recebe 409 se já usado; em backend/src/reproducao/inseminacao.service.spec.ts
 
 ### Implementation for User Story 5
 
-- [ ] T049 [P] [US5] Criar os DTOs `SemenDto`, `EntradaDosesDto` (`doses` > 0), `InseminacaoDto`, `EditarInseminacaoDto` em backend/src/reproducao/dto/inseminacao.dto.ts
-- [ ] T050 [US5] Implementar `InseminacaoService` com baixa atômica `UPDATE ... SET doses = doses - 1 WHERE id = :id AND doses > 0` (R8) até T048 passar, em backend/src/reproducao/inseminacao.service.ts
-- [ ] T051 [US5] Adicionar as rotas de sêmen e inseminação do contrato (`DELETE /semens/:id`, `PATCH /inseminacoes/:id` e `POST /inseminacoes/:id/cancelar` com `@Roles(DONO)`) em backend/src/reproducao/reproducao.controller.ts
-- [ ] T052 [P] [US5] Implementar as funções de sêmen e inseminação no cliente em frontend/src/api/reproducao.ts
-- [ ] T053 [US5] Criar a tela de sêmen (lista com doses, cadastrar, entrada de doses, excluir só dono) em frontend/src/pages/reproducao/Semens.tsx
-- [ ] T054 [US5] Criar a tela de inseminação (fêmea apta, data, IA/IATF, sêmen com doses, aplicado por com o usuário logado preenchido) em frontend/src/pages/reproducao/Inseminacao.tsx, com link para Sêmen
+- [X] T049 [P] [US5] Criar os DTOs `SemenDto`, `EntradaDosesDto` (`doses` > 0), `InseminacaoDto`, `EditarInseminacaoDto` em backend/src/reproducao/dto/inseminacao.dto.ts
+- [X] T050 [US5] Implementar `InseminacaoService` com baixa atômica `UPDATE ... SET doses = doses - 1 WHERE id = :id AND doses > 0` (R8) até T048 passar, em backend/src/reproducao/inseminacao.service.ts
+- [X] T051 [US5] Adicionar as rotas de sêmen e inseminação do contrato (`DELETE /semens/:id`, `PATCH /inseminacoes/:id` e `POST /inseminacoes/:id/cancelar` com `@Roles(DONO)`) em backend/src/reproducao/reproducao.controller.ts
+- [X] T052 [P] [US5] Implementar as funções de sêmen e inseminação no cliente em frontend/src/api/reproducao.ts
+- [X] T053 [US5] Criar a tela de sêmen (lista com doses, cadastrar, entrada de doses, excluir só dono) em frontend/src/pages/reproducao/Semens.tsx
+- [X] T054 [US5] Criar a tela de inseminação (fêmea apta, data, IA/IATF, sêmen com doses, aplicado por com o usuário logado preenchido) em frontend/src/pages/reproducao/Inseminacao.tsx, com link para Sêmen
 
 **Checkpoint**: IA/IATF disponível sem atrapalhar quem só usa monta natural
 
@@ -195,15 +195,20 @@ sozinha.
 
 ### Tests for User Story 6
 
-- [ ] T055 [P] [US6] Testes da taxa de prenhez (R12): primeiro diagnóstico não cancelado depois do início da cobertura e em até 300 dias; taxa = prenhes ÷ (prenhes + vazias); sem diagnóstico e "saíram" contadas à parte; em backend/src/reproducao/dominio/taxa-prenhez.spec.ts
+- [X] T055 [P] [US6] Testes da taxa de prenhez (R12): primeiro diagnóstico não cancelado depois do início da cobertura e em até 300 dias; taxa = prenhes ÷ (prenhes + vazias); sem diagnóstico e "saíram" contadas à parte; em backend/src/reproducao/dominio/taxa-prenhez.spec.ts
 
 ### Implementation for User Story 6
 
-- [ ] T056 [US6] Implementar a função pura `calcularTaxaPrenhez(...)` até T055 passar, em backend/src/reproducao/dominio/taxa-prenhez.ts
-- [ ] T057 [US6] Implementar `indicadoresReprodutivos` (por estação/touro e por sêmen; intervalo entre partos por matriz e média, FR-029) e `vacasVazias` (FR-030) com as rotas `GET /relatorio/indicadores-reprodutivos` e `GET /relatorio/vacas-vazias` em backend/src/relatorio/relatorio.service.ts e backend/src/relatorio/relatorio.controller.ts, com testes em backend/src/relatorio/relatorio.service.spec.ts
-- [ ] T058 [P] [US6] Criar o relatório de indicadores em frontend/src/pages/relatorios/RelatorioIndicadoresReprodutivos.tsx
-- [ ] T059 [P] [US6] Criar o relatório de vacas vazias em frontend/src/pages/relatorios/RelatorioVacasVazias.tsx
-- [ ] T060 [US6] Incluir os dois relatórios em `TIPOS` de frontend/src/pages/Relatorios.tsx
+- [X] T056 [US6] Implementar a função pura `calcularTaxaPrenhez(...)` até T055 passar, em backend/src/reproducao/dominio/taxa-prenhez.ts
+- [X] T057 [US6] Implementar `indicadoresReprodutivos` (por estação/touro e por sêmen; intervalo entre partos por matriz e média, FR-029) e `vacasVazias` (FR-030) com as rotas `GET /relatorio/indicadores-reprodutivos` e `GET /relatorio/vacas-vazias` em backend/src/relatorio/relatorio.service.ts e backend/src/relatorio/relatorio.controller.ts, com testes em backend/src/relatorio/relatorio.service.spec.ts
+- [X] T058 [P] [US6] Criar o relatório de indicadores em frontend/src/pages/relatorios/RelatorioIndicadoresReprodutivos.tsx
+- [X] T059 [P] [US6] Criar o relatório de vacas vazias em frontend/src/pages/relatorios/RelatorioVacasVazias.tsx
+- [X] T060 [US6] Incluir os dois relatórios em `TIPOS` de frontend/src/pages/Relatorios.tsx
+
+> Nota de implementação (T057): a leitura dos dados ficou em `IndicadoresService`
+> (backend/src/reproducao/indicadores.service.ts, com testes próprios), exportado pelo
+> `ReproducaoModule`; `RelatorioService` só delega, para não repetir os repositórios de
+> reprodução no módulo de relatórios. Diagnósticos no mesmo dia: vale o lançado primeiro.
 
 **Checkpoint**: todas as histórias funcionando
 
@@ -213,13 +218,22 @@ sozinha.
 
 **Purpose**: histórico consolidado, documentação e validação final
 
-- [ ] T061 Implementar `SituacaoService.historico(fazendaId, animalId)` (exposições, inseminações, diagnósticos, perdas e partos em ordem de data, com flag `cancelado`, FR-023), rota `GET /animais/:id/historico` e teste, em backend/src/reproducao/situacao.service.ts e backend/src/reproducao/reproducao.controller.ts
-- [ ] T062 Mostrar a linha do tempo reprodutiva (cancelados riscados, com motivo) em frontend/src/pages/AnimalDetalhe.tsx
-- [ ] T063 [P] Formatar com Prettier os arquivos novos de backend/src/reproducao/ e conferir `npm test`, `npx tsc --noEmit`, `npm run lint` (backend) e `tsc -b`, `eslint src` (frontend)
-- [ ] T064 [P] Marcar a seção 3 como concluída em docs/modulos/Planejamento-modulos.md
-- [ ] T065 Executar o roteiro completo de specs/001-cobertura-inseminacao/quickstart.md no navegador, em largura de celular, numa fazenda de teste isolada, registrando o que não pôde ser verificado
+- [X] T061 Implementar `SituacaoService.historico(fazendaId, animalId)` (exposições, inseminações, diagnósticos, perdas e partos em ordem de data, com flag `cancelado`, FR-023), rota `GET /animais/:id/historico` e teste, em backend/src/reproducao/situacao.service.ts e backend/src/reproducao/reproducao.controller.ts
+- [X] T062 Mostrar a linha do tempo reprodutiva (cancelados riscados, com motivo) em frontend/src/pages/AnimalDetalhe.tsx
+- [X] T063 [P] Formatar com Prettier os arquivos novos de backend/src/reproducao/ e conferir `npm test`, `npx tsc --noEmit`, `npm run lint` (backend) e `tsc -b`, `eslint src` (frontend)
+- [X] T064 [P] Marcar a seção 3 como concluída em docs/modulos/Planejamento-modulos.md
+- [X] T065 Executar o roteiro completo de specs/001-cobertura-inseminacao/quickstart.md no navegador, em largura de celular, numa fazenda de teste isolada, registrando o que não pôde ser verificado
 
 ---
+
+> Registro da validação (T065, 03/11/2026): roteiro completo do quickstart rodado numa fazenda de
+> teste nova ("Fazenda Teste Quickstart 1d0a6d"), 35 verificações pela API, todas aprovadas, e as telas
+> conferidas em 375 px como funcionário (linha do tempo com cancelado riscado; sem opções de cancelar
+> ou excluir). Diferenças em relação ao roteiro escrito:
+> - cenário 8: o acesso cruzado foi feito a partir de **outra fazenda de teste**, não da fazenda real,
+>   para não usar a conta real em teste (constituição, princípio V); o resultado esperado (404) é o mesmo;
+> - cenário 4.3: a lista de aptas de uma estação lançada com data passada usa o pasto **atual** das
+>   fêmeas; quem mudou de pasto depois precisa entrar como exceção com motivo.
 
 ## Dependencies & Execution Order
 
