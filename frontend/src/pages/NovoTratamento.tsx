@@ -1,3 +1,4 @@
+import { useProdutoComCarencia } from '../modulos/leite/useProdutoComCarencia';
 import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
@@ -13,6 +14,7 @@ export function NovoTratamento() {
   const navigate = useNavigate();
   const { usuario: usuarioLogado } = useAuth();
   const [erro, setErro] = useState('');
+  const produtoLeite = useProdutoComCarencia();
 
   const [animalId, setAnimalId] = useState('');
   const [produto, setProduto] = useState('');
@@ -39,17 +41,20 @@ export function NovoTratamento() {
     setErro('');
 
     try {
-      await criarTratamento({
-        animalId,
-        produto,
-        data,
-        recorrenciaDias: temRecorrencia ? Number(recorrenciaDias) : undefined,
-        aplicadoPorTipo,
-        aplicadoPorUsuarioId: aplicadoPorTipo === 'USUARIO' ? aplicadoPorUsuarioId : undefined,
-        aplicadoPorVeterinarioId:
-          aplicadoPorTipo === 'VETERINARIO' ? aplicadoPorVeterinarioId : undefined,
-      });
-      navigate('/animais', { state: { aviso: `Tratamento "${produto}" registrado.` } });
+      // Com o Leite ativo, produto sem cadastro abre o cadastro rápido (spec 004)
+      await produtoLeite.enviar(async () => {
+        await criarTratamento({
+          animalId,
+          produto,
+          data,
+          recorrenciaDias: temRecorrencia ? Number(recorrenciaDias) : undefined,
+          aplicadoPorTipo,
+          aplicadoPorUsuarioId: aplicadoPorTipo === 'USUARIO' ? aplicadoPorUsuarioId : undefined,
+          aplicadoPorVeterinarioId:
+            aplicadoPorTipo === 'VETERINARIO' ? aplicadoPorVeterinarioId : undefined,
+        });
+        navigate('/animais', { state: { aviso: `Tratamento "${produto}" registrado.` } });
+      }, produto);
     } catch (erroRequisicao) {
       const mensagem =
         axios.isAxiosError(erroRequisicao) && erroRequisicao.response?.data?.message
@@ -66,6 +71,7 @@ export function NovoTratamento() {
         <Link to="/animais">Voltar</Link>
       </header>
 
+      {produtoLeite.elementos}
       <form onSubmit={handleSubmit}>
         <div>
           <label htmlFor="animal">Animal</label>
@@ -81,7 +87,13 @@ export function NovoTratamento() {
 
         <div>
           <label htmlFor="produto">Produto</label>
-          <input id="produto" value={produto} onChange={(e) => setProduto(e.target.value)} required />
+          <input
+            id="produto"
+            value={produto}
+            onChange={(e) => setProduto(e.target.value)}
+            required
+            {...produtoLeite.atributosDoCampo}
+          />
         </div>
 
         <div>

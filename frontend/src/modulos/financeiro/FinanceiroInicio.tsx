@@ -5,7 +5,7 @@ import { Aviso } from '../../components/Aviso';
 import { formatarReais } from '../../utils/formatadores';
 import { listarLancamentos, type MesFinanceiro } from './api';
 import { useFinanceiro } from './FinanceiroContext';
-import { mesAtual, nomeDoMes } from './meses';
+import { mesAtual, nomeDoMes } from '../../utils/meses';
 
 // Início do Financeiro: para o dono, o mês corrente e os atalhos do dia a dia;
 // para o funcionário, só o que ele pode fazer, sem nenhum valor (FR-002).

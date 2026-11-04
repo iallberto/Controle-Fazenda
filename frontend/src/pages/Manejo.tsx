@@ -1,3 +1,5 @@
+import { useProdutoComCarencia } from '../modulos/leite/useProdutoComCarencia';
+import { AvisoDescarte } from '../modulos/leite/AvisoDescarte';
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
@@ -27,6 +29,7 @@ function extrairMensagem(erro: unknown, padrao: string) {
 }
 
 export function Manejo() {
+  const produtoLeite = useProdutoComCarencia();
   const { usuario } = useAuth();
   const [brinco, setBrinco] = useState('');
   const [animal, setAnimal] = useState<Animal | null>(null);
@@ -117,18 +120,23 @@ export function Manejo() {
     evento.preventDefault();
     if (!animal || !usuario) return;
     setAvisoTratamento(null);
+    const animalId = animal.id;
+    const usuarioId = usuario.id;
     try {
-      await criarTratamento({
-        animalId: animal.id,
-        produto,
-        data: dataTratamento,
-        aplicadoPorTipo: 'USUARIO',
-        aplicadoPorUsuarioId: usuario.id,
-      });
-      setAvisoTratamento({ tipo: 'sucesso', texto: `Tratamento "${produto}" registrado.` });
-      setMostrarTratamento(false);
-      setProduto('');
-      setDataTratamento('');
+      // Com o Leite ativo, produto sem cadastro abre o cadastro rápido (spec 004)
+      await produtoLeite.enviar(async () => {
+        await criarTratamento({
+          animalId,
+          produto,
+          data: dataTratamento,
+          aplicadoPorTipo: 'USUARIO',
+          aplicadoPorUsuarioId: usuarioId,
+        });
+        setAvisoTratamento({ tipo: 'sucesso', texto: `Tratamento "${produto}" registrado.` });
+        setMostrarTratamento(false);
+        setProduto('');
+        setDataTratamento('');
+      }, produto);
     } catch (erro) {
       setAvisoTratamento({
         tipo: 'erro',
@@ -160,6 +168,8 @@ export function Manejo() {
       <header>
         <h1>Manejo</h1>
       </header>
+      <AvisoDescarte />
+      {produtoLeite.elementos}
 
       <form onSubmit={handleBuscar}>
         <label htmlFor="brinco">Brinco</label>
@@ -238,6 +248,7 @@ export function Manejo() {
                   value={produto}
                   onChange={(e) => setProduto(e.target.value)}
                   required
+                  {...produtoLeite.atributosDoCampo}
                 />
                 <input
                   type="date"

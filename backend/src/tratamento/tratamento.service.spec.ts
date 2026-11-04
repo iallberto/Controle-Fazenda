@@ -6,6 +6,7 @@ import { Tratamento, AplicadoPorTipo } from './entities/tratamento.entity';
 import { Animal } from '../animal/entities/animal.entity';
 import { Usuario } from '../usuario/entities/usuario.entity';
 import { Veterinario } from '../veterinario/entities/veterinario.entity';
+import { ganchosRebanho } from '../common/ganchos-rebanho';
 
 describe('TratamentoService', () => {
   let service: TratamentoService;
@@ -15,6 +16,7 @@ describe('TratamentoService', () => {
     findOneBy: jest.fn(),
     create: jest.fn(),
     save: jest.fn(),
+    manager: { transaction: jest.fn() },
   };
 
   const mockAnimalRepository = {
@@ -31,6 +33,11 @@ describe('TratamentoService', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks();
+    ganchosRebanho.limpar();
+    // A transação usa o mesmo save do repositório simulado
+    mockTratamentoRepository.manager.transaction.mockImplementation(
+      (cb: (m: unknown) => unknown) => cb({ save: mockTratamentoRepository.save }),
+    );
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -62,6 +69,45 @@ describe('TratamentoService', () => {
       mockAnimalRepository.findOneBy.mockResolvedValue({ id: 'animal-1', fazendaId, status: 'ATIVO' });
       mockTratamentoRepository.create.mockImplementation((entrada) => entrada);
       mockTratamentoRepository.save.mockImplementation((entrada) => Promise.resolve(entrada));
+    });
+
+    it('avisa os ganchos do rebanho na mesma transação (spec 004, R1)', async () => {
+      mockUsuarioRepository.findOneBy.mockResolvedValue({ id: 'usuario-2', fazendaId });
+      mockTratamentoRepository.save.mockImplementation((entrada) =>
+        Promise.resolve({ ...entrada, id: 'trat-1' }),
+      );
+      const gancho = jest.fn();
+      ganchosRebanho.registrar('tratamentoGravado', gancho);
+
+      await service.create(fazendaId, usuarioLogadoId, {
+        ...baseDto,
+        aplicadoPorTipo: AplicadoPorTipo.USUARIO,
+        aplicadoPorUsuarioId: 'usuario-2',
+      } as any);
+
+      expect(gancho).toHaveBeenCalledWith(expect.anything(), {
+        fazendaId,
+        animalId: 'animal-1',
+        tratamentoId: 'trat-1',
+        produto: 'Vermifugo',
+        data: '2026-01-10',
+        usuarioId: usuarioLogadoId,
+        novo: true,
+      });
+    });
+
+    it('um gancho que recusa faz o create falhar', async () => {
+      mockUsuarioRepository.findOneBy.mockResolvedValue({ id: 'usuario-2', fazendaId });
+      ganchosRebanho.registrar('tratamentoGravado', async () => {
+        throw new Error('produto sem cadastro');
+      });
+      await expect(
+        service.create(fazendaId, usuarioLogadoId, {
+          ...baseDto,
+          aplicadoPorTipo: AplicadoPorTipo.USUARIO,
+          aplicadoPorUsuarioId: 'usuario-2',
+        } as any),
+      ).rejects.toThrow('produto sem cadastro');
     });
 
     it('aceita aplicadoPorTipo USUARIO com um usuario valido da fazenda', async () => {

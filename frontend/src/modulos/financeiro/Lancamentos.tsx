@@ -13,7 +13,7 @@ import {
   type TipoLancamento,
 } from './api';
 import { useFinanceiro } from './FinanceiroContext';
-import { mesAtual, nomeDoMes, somarMeses } from './meses';
+import { mesAtual, nomeDoMes, somarMeses } from '../../utils/meses';
 
 // Lançamentos do mês com receita, despesa e saldo (spec 003, FR-007). Os
 // cancelados ficam na lista, riscados, e fora dos totais (FR-008).

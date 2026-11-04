@@ -42,6 +42,13 @@ export enum StatusReprodutivo {
   VAZIA = 'VAZIA',
 }
 
+// Vaca de leite (spec 004, FR-004b): pela raça (padrão), sim ou não
+export enum VacaDeLeite {
+  PELA_RACA = 'PELA_RACA',
+  SIM = 'SIM',
+  NAO = 'NAO',
+}
+
 export enum OrigemAnimal {
   NASCIDO_FAZENDA = 'NASCIDO_FAZENDA',
   COMPRADO = 'COMPRADO',
@@ -86,6 +93,15 @@ export class Animal {
     nullable: true,
   })
   statusReprodutivo: StatusReprodutivo | null;
+
+  // Só o dono altera, pelo módulo Leite (spec 004, FR-004b)
+  @Column({
+    name: 'vaca_de_leite',
+    type: 'enum',
+    enum: VacaDeLeite,
+    default: VacaDeLeite.PELA_RACA,
+  })
+  vacaDeLeite: VacaDeLeite;
 
   @Column({ type: 'enum', enum: OrigemAnimal })
   origem: OrigemAnimal;

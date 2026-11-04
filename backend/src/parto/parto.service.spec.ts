@@ -1,3 +1,4 @@
+import { ganchosRebanho } from '../common/ganchos-rebanho';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
@@ -51,6 +52,7 @@ describe('PartoService', () => {
   beforeEach(async () => {
     
     jest.clearAllMocks();
+    ganchosRebanho.limpar();
     mockPartoRepository.manager.transaction = jest.fn((cb: any) => cb(mockManager));
     pastoRepository.findOneBy.mockResolvedValue({ id: 'pasto-1', fazendaId: 'fazenda-1' });
     const module: TestingModule = await Test.createTestingModule({
@@ -220,6 +222,31 @@ describe('PartoService', () => {
       expect(chamadasDeMovimentacao[0][1]).toMatchObject({
         pastoId: 'pasto-1',
         dataEntrada: dto.data,
+      });
+    });
+      it('avisa os ganchos do rebanho do parto registrado (spec 004, R1)', async () => {
+      mockAnimalRepository.findOneBy.mockResolvedValue(matriz);
+      mockManager.create.mockImplementation((_entidade: any, entrada: any) => entrada);
+      mockManager.save.mockImplementation((entrada: any) =>
+        Promise.resolve({ id: 'parto-9', ...entrada }),
+      );
+      mockManager.findOne.mockResolvedValue({ id: 'parto-9', crias: [] });
+      const gancho = jest.fn();
+      ganchosRebanho.registrar('partoRegistrado', gancho);
+
+      await service.create(fazendaId, usuarioLogadoId, {
+        maeId: 'matriz-1',
+        data: '2026-01-01',
+        tipo: TipoParto.NORMAL,
+        resultado: ResultadoParto.NATIMORTO,
+      } as any);
+
+      expect(gancho).toHaveBeenCalledWith(mockManager, {
+        fazendaId,
+        maeId: 'matriz-1',
+        partoId: 'parto-9',
+        data: '2026-01-01',
+        usuarioId: usuarioLogadoId,
       });
     });
   });

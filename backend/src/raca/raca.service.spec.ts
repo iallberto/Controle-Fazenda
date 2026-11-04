@@ -32,7 +32,33 @@ describe('RacaService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('create', () => {
+  describe('onModuleInit (raças padrão)', () => {
+    it('cria as quatro raças leiteiras padrão com a gestação média (spec 004, FR-030)', async () => {
+      mockRepository.findOneBy.mockResolvedValue(null);
+      mockRepository.create.mockImplementation((x) => x);
+      await service.onModuleInit();
+      const criadas = mockRepository.save.mock.calls.map(([r]) => r);
+      expect(criadas).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ nome: 'Holandesa', gestacaoMediaDias: 280, leiteira: true, fazendaId: null }),
+          expect.objectContaining({ nome: 'Girolando', gestacaoMediaDias: 285, leiteira: true }),
+          expect.objectContaining({ nome: 'Jersey', gestacaoMediaDias: 279, leiteira: true }),
+          expect.objectContaining({ nome: 'Gir', gestacaoMediaDias: 290, leiteira: true }),
+          expect.objectContaining({ nome: 'Nelore', leiteira: false }),
+        ]),
+      );
+    });
+
+    it('corrige a marca leiteira de uma raça padrão que já existe', async () => {
+      mockRepository.findOneBy.mockImplementation(async ({ nome }) =>
+        nome === 'Gir' ? { id: 'r1', nome: 'Gir', leiteira: false } : { nome, leiteira: nome !== 'Nelore' && ['Holandesa', 'Girolando', 'Jersey'].includes(nome) },
+      );
+      await service.onModuleInit();
+      expect(mockRepository.save).toHaveBeenCalledWith(expect.objectContaining({ id: 'r1', nome: 'Gir', leiteira: true }));
+    });
+  });
+
+    describe('create', () => {
     it('cria uma raca customizada registrando quem criou', async () => {
       const fazendaId = 'fazenda-1';
       const usuarioLogadoId = 'usuario-logado-1';

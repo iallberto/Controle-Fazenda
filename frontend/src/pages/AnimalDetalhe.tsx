@@ -29,6 +29,7 @@ import { obterConfiguracao, type ValorArroba } from '../api/configuracao';
 import { Aviso, type EstadoAviso } from '../components/Aviso';
 import { LinhaDoTempoReprodutiva } from './reproducao/LinhaDoTempoReprodutiva';
 import { BlocoVendaDoAnimal } from '../modulos/financeiro/BlocoVendaDoAnimal';
+import { BlocoLeiteDoAnimal } from '../modulos/leite/BlocoLeiteDoAnimal';
 
 interface PartoComIntervalo extends Parto {
   diasDesdeUltimoParto: number | null;
@@ -143,6 +144,7 @@ export function AnimalDetalhe() {
       </section>
 
       <BlocoVendaDoAnimal animal={animal} />
+      <BlocoLeiteDoAnimal animal={animal} />
 
       <section>
         <h2>Identificação</h2>

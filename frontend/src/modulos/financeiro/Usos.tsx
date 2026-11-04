@@ -5,7 +5,7 @@ import { Aviso } from '../../components/Aviso';
 import { formatarData, rotuloBrinco } from '../../utils/formatadores';
 import { listarUsos, type RegistroUso, type SituacaoUso } from './api';
 import { useFinanceiro } from './FinanceiroContext';
-import { formatarQuantidade } from './meses';
+import { formatarQuantidade } from '../../utils/meses';
 
 const SITUACOES: Record<SituacaoUso, string> = {
   AGUARDANDO: 'aguardando valor',

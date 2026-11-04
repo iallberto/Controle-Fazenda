@@ -1,3 +1,4 @@
+import { ganchosRebanho } from '../common/ganchos-rebanho';
 import {
   Injectable,
   NotFoundException,
@@ -193,6 +194,14 @@ export class PartoService {
       }
       // Lactante com cria viva, Vazia em natimorto (FR-022)
       await recalcularStatusReprodutivo(manager, mae.id, usuarioLogadoId);
+      // Módulos pagos reagem ao parto (ex.: Leite abre a lactação, spec 004)
+      await ganchosRebanho.emitir('partoRegistrado', manager, {
+        fazendaId: mae.fazendaId,
+        maeId: mae.id,
+        partoId: partoSalvo.id,
+        data: dto.data,
+        usuarioId: usuarioLogadoId,
+      });
 
       return manager.findOne(Parto, {
         where: { id: partoSalvo.id },
@@ -275,8 +284,22 @@ export class PartoService {
     dto: UpdatePartoDto,
   ) {
     const parto = await this.findOne(fazendaId, id);
+    const dataAnterior = parto.data;
     Object.assign(parto, dto);
     parto.atualizadoPorId = usuarioLogadoId;
-    return this.partoRepository.save(parto);
+    return this.partoRepository.manager.transaction(async (manager) => {
+      const salvo = await manager.save(parto);
+      if (dto.data && dto.data !== dataAnterior) {
+        await ganchosRebanho.emitir('partoAlterado', manager, {
+          fazendaId,
+          maeId: parto.maeId,
+          partoId: parto.id,
+          dataAnterior,
+          dataNova: dto.data,
+          usuarioId: usuarioLogadoId,
+        });
+      }
+      return salvo;
+    });
   }
 }

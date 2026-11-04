@@ -1,3 +1,4 @@
+import { ganchosRebanho } from '../common/ganchos-rebanho';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { BadRequestException } from '@nestjs/common';
@@ -45,6 +46,14 @@ describe('ManejoLoteService', () => {
     jest.resetAllMocks();
     // Gancho da reprodução: sem estações abertas nos testes
     manager.find.mockResolvedValue([]);
+    ganchosRebanho.limpar();
+    manager.insert.mockImplementation((_e: unknown, linhas: unknown[]) =>
+      Promise.resolve({
+        identifiers: (Array.isArray(linhas) ? linhas : [linhas]).map((_, i) => ({
+          id: `id-${i}`,
+        })),
+      }),
+    );
     animalRepository.manager.transaction.mockImplementation(
       (cb: (m: typeof manager) => unknown) => cb(manager),
     );
@@ -111,6 +120,20 @@ describe('ManejoLoteService', () => {
   });
 
   describe('tratamentoEmLote', () => {
+    it('avisa os ganchos uma vez por animal tratado (spec 004, R1)', async () => {
+      const gancho = jest.fn();
+      ganchosRebanho.registrar('tratamentoGravado', gancho);
+      await service.tratamentoEmLote('f1', 'u1', tratamentoDto);
+      expect(gancho).toHaveBeenCalledTimes(2);
+      expect(gancho.mock.calls[0][1]).toMatchObject({
+        fazendaId: 'f1',
+        animalId: 'a10',
+        tratamentoId: 'id-0',
+        produto: 'Vacina aftosa',
+        novo: true,
+      });
+    });
+
     it('cria um tratamento por animal marcado, ligado a sessao, e guarda as excecoes', async () => {
       const resultado = await service.tratamentoEmLote(
         'f1',

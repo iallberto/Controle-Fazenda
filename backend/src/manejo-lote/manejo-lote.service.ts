@@ -1,3 +1,4 @@
+import { ganchosRebanho } from '../common/ganchos-rebanho';
 import {
   BadRequestException,
   Injectable,
@@ -83,7 +84,7 @@ export class ManejoLoteService {
         },
       );
 
-      await manager.insert(
+      const inseridos = await manager.insert(
         Tratamento,
         dto.animalIds.map((animalId) => ({
           animalId,
@@ -104,6 +105,18 @@ export class ManejoLoteService {
           sessaoManejoId: sessao.id,
         })),
       );
+      // Um aviso por animal, na mesma transação (spec 004, R1)
+      for (const [indice, animalId] of dto.animalIds.entries()) {
+        await ganchosRebanho.emitir('tratamentoGravado', manager, {
+          fazendaId,
+          animalId,
+          tratamentoId: String(inseridos.identifiers[indice]?.id),
+          produto: dto.produto,
+          data: dto.data,
+          usuarioId: usuarioLogadoId,
+          novo: true,
+        });
+      }
 
       return {
         sessaoId: sessao.id,

@@ -2,6 +2,7 @@ import { EntityManager, IsNull } from 'typeorm';
 import { Animal, StatusAnimal } from './entities/animal.entity';
 import { MovimentacaoPasto } from '../movimentacao-pasto/entities/movimentacao-pasto.entity';
 import { encerrarExposicoesPorSaida } from '../reproducao/saida';
+import { ganchosRebanho } from '../common/ganchos-rebanho';
 
 // Saída do rebanho (vendido, morto ou descartado), sempre na transação de quem
 // chama: fecha a permanência no pasto, tira o animal do pasto e encerra as
@@ -39,7 +40,15 @@ export async function registrarSaidaDoRebanho(
     saida: 'REBANHO',
     usuarioId,
   });
-  return manager.save(animal);
+  const salvo = await manager.save(animal);
+  // Módulos pagos reagem à saída (ex.: Leite encerra a lactação, spec 004)
+  await ganchosRebanho.emitir('saidaDoRebanho', manager, {
+    fazendaId: animal.fazendaId,
+    animalId: animal.id,
+    data,
+    usuarioId,
+  });
+  return salvo;
 }
 
 // Volta ao rebanho, quando uma venda é cancelada (spec 003, FR-015): o animal

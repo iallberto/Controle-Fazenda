@@ -1,3 +1,4 @@
+import { useProdutoComCarencia } from '../modulos/leite/useProdutoComCarencia';
 import { useEffect, useState, type FormEvent } from 'react';
 import { listarPastos, type Pasto } from '../api/pastos';
 import { listarAplicadores, type Aplicador } from '../api/usuarios';
@@ -27,6 +28,7 @@ type Acao = 'TRATAMENTO' | 'PASTO';
 // M4: escolher o grupo, conferir quem entra (todos marcados, exceções com motivo)
 // e aplicar o tratamento ou a mudança de pasto de uma vez.
 export function ManejoLote() {
+  const produtoLeite = useProdutoComCarencia();
   const { usuario } = useAuth();
   const [pastos, setPastos] = useState<Pasto[]>([]);
   const [aplicadores, setAplicadores] = useState<Aplicador[]>([]);
@@ -119,8 +121,8 @@ export function ManejoLote() {
       excecoes: Object.entries(excecoes).map(([animalId, motivo]) => ({ animalId, motivo })),
     };
 
-    setEnviando(true);
-    try {
+    // Com o Leite ativo, produto sem cadastro abre o cadastro rápido e repete (spec 004)
+    const executar = async () => {
       let texto: string;
       if (acao === 'TRATAMENTO') {
         const resultado = await aplicarTratamentoEmLote({
@@ -155,6 +157,12 @@ export function ManejoLote() {
       setExcecoes({});
       setProduto('');
       listarSessoes().then(setSessoes).catch(() => {});
+    };
+
+    setEnviando(true);
+    try {
+      if (acao === 'TRATAMENTO') await produtoLeite.enviar(executar, produto);
+      else await executar();
     } catch (erro) {
       setAviso({ tipo: 'erro', texto: mensagemDeErro(erro, 'Não foi possível aplicar o manejo.') });
     } finally {
@@ -167,6 +175,7 @@ export function ManejoLote() {
       <header>
         <h1>Manejo em lote</h1>
       </header>
+      {produtoLeite.elementos}
 
       <form onSubmit={handleCarregar}>
         <p className="passo">1. Escolha o grupo</p>
@@ -272,7 +281,13 @@ export function ManejoLote() {
             <>
               <div>
                 <label htmlFor="produto">Produto</label>
-                <input id="produto" value={produto} onChange={(e) => setProduto(e.target.value)} required />
+                <input
+                  id="produto"
+                  value={produto}
+                  onChange={(e) => setProduto(e.target.value)}
+                  required
+                  {...produtoLeite.atributosDoCampo}
+                />
               </div>
               <div>
                 <label htmlFor="data">Data</label>

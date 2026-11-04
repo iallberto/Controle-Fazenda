@@ -1,6 +1,7 @@
 import { registrarSaidaDoRebanho, voltarAoRebanho } from './saida-do-rebanho';
 import { Animal, StatusAnimal } from './entities/animal.entity';
 import { MovimentacaoPasto } from '../movimentacao-pasto/entities/movimentacao-pasto.entity';
+import { ganchosRebanho } from '../common/ganchos-rebanho';
 
 // Saída e volta ao rebanho (spec 003, research R2), usadas pela mudança de
 // status e pela venda do Financeiro
@@ -12,6 +13,31 @@ describe('saída e volta ao rebanho', () => {
     update: jest.fn(),
     create: jest.fn(),
   };
+
+  afterEach(() => ganchosRebanho.limpar());
+
+  it('registrarSaidaDoRebanho avisa os ganchos do rebanho (spec 004, R1)', async () => {
+    jest.resetAllMocks();
+    manager.save.mockImplementation(async (x: unknown) => x);
+    manager.find.mockResolvedValue([]);
+    manager.update.mockResolvedValue({ affected: 0 });
+    manager.findOne.mockResolvedValue(null);
+    const gancho = jest.fn();
+    ganchosRebanho.registrar('saidaDoRebanho', gancho);
+    await registrarSaidaDoRebanho(manager as never, {
+      animal: { id: 'a1', fazendaId: 'f1' } as Animal,
+      status: StatusAnimal.MORTO,
+      data: '2026-11-04',
+      motivo: 'Morte',
+      usuarioId: 'u1',
+    });
+    expect(gancho).toHaveBeenCalledWith(manager, {
+      fazendaId: 'f1',
+      animalId: 'a1',
+      data: '2026-11-04',
+      usuarioId: 'u1',
+    });
+  });
 
   beforeEach(() => {
     jest.resetAllMocks();

@@ -12,10 +12,15 @@ import { CreateRacaDto } from './dto/create-raca.dto';
 import { UpdateRacaDto } from './dto/update-raca.dto';
 
 const RACAS_PADRAO = [
-  { nome: 'Nelore', gestacaoMediaDias: 291 },
-  { nome: 'Simental', gestacaoMediaDias: 285 },
-  { nome: 'Angus', gestacaoMediaDias: 282 },
-  { nome: 'Brahman', gestacaoMediaDias: 292 },
+  { nome: 'Nelore', gestacaoMediaDias: 291, leiteira: false },
+  { nome: 'Simental', gestacaoMediaDias: 285, leiteira: false },
+  { nome: 'Angus', gestacaoMediaDias: 282, leiteira: false },
+  { nome: 'Brahman', gestacaoMediaDias: 292, leiteira: false },
+  // Raças leiteiras (spec 004, FR-030)
+  { nome: 'Holandesa', gestacaoMediaDias: 280, leiteira: true },
+  { nome: 'Girolando', gestacaoMediaDias: 285, leiteira: true },
+  { nome: 'Jersey', gestacaoMediaDias: 279, leiteira: true },
+  { nome: 'Gir', gestacaoMediaDias: 290, leiteira: true },
 ];
 
 @Injectable()
@@ -35,6 +40,9 @@ export class RacaService implements OnModuleInit {
         await this.racaRepository.save(
           this.racaRepository.create({ ...padrao, fazendaId: null, criadoPorId: null }),
         );
+      } else if (existe.leiteira !== padrao.leiteira) {
+        existe.leiteira = padrao.leiteira;
+        await this.racaRepository.save(existe);
       }
     }
   }

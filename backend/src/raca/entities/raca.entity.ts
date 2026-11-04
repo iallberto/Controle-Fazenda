@@ -27,6 +27,10 @@ export class Raca {
   @Column({ name: 'gestacao_media_dias', type: 'int' })
   gestacaoMediaDias: number;
 
+  // Raça leiteira (spec 004, FR-004a): o parto da vaca abre lactação no Leite
+  @Column({ default: false })
+  leiteira: boolean;
+
   @ManyToOne(() => Usuario, { nullable: true })
   @JoinColumn({ name: 'criado_por' })
   criadoPor?: Usuario;

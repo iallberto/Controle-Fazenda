@@ -3,9 +3,9 @@ import { mensagemDeErro } from '../../api/client';
 import { Aviso } from '../../components/Aviso';
 import { formatarCategoria, formatarReais } from '../../utils/formatadores';
 import { buscarResultado, type DespesasPorCategoria, type ResultadoMensal, type ResultadoVendas } from './api';
-import { GraficoMensal } from './graficos/GraficoMensal';
-import { GraficoLinha } from './graficos/GraficoLinha';
-import { mesAtual, nomeCurtoDoMes, nomeDoMes, somarMeses } from './meses';
+import { GraficoMensal } from '../../components/graficos/GraficoMensal';
+import { GraficoLinha } from '../../components/graficos/GraficoLinha';
+import { mesAtual, nomeCurtoDoMes, nomeDoMes, somarMeses } from '../../utils/meses';
 
 const PERIODOS = [3, 6, 12, 24, 36];
 
@@ -70,7 +70,19 @@ export function Resultado() {
                 {formatarReais(dados.mensal.totais.lucroCentavos)}
               </dd>
             </dl>
-            <GraficoMensal meses={dados.mensal.meses} />
+            <GraficoMensal
+              grupos={dados.mensal.meses.map((m) => ({
+                chave: m.mes,
+                rotulo: nomeCurtoDoMes(m.mes),
+                valores: [m.receitaCentavos, m.despesaCentavos],
+              }))}
+              series={[
+                { rotulo: 'Receitas', classe: 'barra-receita', classeLegenda: 'legenda-receita' },
+                { rotulo: 'Despesas', classe: 'barra-despesa', classeLegenda: 'legenda-despesa' },
+              ]}
+              formatar={formatarReais}
+              rotuloAria="Receitas e despesas por mês"
+            />
             <div className="tabela-rolavel">
               <table className="tabela-resultado">
                 <thead>
@@ -137,7 +149,14 @@ export function Resultado() {
                 </ul>
                 <h3>Preço médio da arroba</h3>
                 <GraficoLinha
-                  pontos={dados.vendas.arrobaPorMes.map((m) => ({ mes: m.mes, valor: m.precoMedioArrobaCentavos }))}
+                  pontos={dados.vendas.arrobaPorMes.map((m) => ({
+                    chave: m.mes,
+                    rotulo: nomeCurtoDoMes(m.mes),
+                    valor: m.precoMedioArrobaCentavos,
+                  }))}
+                  formatar={(v) => `${formatarReais(v)} a arroba`}
+                  rotuloAria="Preço médio da arroba por mês"
+                  vazio="Sem vendas com peso no período."
                 />
                 <ul>
                   {dados.vendas.arrobaPorMes

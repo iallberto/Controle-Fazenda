@@ -14,7 +14,7 @@ import {
   type RegistroUso,
 } from './api';
 import { useFinanceiro } from './FinanceiroContext';
-import { formatarQuantidade } from './meses';
+import { formatarQuantidade } from '../../utils/meses';
 
 // Pendências do dono (spec 003, FR-016c, FR-024): usos dos funcionários que
 // esperam o valor e animais comprados cadastrados sem valor.

@@ -13,6 +13,7 @@ import { useAuth } from '../../contexts/useAuth';
 import { useModulos } from '../../contexts/useModulos';
 import { formatarData, ROTULOS_MODULO } from '../../utils/formatadores';
 import { FinanceiroRotas } from '../financeiro/FinanceiroRotas';
+import { LeiteRotas } from '../leite/LeiteRotas';
 
 // O que cada módulo faz, para a vitrine (docs/modulos/Planejamento-modulos.md)
 const DESCRICOES: Record<ModuloPago, string[]> = {
@@ -56,6 +57,9 @@ export function RotaDeModulo() {
   // Módulos já construídos abrem as próprias telas; os outros, a página de espera
   if (modulo === 'FINANCEIRO') {
     return <FinanceiroRotas soConsulta={situacao.situacao === 'SO_CONSULTA'} />;
+  }
+  if (modulo === 'LEITE') {
+    return <LeiteRotas soConsulta={situacao.situacao === 'SO_CONSULTA'} />;
   }
   return <TelaDeEspera situacao={situacao} />;
 }

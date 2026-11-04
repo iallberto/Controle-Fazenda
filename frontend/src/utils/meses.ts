@@ -1,4 +1,4 @@
-import { hojeLocal } from '../../utils/datas';
+import { hojeLocal } from './datas';
 
 const NOMES = [
   'janeiro',

@@ -13,6 +13,7 @@ import { CreateTratamentoDto } from './dto/create-tratamento.dto';
 import { UpdateTratamentoDto } from './dto/update-tratamento.dto';
 import { garantirAnimalAtivo } from '../common/vinculos';
 import { formatarDataLocal } from '../common/datas';
+import { ganchosRebanho } from '../common/ganchos-rebanho';
 
 @Injectable()
 export class TratamentoService {
@@ -54,7 +55,20 @@ export class TratamentoService {
         dto.aplicadoPorTipo === AplicadoPorTipo.VETERINARIO ? dto.aplicadoPorVeterinarioId! : null,
       lancadoPorId: usuarioLogadoId,
     });
-    return this.tratamentoRepository.save(tratamento);
+    // Na mesma transação dos ganchos: o Leite pode recusar o produto (spec 004, R6)
+    return this.tratamentoRepository.manager.transaction(async (manager) => {
+      const salvo = await manager.save(tratamento);
+      await ganchosRebanho.emitir('tratamentoGravado', manager, {
+        fazendaId,
+        animalId: salvo.animalId,
+        tratamentoId: salvo.id,
+        produto: salvo.produto,
+        data: salvo.data,
+        usuarioId: usuarioLogadoId,
+        novo: true,
+      });
+      return salvo;
+    });
   }
 
   async findAll(fazendaId: string, animalId?: string) {
@@ -112,7 +126,19 @@ export class TratamentoService {
     tratamento.proximaDataPrevista = this.calcularProximaData(novaData, novaRecorrencia);
 
     tratamento.atualizadoPorId = usuarioLogadoId;
-    return this.tratamentoRepository.save(tratamento);
+    return this.tratamentoRepository.manager.transaction(async (manager) => {
+      const salvo = await manager.save(tratamento);
+      await ganchosRebanho.emitir('tratamentoGravado', manager, {
+        fazendaId,
+        animalId: tratamento.animalId,
+        tratamentoId: tratamento.id,
+        produto: tratamento.produto,
+        data: tratamento.data,
+        usuarioId: usuarioLogadoId,
+        novo: false,
+      });
+      return salvo;
+    });
   }
 
   // Público para o manejo em lote validar o aplicador uma vez só
