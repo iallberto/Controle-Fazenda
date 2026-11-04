@@ -306,3 +306,26 @@ export class CriarAnaliseDto {
   @Max(20)
   proteina?: number;
 }
+
+// --- Relatórios (FR-026 a FR-028) --------------------------------------------
+
+export class FiltroDiariaDto {
+  @IsOptional()
+  @IsDateString({ strict: true })
+  de?: string;
+
+  @IsOptional()
+  @IsDateString({ strict: true })
+  ate?: string;
+}
+
+export class FiltroCurvaDto {
+  @IsOptional()
+  @IsUUID()
+  lactacaoId?: string;
+}
+
+export class FiltroEncerradasDto {
+  @IsUUID()
+  animalId: string;
+}

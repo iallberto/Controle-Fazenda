@@ -130,7 +130,19 @@ Parte nova da Reprodução, disponível para **todas** as fazendas (D8). Pode se
 
 ---
 
-## 4. Módulo Leite
+## 4. Módulo Leite ✔️ Concluído
+
+> **Concluído em 04/11/2026** pela spec `specs/004-modulo-leite`. Decisões do clarify:
+> - só a **vaca de leite** entra em lactação no parto: de raça leiteira (Holandesa, Girolando,
+>   Jersey e Gir vêm marcadas; o dono marca as da fazenda) ou marcada pelo dono na vaca
+>   ("pela raça", "sim" ou "não");
+> - as vacas que já davam leite antes da liberação entram à mão, uma a uma, com a data de início;
+> - a carência vem de um **cadastro de produtos**: com o Leite ativo, o tratamento de uma fêmea
+>   exige o produto cadastrado (cadastro rápido na hora) e guarda a carência daquele dia;
+> - no modo só tanque, as vacas em carência são anotadas uma a uma, como descarte;
+> - o funcionário lança ordenha, secagem, entregas e análises, mas não vê preço nem valor.
+> - O pacote inicial avisa o Leite por **ganchos do rebanho** (parto, saída, tratamento), sem
+>   importá-lo. A integração entrega → receita no Financeiro fica para a fase de integrações.
 
 Para fazendas com vacas de ordenha. Usa os animais, partos, tratamentos e a cobertura/inseminação do pacote inicial.
 

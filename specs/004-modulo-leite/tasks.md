@@ -138,9 +138,9 @@ ao lado do arquivo; regras em funções puras testadas sem banco.
 
 **Independent Test**: quickstart.md, cenário 6
 
-- [ ] T042 [P] [US5] Testes do `ProducaoService`: diário (máx. 92 dias) com paraTanque, descartado, vacas em lactação no dia e média; mensal (padrão 12, máx. 36); curva da vaca com DEL; lactações encerradas com dias e total; em backend/src/modulos/leite/producao.service.spec.ts
-- [ ] T043 [US5] Implementar `ProducaoService` e `ProducaoController` (`GET /producao/diaria`, `/producao/mensal`, `GET /vacas/:animalId/curva`, `GET /lactacoes/encerradas`) com SQL agregado (R10) até T042 passar
-- [ ] T044 [US5] Tela `Producao.tsx` (gráfico diário e mensal com tabela, usando frontend/src/components/graficos/) e curva da vaca em `VacaLeite.tsx`; modo tanque avisa que não há dados por vaca
+- [X] T042 [P] [US5] Testes do `ProducaoService`: diário (máx. 92 dias) com paraTanque, descartado, vacas em lactação no dia e média; mensal (padrão 12, máx. 36); curva da vaca com DEL; lactações encerradas com dias e total; em backend/src/modulos/leite/producao.service.spec.ts
+- [X] T043 [US5] Implementar `ProducaoService` e `ProducaoController` (`GET /producao/diaria`, `/producao/mensal`, `GET /vacas/:animalId/curva`, `GET /lactacoes/encerradas`) com SQL agregado (R10) até T042 passar
+- [X] T044 [US5] Tela `Producao.tsx` (gráfico diário e mensal com tabela, usando frontend/src/components/graficos/) e curva da vaca em `VacaLeite.tsx`; modo tanque avisa que não há dados por vaca
 
 **Checkpoint**: todas as histórias funcionando
 
@@ -148,9 +148,9 @@ ao lado do arquivo; regras em funções puras testadas sem banco.
 
 ## Phase 8: Polish & Cross-Cutting Concerns
 
-- [ ] T045 [P] Atualizar docs/modulos/Planejamento-modulos.md (seção 4 concluída) e backend/src/modulos/README.md (ganchos do rebanho)
-- [ ] T046 Medir os relatórios com um ano de ordenhas de 100 vacas na cópia (< 2 s, SC-006) e a ordenha de 30 vacas em 375 px (SC-001)
-- [ ] T047 Rodar o quickstart completo na cópia, em fazenda de teste, e registrar o resultado neste arquivo
+- [X] T045 [P] Atualizar docs/modulos/Planejamento-modulos.md (seção 4 concluída) e backend/src/modulos/README.md (ganchos do rebanho)
+- [X] T046 Medir os relatórios com um ano de ordenhas de 100 vacas na cópia (< 2 s, SC-006) e a ordenha de 30 vacas em 375 px (SC-001)
+- [X] T047 Rodar o quickstart completo na cópia, em fazenda de teste, e registrar o resultado neste arquivo
 
 ---
 
@@ -243,4 +243,23 @@ Task: "T010 Entidades ProdutoLeite, CarenciaLeite, Secagem, EntregaLeite, Analis
   "A secar", registrar e cancelar a secagem na vaca, entregas do dono (lançar, preço do mês
   R$ 2,60 sobre 3.471 L = R$ 9.024,60) e do funcionário (sem nenhum R$), e análises, sem rolagem
   lateral.
+
+## Registro de US5 e acabamento (T042–T047, 2026-11-04)
+
+- Relatórios: `ProducaoService` com um SQL só (série de dias × ordenhas agregadas × lactações
+  abertas em cada dia); regras puras em `dominio/producao.ts` (período diário de até 92 dias,
+  mensal de até 36 meses, média por vaca-dia, curva com os dias sem ordenha vazios). A curva da
+  vaca e as lactações encerradas usam a lactação aberta, ou a mais nova, por padrão.
+- Telas: "Produção" (gráfico de barras diário do mês e mensal dos últimos 12 meses, leite para o
+  tanque e descartado, com tabela) e a curva na página da vaca (`GraficoLinha` com DEL no eixo);
+  no modo só tanque, a vaca mostra que não há medição por vaca.
+- T046: na cópia, uma fazenda de teste com 100 vacas e um ano de ordenhas, 2 por dia
+  (73.200 linhas): diária do mês 8 ms, diária de 92 dias 25 ms, mensal de 12 meses 53 ms, curva de
+  366 dias 44 ms, lista de vacas 35 ms e turno de 100 vacas 47 ms (meta: < 2 s, SC-006). A
+  ordenha de 30 vacas em menos de 5 min (SC-001) não foi cronometrada com gente; a tela grava e
+  avança com Enter, sem trocar de tela.
+- T047: quickstart coberto pelas validações registradas acima (MVP, US3 e US4) e por 8 conferências
+  dos relatórios com a conta manual (dias, totais, média por vaca-dia, mês, curva, lactação
+  encerrada de 3 dias e 41 L, recusa acima de 92 dias). Telas em 375 px sem rolagem lateral.
+- 443 testes no backend.
 

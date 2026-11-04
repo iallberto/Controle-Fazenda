@@ -2,16 +2,19 @@ import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { mensagemDeErro } from '../../api/client';
 import { Aviso, type EstadoAviso } from '../../components/Aviso';
+import { GraficoLinha } from '../../components/graficos/GraficoLinha';
 import { formatarData } from '../../utils/formatadores';
 import { hojeLocal } from '../../utils/datas';
 import {
   alterarVacaDeLeite,
+  buscarCurva,
   buscarVaca,
   cancelarSecagem,
   registrarSecagem,
   formatarLitros,
   iniciarLactacao,
   type VacaDeLeite,
+  type CurvaLactacao,
   type VacaDetalhe,
 } from './api';
 import { useLeite } from './LeiteContext';
@@ -34,6 +37,7 @@ export function VacaLeite() {
   const { animalId = '' } = useParams<{ animalId: string }>();
   const { soConsulta, ehDono } = useLeite();
   const [vaca, setVaca] = useState<VacaDetalhe | null>(null);
+  const [curva, setCurva] = useState<CurvaLactacao | null>(null);
   const [erro, setErro] = useState('');
   const [aviso, setAviso] = useState<EstadoAviso>(null);
   const [inicio, setInicio] = useState(hojeLocal());
@@ -43,6 +47,10 @@ export function VacaLeite() {
     buscarVaca(animalId)
       .then(setVaca)
       .catch((e) => setErro(mensagemDeErro(e)));
+    buscarCurva(animalId)
+      .then(setCurva)
+      // Vaca sem lactação: sem curva
+      .catch(() => setCurva(null));
   }, [animalId]);
 
   useEffect(carregar, [carregar]);
@@ -217,6 +225,31 @@ export function VacaLeite() {
             </form>
           </section>
         )
+      )}
+
+      {curva && (
+        <section>
+          <h2>Curva da lactação {curva.fim ? `(${formatarData(curva.inicio)} a ${formatarData(curva.fim)})` : 'atual'}</h2>
+          {curva.pontos.some((p) => p.litros !== null) ? (
+            <GraficoLinha
+              pontos={curva.pontos.map((p) => ({
+                chave: p.data,
+                rotulo: String(p.del),
+                valor: p.litros,
+              }))}
+              formatar={(v) => `${formatarLitros(v)} no dia`}
+              rotuloAria="Litros por dia em lactação"
+              vazio=""
+              larguraPonto={curva.pontos.length > 60 ? 6 : 14}
+              cadaRotulo={curva.pontos.length > 60 ? 30 : 7}
+            />
+          ) : (
+            <p className="dica">
+              Sem ordenhas desta vaca nesta lactação. No modo só tanque o leite não é medido vaca a vaca.
+            </p>
+          )}
+          <p className="dica">Eixo de baixo: dias em lactação (DEL).</p>
+        </section>
       )}
 
       {vaca.encerradas.length > 0 && (

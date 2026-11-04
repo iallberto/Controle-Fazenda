@@ -326,3 +326,49 @@ export async function criarAnalise(dados: {
 export async function cancelarAnalise(id: string, motivo: string) {
   return (await apiClient.post(`${BASE}/analises/${id}/cancelar`, { motivo })).data;
 }
+
+// --- Relatórios (US5) --------------------------------------------------------
+
+export interface LinhaProducao {
+  paraTanque: number;
+  descartado: number;
+  total: number;
+  mediaPorVaca: number | null;
+}
+
+export interface ProducaoDiaria {
+  de: string;
+  ate: string;
+  dias: (LinhaProducao & { data: string; vacasEmLactacao: number })[];
+  totais: LinhaProducao;
+}
+
+export interface ProducaoMensal {
+  de: string;
+  ate: string;
+  meses: (LinhaProducao & { mes: string })[];
+  totais: LinhaProducao;
+}
+
+export interface CurvaLactacao {
+  lactacaoId: string;
+  inicio: string;
+  fim: string | null;
+  pontos: { data: string; del: number; litros: number | null; descarte: boolean }[];
+}
+
+export async function buscarProducaoDiaria(de?: string, ate?: string) {
+  return (await apiClient.get<ProducaoDiaria>(`${BASE}/producao/diaria`, { params: { de, ate } })).data;
+}
+
+export async function buscarProducaoMensal() {
+  return (await apiClient.get<ProducaoMensal>(`${BASE}/producao/mensal`)).data;
+}
+
+export async function buscarCurva(animalId: string, lactacaoId?: string) {
+  return (
+    await apiClient.get<CurvaLactacao>(`${BASE}/vacas/${animalId}/curva`, {
+      params: lactacaoId ? { lactacaoId } : {},
+    })
+  ).data;
+}
