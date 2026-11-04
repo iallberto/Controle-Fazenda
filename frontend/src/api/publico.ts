@@ -20,11 +20,21 @@ export interface AnimalPublico {
   tratamentos: { produto: string; data: string }[];
 }
 
-export interface ConsultaPublica {
-  situacao: 'ATIVO' | 'FORA_DO_REBANHO' | 'ETIQUETA_SUBSTITUIDA';
-  fazenda: { nome: string };
-  animal: AnimalPublico | null;
-}
+// Fazenda suspensa pelo administrador: só o básico, sem pesos nem histórico
+// (spec 002, FR-028)
+export type AnimalPublicoBasico = Pick<AnimalPublico, 'brinco' | 'raca' | 'sexo' | 'categoria'>;
+
+export type ConsultaPublica =
+  | {
+      situacao: 'ATIVO' | 'FORA_DO_REBANHO' | 'ETIQUETA_SUBSTITUIDA';
+      fazenda: { nome: string };
+      animal: AnimalPublico | null;
+    }
+  | {
+      situacao: 'FAZENDA_SUSPENSA';
+      fazenda: { nome: string };
+      animal: AnimalPublicoBasico;
+    };
 
 // Rota sem login, usada por quem escaneia o QR da etiqueta
 export async function consultarAnimalPublico(codigo: string): Promise<ConsultaPublica> {

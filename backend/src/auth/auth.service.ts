@@ -2,6 +2,7 @@ import {
   Injectable,
   UnauthorizedException,
   ConflictException,
+  ForbiddenException,
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
@@ -13,6 +14,7 @@ import { Usuario, PapelUsuario } from '../usuario/entities/usuario.entity';
 import { Fazenda } from '../fazenda/entities/fazenda.entity';
 import { LoginDto } from './dto/login.dto';
 import { RegistrarFazendaDto } from './dto/registrar-fazenda.dto';
+import { ACESSO_SUSPENSO } from './strategies/jwt.strategy';
 
 export interface JwtPayload {
   sub: string;
@@ -39,7 +41,10 @@ export class AuthService {
   async login(dto: LoginDto) {
     this.garantirLoginNaoBloqueado(dto.email);
 
-    const usuario = await this.usuarioRepository.findOneBy({ email: dto.email });
+    const usuario = await this.usuarioRepository.findOne({
+      where: { email: dto.email },
+      relations: { fazenda: true },
+    });
     const senhaConfere = usuario ? await bcrypt.compare(dto.senha, usuario.senhaHash) : false;
     if (!usuario || !senhaConfere) {
       this.registrarFalhaLogin(dto.email);
@@ -47,6 +52,10 @@ export class AuthService {
     }
     if (!usuario.ativo) {
       throw new UnauthorizedException('Este usuário está desativado');
+    }
+    // Fazenda suspensa pelo administrador: ninguém dela entra (spec 002, FR-026)
+    if (usuario.fazenda?.suspensa) {
+      throw new ForbiddenException(ACESSO_SUSPENSO);
     }
     this.falhasLogin.delete(dto.email);
 

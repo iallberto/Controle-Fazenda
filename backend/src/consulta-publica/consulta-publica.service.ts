@@ -5,7 +5,11 @@ import {
   CodigoIdentificacao,
   StatusCodigo,
 } from '../codigo-identificacao/entities/codigo-identificacao.entity';
-import { Animal, CategoriaAnimal, StatusAnimal } from '../animal/entities/animal.entity';
+import {
+  Animal,
+  CategoriaAnimal,
+  StatusAnimal,
+} from '../animal/entities/animal.entity';
 import { Pesagem } from '../pesagem/entities/pesagem.entity';
 import { Tratamento } from '../tratamento/entities/tratamento.entity';
 import { calcularGmd } from '../pesagem/gmd';
@@ -15,7 +19,10 @@ import { ValorArrobaCategoria } from '../configuracao/entities/valor-arroba-cate
 // ATIVO: animal no rebanho, dados exibidos
 // FORA_DO_REBANHO: animal vendido, morto ou descartado; nenhum dado do animal é exibido
 // ETIQUETA_SUBSTITUIDA: a etiqueta foi trocada por outra (reemissão)
-export type SituacaoConsulta = 'ATIVO' | 'FORA_DO_REBANHO' | 'ETIQUETA_SUBSTITUIDA';
+// FAZENDA_SUSPENSA: fazenda suspensa pelo administrador; só os dados básicos
+//   do animal, sem pesos nem histórico (spec 002, FR-028)
+export type SituacaoConsulta =
+  'ATIVO' | 'FORA_DO_REBANHO' | 'ETIQUETA_SUBSTITUIDA' | 'FAZENDA_SUSPENSA';
 
 const FORMATO_CODIGO = /^[0-9a-f]{8}$/;
 
@@ -49,13 +56,21 @@ export class ConsultaPublicaService {
       where: { codigo: texto },
       relations: { fazenda: true },
     });
-    if (!registro || registro.status === StatusCodigo.DISPONIVEL || !registro.animalId) {
+    if (
+      !registro ||
+      registro.status === StatusCodigo.DISPONIVEL ||
+      !registro.animalId
+    ) {
       throw new NotFoundException('Etiqueta não encontrada');
     }
 
     const fazenda = { nome: registro.fazenda.nome };
     if (registro.status === StatusCodigo.DESATIVADO) {
-      return { situacao: 'ETIQUETA_SUBSTITUIDA' as SituacaoConsulta, fazenda, animal: null };
+      return {
+        situacao: 'ETIQUETA_SUBSTITUIDA' as SituacaoConsulta,
+        fazenda,
+        animal: null,
+      };
     }
 
     const animal = await this.animalRepository.findOne({
@@ -66,7 +81,23 @@ export class ConsultaPublicaService {
       throw new NotFoundException('Etiqueta não encontrada');
     }
     if (animal.status !== StatusAnimal.ATIVO) {
-      return { situacao: 'FORA_DO_REBANHO' as SituacaoConsulta, fazenda, animal: null };
+      return {
+        situacao: 'FORA_DO_REBANHO' as SituacaoConsulta,
+        fazenda,
+        animal: null,
+      };
+    }
+    if (registro.fazenda.suspensa) {
+      return {
+        situacao: 'FAZENDA_SUSPENSA' as SituacaoConsulta,
+        fazenda,
+        animal: {
+          brinco: animal.brinco,
+          raca: animal.raca?.nome ?? null,
+          sexo: animal.sexo,
+          categoria: animal.categoria,
+        },
+      };
     }
 
     const pesagens = await this.pesagemRepository.find({
@@ -75,7 +106,10 @@ export class ConsultaPublicaService {
       order: { data: 'ASC', criadoEm: 'ASC' },
     });
     const historicoPesagens = calcularGmd(
-      pesagens.map((pesagem) => ({ data: pesagem.data, pesoKg: Number(pesagem.pesoKg) })),
+      pesagens.map((pesagem) => ({
+        data: pesagem.data,
+        pesoKg: Number(pesagem.pesoKg),
+      })),
     );
 
     const tratamentos = await this.tratamentoRepository.find({
@@ -119,11 +153,16 @@ export class ConsultaPublicaService {
 
   // Usa o peso da arroba que a fazenda configurou para a categoria do animal
   // (Configurações → Peso de referência da arroba). Uma casa decimal.
-  private async converterEmArrobas(fazendaId: string, categoria: CategoriaAnimal, pesoKg: number) {
+  private async converterEmArrobas(
+    fazendaId: string,
+    categoria: CategoriaAnimal,
+    pesoKg: number,
+  ) {
     const referencia = await this.valorArrobaRepository.findOne({
       where: { configuracaoFazenda: { fazendaId }, categoria },
     });
-    const kgPorArroba = Number(referencia?.pesoReferenciaKg) || KG_POR_ARROBA_PADRAO;
+    const kgPorArroba =
+      Number(referencia?.pesoReferenciaKg) || KG_POR_ARROBA_PADRAO;
     return Math.round((pesoKg / kgPorArroba) * 10) / 10;
   }
 }

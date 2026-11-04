@@ -154,4 +154,22 @@ describe('ConsultaPublicaService', () => {
 
     expect(resultado.animal?.pesoAtual?.arrobas).toBe(30);
   });
+
+  it('fazenda suspensa: só fazenda, brinco, raça, sexo e categoria (spec 002, FR-028)', async () => {
+    codigoRepository.findOne.mockResolvedValue({
+      ...registroVinculado,
+      fazenda: { ...registroVinculado.fazenda, suspensa: true },
+    });
+    animalRepository.findOne.mockResolvedValue(animalAtivo);
+
+    const resultado = await service.consultar('d9459e89');
+
+    expect(resultado).toEqual({
+      situacao: 'FAZENDA_SUSPENSA',
+      fazenda: { nome: 'Fazenda Boa Vista' },
+      animal: { brinco: '240', raca: 'Nelore', sexo: 'F', categoria: 'NOVILHA' },
+    });
+    expect(pesagemRepository.find).not.toHaveBeenCalled();
+    expect(tratamentoRepository.find).not.toHaveBeenCalled();
+  });
 });

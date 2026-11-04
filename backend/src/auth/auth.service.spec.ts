@@ -12,6 +12,7 @@ describe('AuthService', () => {
 
   const mockUsuarioRepository = {
     findOneBy: jest.fn(),
+    findOne: jest.fn(),
   };
 
   const mockJwtService = {
@@ -41,7 +42,7 @@ describe('AuthService', () => {
 
   describe('login', () => {
     it('bloqueia o e-mail depois de 5 tentativas erradas', async () => {
-      mockUsuarioRepository.findOneBy.mockResolvedValue(null);
+      mockUsuarioRepository.findOne.mockResolvedValue(null);
       const dto = { email: 'alguem@teste.com', senha: 'errada' };
 
       for (let i = 0; i < 5; i++) {
@@ -52,11 +53,27 @@ describe('AuthService', () => {
 
     it('rejeita usuario desativado mesmo com a senha certa', async () => {
       const senhaHash = await bcrypt.hash('certa', 4);
-      mockUsuarioRepository.findOneBy.mockResolvedValue({ id: 'u1', senhaHash, ativo: false });
+      mockUsuarioRepository.findOne.mockResolvedValue({ id: 'u1', senhaHash, ativo: false });
 
       await expect(service.login({ email: 'u@teste.com', senha: 'certa' })).rejects.toThrow(
         'desativado',
       );
+    });
+
+    it('rejeita usuario de fazenda suspensa com 403 ACESSO_SUSPENSO (spec 002, FR-026)', async () => {
+      const senhaHash = await bcrypt.hash('certa', 4);
+      mockUsuarioRepository.findOne.mockResolvedValue({
+        id: 'u1',
+        senhaHash,
+        ativo: true,
+        fazenda: { suspensa: true },
+      });
+
+      await expect(service.login({ email: 'u@teste.com', senha: 'certa' })).rejects.toMatchObject({
+        status: 403,
+        response: expect.objectContaining({ codigo: 'ACESSO_SUSPENSO' }),
+      });
+      expect(mockJwtService.sign).not.toHaveBeenCalled();
     });
   });
 });

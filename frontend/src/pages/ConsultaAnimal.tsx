@@ -63,6 +63,22 @@ export function ConsultaAnimal() {
     );
   }
 
+  if (consulta.situacao === 'FAZENDA_SUSPENSA') {
+    const basico = consulta.animal;
+    return (
+      <div className="pagina-publica">
+        <p className="publica-fazenda">{consulta.fazenda.nome}</p>
+        <h1>Brinco {formatarNumeroEtiqueta(basico.brinco)}</h1>
+        <p className="publica-resumo">
+          {[formatarCategoria(basico.categoria), basico.raca, formatarSexo(basico.sexo)]
+            .filter(Boolean)
+            .join(' · ')}
+        </p>
+        <Aviso tipo="atencao">Informações completas indisponíveis no momento.</Aviso>
+      </div>
+    );
+  }
+
   const { fazenda, animal, situacao } = consulta;
 
   if (situacao !== 'ATIVO' || !animal) {

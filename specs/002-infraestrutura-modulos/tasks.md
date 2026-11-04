@@ -111,25 +111,25 @@ arquivo; funções puras testadas sem banco. As migrations são validadas numa c
 
 ### Tests for User Story 2
 
-- [ ] T026 [P] [US2] Testes do `AdminAuthService`: login certo emite token com `aud: 'admin'`; senha errada → 401 e tentativa gravada; 5 falhas seguidas em 15 min → 429 mesmo com a senha certa; falha antiga fora da janela não conta; administrador inativo → 401; em backend/src/modulos/admin/admin-auth.service.spec.ts
-- [ ] T027 [P] [US2] Testes do `AdminFazendasService`: listar com busca e sem dados de rebanho; liberar (400 término < início; 409 com período vigente ou futuro; permite novo período depois de desativado ou vencido); desativar (400 se já desativado); suspender (motivo obrigatório; 400 se já suspensa; não altera módulos); reativar; cada ação limpa o cache e grava quem fez; em backend/src/modulos/admin/admin-fazendas.service.spec.ts
-- [ ] T028 [P] [US2] Testes da suspensão no acesso da fazenda: `JwtStrategy` recusa token com `aud: 'admin'` e usuário de fazenda suspensa (403 `ACESSO_SUSPENSO`); `AuthService.login` recusa fazenda suspensa; em backend/src/auth/strategies/jwt.strategy.spec.ts e backend/src/auth/auth.service.spec.ts
-- [ ] T029 [P] [US2] Teste da página pública de fazenda suspensa: situação `FAZENDA_SUSPENSA` só com fazenda, brinco, raça, sexo e categoria (FR-028), em backend/src/consulta-publica/consulta-publica.service.spec.ts
+- [X] T026 [P] [US2] Testes do `AdminAuthService`: login certo emite token com `aud: 'admin'`; senha errada → 401 e tentativa gravada; 5 falhas seguidas em 15 min → 429 mesmo com a senha certa; falha antiga fora da janela não conta; administrador inativo → 401; em backend/src/modulos/admin/admin-auth.service.spec.ts
+- [X] T027 [P] [US2] Testes do `AdminFazendasService`: listar com busca e sem dados de rebanho; liberar (400 término < início; 409 com período vigente ou futuro; permite novo período depois de desativado ou vencido); desativar (400 se já desativado); suspender (motivo obrigatório; 400 se já suspensa; não altera módulos); reativar; cada ação limpa o cache e grava quem fez; em backend/src/modulos/admin/admin-fazendas.service.spec.ts
+- [X] T028 [P] [US2] Testes da suspensão no acesso da fazenda: `JwtStrategy` recusa token com `aud: 'admin'` e usuário de fazenda suspensa (403 `ACESSO_SUSPENSO`); `AuthService.login` recusa fazenda suspensa; em backend/src/auth/strategies/jwt.strategy.spec.ts e backend/src/auth/auth.service.spec.ts
+- [X] T029 [P] [US2] Teste da página pública de fazenda suspensa: situação `FAZENDA_SUSPENSA` só com fazenda, brinco, raça, sexo e categoria (FR-028), em backend/src/consulta-publica/consulta-publica.service.spec.ts
 
 ### Implementation for User Story 2
 
-- [ ] T030 [US2] Criar a estratégia `jwt-admin` (valida `aud: 'admin'` e o administrador ativo), o `AdminJwtGuard` e o decorator `@AreaAdmin()`, e ajustar backend/src/auth/guards/jwt-auth.guard.ts para entregar rotas `@AreaAdmin` ao guard do administrador; emitir os tokens de fazenda com `aud: 'fazenda'` e fazer a `JwtStrategy` recusar `aud: 'admin'` (R6)
-- [ ] T031 [US2] Implementar `AdminAuthService` e `AdminAuthController` (`POST /admin/auth/login`, público, com tentativas gravadas e bloqueio) em backend/src/modulos/admin/ até T026 passar
-- [ ] T032 [US2] Criar o comando backend/src/database/criar-admin.ts (pergunta nome, e-mail e senha sem eco; senha ≥ 12 com letras e números; recusa e-mail repetido ou redefine a senha com confirmação) e o script `admin:criar` em backend/package.json, rodando sobre `dist/` (FR-022)
-- [ ] T033 [US2] Implementar `AdminFazendasService` e `AdminFazendasController` (rotas de fazendas, liberar, desativar, suspender, reativar do contrato) e o `AdminModule`, em backend/src/modulos/admin/, até T027 passar; registrar no backend/src/app.module.ts
-- [ ] T034 [US2] Checar a suspensão na `JwtStrategy` (carregando a fazenda junto do usuário) e no `AuthService.login`, com 403 `ACESSO_SUSPENSO`, até T028 passar, em backend/src/auth/
-- [ ] T035 [US2] Situação `FAZENDA_SUSPENSA` em backend/src/consulta-publica/consulta-publica.service.ts até T029 passar
-- [ ] T036 [P] [US2] Frontend da suspensão: interceptor de frontend/src/api/client.ts trata 403 `ACESSO_SUSPENSO` limpando a sessão e indo ao login com aviso; frontend/src/pages/Login.tsx mostra "Acesso suspenso · fale com o suporte"; frontend/src/pages/ConsultaAnimal.tsx mostra a versão reduzida com "Informações completas indisponíveis no momento"
-- [ ] T037 [P] [US2] Criar `adminClient` (token em `localStorage['adminToken']`, 401 leva a `/admin/login`) e as funções do painel em frontend/src/modulos/admin/api.ts
-- [ ] T038 [US2] Criar `AdminLogin` (mensagem de bloqueio do 429) e `AdminLayout` (cabeçalho próprio, sair) em frontend/src/modulos/admin/
-- [ ] T039 [US2] Criar `AdminFazendas` (lista com busca, usuários ativos, selo de suspensa e selos dos módulos) em frontend/src/modulos/admin/AdminFazendas.tsx
-- [ ] T040 [US2] Criar `AdminFazendaDetalhe` (liberar com início e término opcional, desativar com confirmação, suspender com motivo, reativar, histórico de períodos e suspensões com quem fez) em frontend/src/modulos/admin/AdminFazendaDetalhe.tsx
-- [ ] T041 [US2] Adicionar as rotas `/admin/login` e `/admin/*` fora do `Layout` das fazendas em frontend/src/App.tsx
+- [X] T030 [US2] Criar a estratégia `jwt-admin` (valida `aud: 'admin'` e o administrador ativo), o `AdminJwtGuard` e o decorator `@AreaAdmin()`, e ajustar backend/src/auth/guards/jwt-auth.guard.ts para entregar rotas `@AreaAdmin` ao guard do administrador; emitir os tokens de fazenda com `aud: 'fazenda'` e fazer a `JwtStrategy` recusar `aud: 'admin'` (R6)
+- [X] T031 [US2] Implementar `AdminAuthService` e `AdminAuthController` (`POST /admin/auth/login`, público, com tentativas gravadas e bloqueio) em backend/src/modulos/admin/ até T026 passar
+- [X] T032 [US2] Criar o comando backend/src/database/criar-admin.ts (pergunta nome, e-mail e senha sem eco; senha ≥ 12 com letras e números; recusa e-mail repetido ou redefine a senha com confirmação) e o script `admin:criar` em backend/package.json, rodando sobre `dist/` (FR-022)
+- [X] T033 [US2] Implementar `AdminFazendasService` e `AdminFazendasController` (rotas de fazendas, liberar, desativar, suspender, reativar do contrato) e o `AdminModule`, em backend/src/modulos/admin/, até T027 passar; registrar no backend/src/app.module.ts
+- [X] T034 [US2] Checar a suspensão na `JwtStrategy` (carregando a fazenda junto do usuário) e no `AuthService.login`, com 403 `ACESSO_SUSPENSO`, até T028 passar, em backend/src/auth/
+- [X] T035 [US2] Situação `FAZENDA_SUSPENSA` em backend/src/consulta-publica/consulta-publica.service.ts até T029 passar
+- [X] T036 [P] [US2] Frontend da suspensão: interceptor de frontend/src/api/client.ts trata 403 `ACESSO_SUSPENSO` limpando a sessão e indo ao login com aviso; frontend/src/pages/Login.tsx mostra "Acesso suspenso · fale com o suporte"; frontend/src/pages/ConsultaAnimal.tsx mostra a versão reduzida com "Informações completas indisponíveis no momento"
+- [X] T037 [P] [US2] Criar `adminClient` (token em `localStorage['adminToken']`, 401 leva a `/admin/login`) e as funções do painel em frontend/src/modulos/admin/api.ts
+- [X] T038 [US2] Criar `AdminLogin` (mensagem de bloqueio do 429) e `AdminLayout` (cabeçalho próprio, sair) em frontend/src/modulos/admin/
+- [X] T039 [US2] Criar `AdminFazendas` (lista com busca, usuários ativos, selo de suspensa e selos dos módulos) em frontend/src/modulos/admin/AdminFazendas.tsx
+- [X] T040 [US2] Criar `AdminFazendaDetalhe` (liberar com início e término opcional, desativar com confirmação, suspender com motivo, reativar, histórico de períodos e suspensões com quem fez) em frontend/src/modulos/admin/AdminFazendaDetalhe.tsx
+- [X] T041 [US2] Adicionar as rotas `/admin/login` e `/admin/*` fora do `Layout` das fazendas em frontend/src/App.tsx
 
 **Checkpoint**: módulos liberados e fazendas suspensas pelo painel
 
@@ -242,3 +242,19 @@ Task: "T024 NutricaoModule com ExemploController em backend/src/modulos/nutricao
   módulos; pacote inicial liberado; ativo → 200/201; início futuro → não contratado; término em
   7 dias → `diasParaVencer` 7; desativado → depois de no máximo 60 s, GET 200 e POST 403 "Módulo
   desativado: só consulta".
+
+## Registro da US2 (2026-11-04)
+
+- 284 testes no backend (30 novos: login do administrador com bloqueio, painel, suspensão na
+  estratégia e no login, página pública reduzida, senha forte do comando).
+- Desvio da T030: os tokens das fazendas **não** ganharam `aud: 'fazenda'`. Basta que a estratégia
+  das fazendas recuse `aud: 'admin'` e a do administrador exija `aud: 'admin'`; assim as sessões
+  abertas das fazendas continuaram válidas.
+- `liberar` devolve `{ liberado: true }` (a tela recarrega o detalhe), e não o período.
+- O comando `admin:criar` lê as respostas por fila de linhas, para funcionar também com pipe.
+- Validação pela API e no navegador (375 px), num backend de teste ligado à **cópia** e com um
+  administrador de teste criado pelo próprio comando: 31 verificações pela API e, nas telas,
+  login do painel, lista com selos, liberar Nutrição, suspender com motivo, login da fazenda
+  suspensa recusado, sessão aberta devolvida ao login com o aviso e página pública reduzida.
+- O banco de dev continua **sem administrador**: o dono cria o seu com
+  `docker compose exec backend npm run admin:criar`.

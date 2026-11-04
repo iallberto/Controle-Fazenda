@@ -24,6 +24,10 @@ import { EstacaoDetalhe } from './pages/reproducao/EstacaoDetalhe';
 import { DiagnosticoLote } from './pages/reproducao/DiagnosticoLote';
 import { Semens } from './pages/reproducao/Semens';
 import { Inseminacao } from './pages/reproducao/Inseminacao';
+import { AdminLogin } from './modulos/admin/AdminLogin';
+import { AdminLayout } from './modulos/admin/AdminLayout';
+import { AdminFazendas } from './modulos/admin/AdminFazendas';
+import { AdminFazendaDetalhe } from './modulos/admin/AdminFazendaDetalhe';
 
 function App() {
   return (
@@ -31,6 +35,12 @@ function App() {
       <Route path="/login" element={<Login />} />
       {/* Pública: aberta por quem escaneia o QR da etiqueta, sem login */}
       <Route path="/a/:codigo" element={<ConsultaAnimal />} />
+      {/* Painel do dono do software: login e sessão próprios (spec 002) */}
+      <Route path="/admin/login" element={<AdminLogin />} />
+      <Route element={<AdminLayout />}>
+        <Route path="/admin" element={<AdminFazendas />} />
+        <Route path="/admin/fazendas/:id" element={<AdminFazendaDetalhe />} />
+      </Route>
       <Route element={<RotaProtegida />}>
         <Route path="/" element={<Dashboard />} />
         <Route path="/animais" element={<Animais />} />

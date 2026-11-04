@@ -29,6 +29,7 @@ import { ModuloGuard } from './modulos/acesso/modulo.guard';
 import { LeiteModule } from './modulos/leite/leite.module';
 import { FinanceiroModule } from './modulos/financeiro/financeiro.module';
 import { NutricaoModule } from './modulos/nutricao/nutricao.module';
+import { AdminModule } from './modulos/admin/admin.module';
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { NutricaoModule } from './modulos/nutricao/nutricao.module';
     ReproducaoModule,
     // Fase 0: acesso aos módulos pagos e os módulos (por ora, só rotas de exemplo)
     AcessoModule,
+    AdminModule,
     LeiteModule,
     FinanceiroModule,
     NutricaoModule,
