@@ -12,6 +12,8 @@ describe('MovimentacaoPastoService', () => {
   const mockManager = {
     update: jest.fn(async () => ({ affected: 1 })),
     query: jest.fn(),
+    // Gancho da reprodução: sem estações abertas nos testes
+    find: jest.fn(async () => []),
     findOne: jest.fn(),
     create: jest.fn(),
     save: jest.fn(),

@@ -18,6 +18,7 @@ import {
   formatarSexo,
 } from '../utils/formatadores';
 import { Aviso, type EstadoAviso } from '../components/Aviso';
+import { BlocoReproducao } from './reproducao/BlocoReproducao';
 
 function extrairMensagem(erro: unknown, padrao: string) {
   const mensagem =
@@ -196,6 +197,8 @@ export function Manejo() {
             </p>
             {avisoCategoria && <Aviso tipo={avisoCategoria.tipo}>{avisoCategoria.texto}</Aviso>}
           </section>
+
+          {animal.sexo === 'F' && <BlocoReproducao key={animal.id} animalId={animal.id} />}
 
           <section>
             <h2>Peso</h2>

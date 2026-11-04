@@ -144,6 +144,7 @@ O dono acompanha os números da reprodução: taxa de prenhez por estação e po
 - **FR-006**: O sistema MUST permitir incluir fêmeas numa estação aberta a partir de uma data posterior à abertura.
 - **FR-007**: O sistema MUST encerrar automaticamente a exposição de uma fêmea quando ela sair do pasto da estação ou do rebanho, e MUST encerrar a estação quando o touro sair do rebanho.
 - **FR-008**: O sistema MUST aceitar como touro apenas animal ativo, macho, da categoria Touro, da mesma fazenda.
+- **FR-032**: Abrir a estação MUST colocar o touro no pasto dela: se ele estiver em outro pasto, o sistema registra a movimentação na data de entrada, na mesma operação.
 
 **Inseminação (opcional)**
 

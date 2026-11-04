@@ -131,6 +131,53 @@ export const formatarPapel = rotular({
   FUNCIONARIO: 'Funcionário',
 });
 
+export const formatarMotivoEncerramento = rotular({
+  MANUAL: 'Encerrada',
+  TOURO_SAIU_DO_PASTO: 'Encerrada: o touro saiu do pasto',
+  TOURO_SAIU_DO_REBANHO: 'Encerrada: o touro saiu do rebanho',
+});
+
+export const formatarMotivoFimExposicao = rotular({
+  ESTACAO_ENCERRADA: 'Fim da estação',
+  SAIU_DO_PASTO: 'Saiu do pasto',
+  SAIU_DO_REBANHO: 'Saiu do rebanho',
+});
+
+export const formatarResultadoDiagnostico = rotular({
+  PRENHE: 'Prenhe',
+  VAZIA: 'Vazia',
+  PERDA: 'Perda de gestação',
+});
+
+export const formatarMetodoDiagnostico = rotular({
+  TOQUE: 'Toque',
+  ULTRASSOM: 'Ultrassom',
+});
+
+export const formatarBasePrevisao = rotular({
+  INSEMINACAO: 'pela inseminação',
+  TOQUE: 'estimada pelo toque',
+  ESTACAO: 'estimada pela estação',
+});
+
+// Idade gestacional: o veterinário fala em meses e dias; o sistema guarda dias,
+// contando 30 dias por mês (3 meses e 22 dias = 112 dias)
+export const DIAS_POR_MES_GESTACAO = 30;
+
+export function idadeGestacionalEmDias(meses: number, dias: number): number {
+  return meses * DIAS_POR_MES_GESTACAO + dias;
+}
+
+export function formatarIdadeGestacional(totalDias: number | null | undefined): string {
+  if (!totalDias) return '';
+  const meses = Math.floor(totalDias / DIAS_POR_MES_GESTACAO);
+  const dias = totalDias % DIAS_POR_MES_GESTACAO;
+  const textoMeses = meses === 1 ? '1 mês' : `${meses} meses`;
+  const textoDias = dias === 1 ? '1 dia' : `${dias} dias`;
+  if (meses === 0) return textoDias;
+  return dias === 0 ? textoMeses : `${textoMeses} e ${textoDias}`;
+}
+
 export const formatarStatusCodigo = rotular({
   DISPONIVEL: 'Disponível',
   VINCULADO: 'Vinculado',

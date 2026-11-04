@@ -18,6 +18,10 @@ import { NovaPesagem } from './pages/NovaPesagem';
 import { Manejo } from './pages/Manejo';
 import { ConsultaAnimal } from './pages/ConsultaAnimal';
 import { ManejoLote } from './pages/ManejoLote';
+import { Estacoes } from './pages/reproducao/Estacoes';
+import { NovaEstacao } from './pages/reproducao/NovaEstacao';
+import { EstacaoDetalhe } from './pages/reproducao/EstacaoDetalhe';
+import { DiagnosticoLote } from './pages/reproducao/DiagnosticoLote';
 
 function App() {
   return (
@@ -42,6 +46,10 @@ function App() {
         <Route path="/pesagens/novo" element={<NovaPesagem />} />
         <Route path="/manejo" element={<Manejo />} />
         <Route path="/manejo/lote" element={<ManejoLote />} />
+        <Route path="/reproducao/estacoes" element={<Estacoes />} />
+        <Route path="/reproducao/estacoes/nova" element={<NovaEstacao />} />
+        <Route path="/reproducao/estacoes/:id" element={<EstacaoDetalhe />} />
+        <Route path="/reproducao/diagnostico" element={<DiagnosticoLote />} />
       </Route>
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>

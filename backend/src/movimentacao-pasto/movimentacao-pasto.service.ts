@@ -7,6 +7,7 @@ import { Pasto } from '../pasto/entities/pasto.entity';
 import { MoverAnimalDto } from './dto/mover-animal.dto';
 import { garantirAnimalAtivo } from '../common/vinculos';
 import { hojeLocal } from '../common/datas';
+import { encerrarExposicoesPorSaida } from '../reproducao/saida';
 
 @Injectable()
 export class MovimentacaoPastoService {
@@ -60,6 +61,15 @@ export class MovimentacaoPastoService {
         { id: animal.id },
         { pastoAtualId: pasto.id, atualizadoPorId: usuarioLogadoId },
       );
+
+      // Saiu do pasto de uma estação de monta: encerra a exposição ou a estação
+      await encerrarExposicoesPorSaida(manager, {
+        animalIds: [animal.id],
+        data,
+        saida: 'PASTO',
+        pastoDestinoId: pasto.id,
+        usuarioId: usuarioLogadoId,
+      });
 
       return movimentacaoSalva;
     });

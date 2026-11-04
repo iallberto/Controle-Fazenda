@@ -15,6 +15,7 @@ import { MovimentacaoPasto } from '../movimentacao-pasto/entities/movimentacao-p
 import { Pasto } from '../pasto/entities/pasto.entity';
 import { CreateAnimalDto } from './dto/create-animal.dto';
 import { UpdateAnimalDto } from './dto/update-animal.dto';
+import { encerrarExposicoesPorSaida } from '../reproducao/saida';
 import {
   garantirAnimalAtivo,
   garantirRacaDisponivel,
@@ -156,6 +157,14 @@ export class AnimalService {
       animal.pastoAtualId = null;
       animal.pastoAtual = undefined;
       animal.atualizadoPorId = usuarioLogadoId;
+
+      // Saiu do rebanho: encerra exposições (fêmea) ou a estação (touro)
+      await encerrarExposicoesPorSaida(manager, {
+        animalIds: [animal.id],
+        data,
+        saida: 'REBANHO',
+        usuarioId: usuarioLogadoId,
+      });
       return manager.save(animal);
     });
   }

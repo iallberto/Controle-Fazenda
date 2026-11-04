@@ -14,6 +14,7 @@ import {
 import { MovimentacaoPasto } from '../movimentacao-pasto/entities/movimentacao-pasto.entity';
 import { TratamentoService } from '../tratamento/tratamento.service';
 import { hojeLocal } from '../common/datas';
+import { encerrarExposicoesPorSaida } from '../reproducao/saida';
 import {
   SessaoManejo,
   TipoSessaoManejo,
@@ -173,6 +174,15 @@ export class ManejoLoteService {
             atualizadoPorId: usuarioLogadoId,
           },
         );
+
+        // Quem saiu do pasto de uma estação de monta encerra a exposição/estação
+        await encerrarExposicoesPorSaida(manager, {
+          animalIds: idsAMover,
+          data,
+          saida: 'PASTO',
+          pastoDestinoId: dto.pastoDestinoId,
+          usuarioId: usuarioLogadoId,
+        });
       }
 
       return {

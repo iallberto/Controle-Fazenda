@@ -350,6 +350,78 @@ button.botao-link:hover {
   white-space: nowrap;
 }
 
+/* Reprodução: registros cancelados ficam visíveis, riscados */
+.cancelado {
+  opacity: 0.6;
+}
+
+.cancelado a,
+.cancelado strong {
+  text-decoration: line-through;
+}
+
+.cancelar-inline {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-left: 8px;
+}
+
+/* Diagnóstico: Prenhe / Vazia com um toque, alvos de 44 px */
+.lista-diagnostico li {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.diagnostico-cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.botoes-resultado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+button.resultado,
+button.resultado:hover {
+  min-width: 88px;
+  min-height: 44px;
+  background: var(--cor-card);
+  color: var(--cor-texto);
+  border: 2px solid var(--cor-borda);
+}
+
+button.resultado.ativo-prenhe {
+  background: #e8f5e9;
+  border-color: #2e7d32;
+  color: #1b5e20;
+}
+
+button.resultado.ativo-vazia {
+  background: #fff8e1;
+  border-color: #b07d00;
+  color: #6b4e00;
+}
+
+.idade-gestacional {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+.idade-gestacional input {
+  width: 72px;
+}
+
 /* --- Avisos (V3) -------------------------------------------------------------
    Mensagens depois de salvar, carregar ou buscar: separadas do conteúdo,
    com cor e ícone para distinguir sucesso, erro e atenção. */

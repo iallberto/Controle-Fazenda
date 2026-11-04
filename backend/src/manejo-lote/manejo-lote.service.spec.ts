@@ -17,6 +17,7 @@ describe('ManejoLoteService', () => {
   let service: ManejoLoteService;
 
   const manager = {
+    find: jest.fn(),
     create: jest.fn(),
     save: jest.fn(),
     insert: jest.fn(),
@@ -42,6 +43,8 @@ describe('ManejoLoteService', () => {
 
   beforeEach(async () => {
     jest.resetAllMocks();
+    // Gancho da reprodução: sem estações abertas nos testes
+    manager.find.mockResolvedValue([]);
     animalRepository.manager.transaction.mockImplementation(
       (cb: (m: typeof manager) => unknown) => cb(manager),
     );

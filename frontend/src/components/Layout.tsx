@@ -28,6 +28,13 @@ const GRUPOS_MENU: { titulo: string; itens: ItemMenu[] }[] = [
     ],
   },
   {
+    titulo: 'Reprodução',
+    itens: [
+      { rotulo: 'Estações de monta', destino: '/reproducao/estacoes' },
+      { rotulo: 'Diagnóstico de gestação', destino: '/reproducao/diagnostico' },
+    ],
+  },
+  {
     titulo: 'Registrar',
     itens: [
       { rotulo: 'Cadastrar animal', destino: '/animais/novo' },
@@ -56,11 +63,13 @@ const TITULOS: Record<string, string> = {
   '/tratamentos/novo': 'Registrar tratamento',
   '/pesagens/novo': 'Registrar pesagem',
   '/veterinarios/novo': 'Novo veterinário',
+  '/reproducao/estacoes/nova': 'Nova estação de monta',
 };
 
 function tituloDaRota(caminho: string) {
   if (TITULOS[caminho]) return TITULOS[caminho];
   if (caminho.startsWith('/animais/')) return 'Animal';
+  if (caminho.startsWith('/reproducao/estacoes/')) return 'Estação de monta';
   return null;
 }
 
