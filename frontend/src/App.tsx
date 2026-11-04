@@ -24,6 +24,7 @@ import { EstacaoDetalhe } from './pages/reproducao/EstacaoDetalhe';
 import { DiagnosticoLote } from './pages/reproducao/DiagnosticoLote';
 import { Semens } from './pages/reproducao/Semens';
 import { Inseminacao } from './pages/reproducao/Inseminacao';
+import { RotaDeModulo } from './modulos/vitrine/RotaDeModulo';
 import { AdminLogin } from './modulos/admin/AdminLogin';
 import { AdminLayout } from './modulos/admin/AdminLayout';
 import { AdminFazendas } from './modulos/admin/AdminFazendas';
@@ -64,6 +65,8 @@ function App() {
         <Route path="/reproducao/diagnostico" element={<DiagnosticoLote />} />
         <Route path="/reproducao/inseminacao" element={<Inseminacao />} />
         <Route path="/reproducao/semens" element={<Semens />} />
+        {/* Módulos pagos: vitrine, só consulta ou ativo (spec 002) */}
+        <Route path="/modulos/:modulo" element={<RotaDeModulo />} />
       </Route>
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>

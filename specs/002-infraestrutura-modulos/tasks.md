@@ -141,12 +141,12 @@ arquivo; funções puras testadas sem banco. As migrations são validadas numa c
 
 **Independent Test**: quickstart.md, cenário 4
 
-- [ ] T042 [P] [US4] Criar frontend/src/api/modulos.ts (`buscarModulos`, `consultarExemplo`, `lancarExemplo`) e os rótulos dos módulos e situações em frontend/src/utils/formatadores.ts
-- [ ] T043 [US4] Criar `ModulosContext` (carrega `GET /fazenda/modulos` depois do login; expõe a situação de cada módulo e `recarregar`) em frontend/src/contexts/ModulosContext.tsx e usá-lo em frontend/src/main.tsx ou App.tsx
-- [ ] T044 [US4] Adicionar o grupo **Módulos** (Leite, Financeiro, Nutrição) com selo "só consulta" ou "disponível" em frontend/src/components/Layout.tsx, para dono e funcionário (Q2 = A)
-- [ ] T045 [US4] Criar `RotaDeModulo`, `Vitrine` ("Disponível no módulo X · fale com o suporte") e `TelaDeEspera` (ativo: botão que chama o exemplo; só consulta: aviso "Módulo desativado: só consulta · fale com o suporte para reativar", sem botão de lançar) em frontend/src/modulos/vitrine/ e a rota `/modulos/:modulo` em frontend/src/App.tsx
-- [ ] T046 [US4] Aviso de vencimento no topo de frontend/src/pages/Dashboard.tsx: só para o dono, `diasParaVencer` de 0 a 10, "vence hoje" no último dia, volta a cada login (sessionStorage) (FR-016a)
-- [ ] T047 [US4] Seção "Módulos contratados" com situação e data de término em frontend/src/pages/Configuracao.tsx (FR-016)
+- [X] T042 [P] [US4] Criar frontend/src/api/modulos.ts (`buscarModulos`, `consultarExemplo`, `lancarExemplo`) e os rótulos dos módulos e situações em frontend/src/utils/formatadores.ts
+- [X] T043 [US4] Criar `ModulosContext` (carrega `GET /fazenda/modulos` depois do login; expõe a situação de cada módulo e `recarregar`) em frontend/src/contexts/ModulosContext.tsx e usá-lo em frontend/src/main.tsx ou App.tsx
+- [X] T044 [US4] Adicionar o grupo **Módulos** (Leite, Financeiro, Nutrição) com selo "só consulta" ou "disponível" em frontend/src/components/Layout.tsx, para dono e funcionário (Q2 = A)
+- [X] T045 [US4] Criar `RotaDeModulo`, `Vitrine` ("Disponível no módulo X · fale com o suporte") e `TelaDeEspera` (ativo: botão que chama o exemplo; só consulta: aviso "Módulo desativado: só consulta · fale com o suporte para reativar", sem botão de lançar) em frontend/src/modulos/vitrine/ e a rota `/modulos/:modulo` em frontend/src/App.tsx
+- [X] T046 [US4] Aviso de vencimento no topo de frontend/src/pages/Dashboard.tsx: só para o dono, `diasParaVencer` de 0 a 10, "vence hoje" no último dia, volta a cada login (sessionStorage) (FR-016a)
+- [X] T047 [US4] Seção "Módulos contratados" com situação e data de término em frontend/src/pages/Configuracao.tsx (FR-016)
 
 **Checkpoint**: todas as histórias funcionando
 
@@ -258,3 +258,17 @@ Task: "T024 NutricaoModule com ExemploController em backend/src/modulos/nutricao
   suspensa recusado, sessão aberta devolvida ao login com o aviso e página pública reduzida.
 - O banco de dev continua **sem administrador**: o dono cria o seu com
   `docker compose exec backend npm run admin:criar`.
+
+## Registro da US4 (2026-11-04)
+
+- Validação no navegador (375 px), no backend de teste ligado à **cópia**:
+  - dono da fazenda "São Pedro" (Leite vencendo em 7 dias, Financeiro ativo, Nutrição desativado):
+    aviso "O módulo Leite vence em 7 dias · fale com o suporte para renovar" no painel; fechado,
+    some na sessão e volta no login seguinte; grupo Módulos antes de Gestão, com "só consulta" no
+    Nutrição; Leite ativo com os dois botões de teste (lançamento liberado); Nutrição só com
+    consulta (liberada) e o aviso de módulo desativado; Configurações com os três módulos e datas;
+  - funcionário da mesma fazenda: mesmo menu, sem o aviso de vencimento;
+  - fazenda sem módulos: `/modulos/financeiro` aberto pela barra de endereço mostra a vitrine,
+    e os três aparecem como "disponível" no menu; sem rolagem lateral.
+- A tela de cada módulo ativo, nesta fase, é uma página de espera com o teste de ligação
+  (rotas de exemplo); sai quando as telas reais do módulo chegarem.

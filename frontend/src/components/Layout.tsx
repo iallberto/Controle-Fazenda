@@ -3,12 +3,19 @@ import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-do
 import { useAuth } from '../contexts/useAuth';
 import { Aviso } from './Aviso';
 import { Logo } from './Logo';
+import { useModulos } from '../contexts/useModulos';
+import { ROTA_DO_MODULO, type ModuloPago } from '../api/modulos';
+import { ROTULOS_MODULO } from '../utils/formatadores';
 
 interface ItemMenu {
   rotulo: string;
   destino: string;
   somenteDono?: boolean;
+  // Selo ao lado do nome: "só consulta" ou "disponível" (spec 002)
+  selo?: { texto: string; classe: string };
 }
+
+const MODULOS_NO_MENU: ModuloPago[] = ['LEITE', 'FINANCEIRO', 'NUTRICAO'];
 
 const GRUPOS_MENU: { titulo: string; itens: ItemMenu[] }[] = [
   {
@@ -66,6 +73,9 @@ const TITULOS: Record<string, string> = {
   '/pesagens/novo': 'Registrar pesagem',
   '/veterinarios/novo': 'Novo veterinário',
   '/reproducao/estacoes/nova': 'Nova estação de monta',
+  '/modulos/leite': 'Leite',
+  '/modulos/financeiro': 'Financeiro',
+  '/modulos/nutricao': 'Nutrição',
 };
 
 function tituloDaRota(caminho: string) {
@@ -103,6 +113,27 @@ export function Layout() {
 
   const fecharMenu = () => setMenuAberto(false);
 
+  // Grupo Módulos para dono e funcionário: ativo, só consulta ou vitrine (FR-014)
+  const { situacaoDe } = useModulos();
+  const grupoModulos = {
+    titulo: 'Módulos',
+    itens: MODULOS_NO_MENU.map((modulo): ItemMenu => {
+      const situacao = situacaoDe(modulo)?.situacao ?? 'NAO_CONTRATADO';
+      return {
+        rotulo: ROTULOS_MODULO[modulo],
+        destino: `/modulos/${ROTA_DO_MODULO[modulo]}`,
+        selo:
+          situacao === 'ATIVO'
+            ? undefined
+            : situacao === 'SO_CONSULTA'
+              ? { texto: 'só consulta', classe: 'selo selo-consulta' }
+              : { texto: 'disponível', classe: 'selo selo-inativo' },
+      };
+    }),
+  };
+  // Antes de Gestão, que fica por último
+  const grupos = [...GRUPOS_MENU.slice(0, -1), grupoModulos, GRUPOS_MENU[GRUPOS_MENU.length - 1]];
+
   return (
     <div className="layout">
       <header className="barra-topo nao-imprimir">
@@ -137,7 +168,7 @@ export function Layout() {
           Controle Fazenda
         </p>
         <p className="menu-usuario">Olá, {usuario?.nome}</p>
-        {GRUPOS_MENU.map((grupo) => {
+        {grupos.map((grupo) => {
           const itens = grupo.itens.filter(
             (item) => !item.somenteDono || usuario?.papel === 'DONO',
           );
@@ -150,6 +181,7 @@ export function Layout() {
                     {/* end: "/animais" não fica ativo em "/animais/novo" */}
                     <NavLink to={item.destino} end onClick={fecharMenu}>
                       {item.rotulo}
+                      {item.selo && <span className={`${item.selo.classe} selo-menu`}>{item.selo.texto}</span>}
                     </NavLink>
                   </li>
                 ))}

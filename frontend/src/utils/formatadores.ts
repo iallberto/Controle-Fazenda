@@ -183,3 +183,17 @@ export const formatarStatusCodigo = rotular({
   VINCULADO: 'Vinculado',
   DESATIVADO: 'Desativado (brinco reemitido)',
 });
+
+// Módulos pagos (spec 002)
+export const ROTULOS_MODULO = {
+  LEITE: 'Leite',
+  FINANCEIRO: 'Financeiro',
+  NUTRICAO: 'Nutrição',
+} as const;
+export const formatarModulo = rotular(ROTULOS_MODULO);
+
+export const formatarSituacaoModulo = rotular({
+  ATIVO: 'Ativo',
+  SO_CONSULTA: 'Só consulta',
+  NAO_CONTRATADO: 'Não contratado',
+});

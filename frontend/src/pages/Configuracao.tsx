@@ -7,6 +7,7 @@ import {
 } from '../api/configuracao';
 import { mensagemDeErro } from '../api/client';
 import { useAuth } from '../contexts/useAuth';
+import { ModulosContratados } from '../modulos/vitrine/ModulosContratados';
 import { formatarCategoria } from '../utils/formatadores';
 import { Aviso } from '../components/Aviso';
 import { usePreferencias } from '../contexts/usePreferencias';
@@ -80,6 +81,8 @@ export function Configuracao() {
       {sucesso && <Aviso tipo="sucesso">{sucesso}</Aviso>}
       {erro && <Aviso tipo="erro">{erro}</Aviso>}
       {somenteLeitura && <p>Somente o dono da fazenda pode alterar as configurações.</p>}
+
+      {!somenteLeitura && <ModulosContratados />}
 
       <section>
         <h2>Notificações</h2>

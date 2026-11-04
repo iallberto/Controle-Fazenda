@@ -4,6 +4,7 @@ import { buscarPainelInicial, type PainelInicial } from '../api/relatorios';
 import { mensagemDeErro } from '../api/client';
 import { formatarCategoria } from '../utils/formatadores';
 import { Aviso } from '../components/Aviso';
+import { AvisosDeVencimento } from '../modulos/vitrine/AvisosDeVencimento';
 
 export function Dashboard() {
   const { usuario } = useAuth();
@@ -26,6 +27,7 @@ export function Dashboard() {
       </header>
 
       <main>
+        <AvisosDeVencimento />
         {carregando && <p>Carregando...</p>}
         {erro && <Aviso tipo="erro">{erro}</Aviso>}
 

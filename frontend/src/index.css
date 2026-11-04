@@ -537,6 +537,30 @@ form.entrada-doses {
   background: #fdecea;
 }
 
+/* Selo dentro do item do menu */
+.selo-menu {
+  margin-left: 8px;
+  padding: 0 8px;
+  font-size: 0.72rem;
+  vertical-align: middle;
+}
+
+/* Vitrine de módulo não contratado */
+.vitrine-chamada {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--cor-primaria-escura);
+}
+
+.selo-inativo {
+  background: var(--cor-card);
+}
+
+/* Aviso de vencimento do módulo, no painel inicial do dono */
+.avisos-vencimento {
+  margin-bottom: 12px;
+}
+
 /* Painel do administrador: sem o menu lateral das fazendas */
 .layout-admin .barra-topo {
   display: flex;
