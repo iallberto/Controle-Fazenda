@@ -1,19 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Navigate, useParams } from 'react-router-dom';
-import { mensagemDeErro } from '../../api/client';
-import {
-  consultarExemplo,
-  lancarExemplo,
-  moduloDaRota,
-  type ModuloDaFazenda,
-  type ModuloPago,
-} from '../../api/modulos';
-import { Aviso, type EstadoAviso } from '../../components/Aviso';
-import { useAuth } from '../../contexts/useAuth';
+import { moduloDaRota, type ModuloPago } from '../../api/modulos';
 import { useModulos } from '../../contexts/useModulos';
-import { formatarData, ROTULOS_MODULO } from '../../utils/formatadores';
+import { ROTULOS_MODULO } from '../../utils/formatadores';
 import { FinanceiroRotas } from '../financeiro/FinanceiroRotas';
 import { LeiteRotas } from '../leite/LeiteRotas';
+import { NutricaoRotas } from '../nutricao/NutricaoRotas';
 
 // O que cada módulo faz, para a vitrine (docs/modulos/Planejamento-modulos.md)
 const DESCRICOES: Record<ModuloPago, string[]> = {
@@ -54,14 +46,14 @@ export function RotaDeModulo() {
   if (!situacao || situacao.situacao === 'NAO_CONTRATADO') {
     return <Vitrine modulo={modulo} />;
   }
-  // Módulos já construídos abrem as próprias telas; os outros, a página de espera
+  // Cada módulo abre as próprias telas (Financeiro, Leite e Nutrição)
   if (modulo === 'FINANCEIRO') {
     return <FinanceiroRotas soConsulta={situacao.situacao === 'SO_CONSULTA'} />;
   }
   if (modulo === 'LEITE') {
     return <LeiteRotas soConsulta={situacao.situacao === 'SO_CONSULTA'} />;
   }
-  return <TelaDeEspera situacao={situacao} />;
+  return <NutricaoRotas soConsulta={situacao.situacao === 'SO_CONSULTA'} />;
 }
 
 function Vitrine({ modulo }: { modulo: ModuloPago }) {
@@ -82,69 +74,6 @@ function Vitrine({ modulo }: { modulo: ModuloPago }) {
           O pacote inicial (rebanho, reprodução, manejo e relatórios) continua igual. O módulo {nome} é
           contratado à parte e liberado para a sua fazenda pelo suporte.
         </p>
-      </section>
-    </div>
-  );
-}
-
-// Os módulos ainda não têm telas próprias (fase 0). Esta página mostra a
-// situação e testa a ligação com o módulo pelas rotas de exemplo.
-function TelaDeEspera({ situacao }: { situacao: ModuloDaFazenda }) {
-  const { usuario } = useAuth();
-  const nome = ROTULOS_MODULO[situacao.modulo];
-  const soConsulta = situacao.situacao === 'SO_CONSULTA';
-  const [aviso, setAviso] = useState<EstadoAviso>(null);
-
-  async function testar(acao: 'consulta' | 'lancamento') {
-    setAviso(null);
-    try {
-      if (acao === 'consulta') await consultarExemplo(situacao.modulo);
-      else await lancarExemplo(situacao.modulo);
-      setAviso({
-        tipo: 'sucesso',
-        texto: acao === 'consulta' ? 'Consulta liberada.' : 'Lançamento liberado.',
-      });
-    } catch (erro) {
-      setAviso({ tipo: 'erro', texto: mensagemDeErro(erro) });
-    }
-  }
-
-  return (
-    <div>
-      <header>
-        <h1>Módulo {nome}</h1>
-      </header>
-
-      {soConsulta ? (
-        <Aviso tipo="atencao">Módulo desativado: só consulta · fale com o suporte para reativar</Aviso>
-      ) : (
-        <p>
-          Módulo contratado
-          {situacao.dataTermino && usuario?.papel === 'DONO'
-            ? `, até ${formatarData(situacao.dataTermino)}`
-            : ''}
-          . As telas do {nome} chegam na próxima versão do sistema.
-        </p>
-      )}
-
-      {aviso && (
-        <Aviso tipo={aviso.tipo} aoFechar={() => setAviso(null)}>
-          {aviso.texto}
-        </Aviso>
-      )}
-
-      <section>
-        <h2>Ligação com o módulo</h2>
-        <div className="acoes-marcacao">
-          <button type="button" onClick={() => testar('consulta')}>
-            Testar consulta
-          </button>
-          {!soConsulta && (
-            <button type="submit" onClick={() => testar('lancamento')}>
-              Testar lançamento
-            </button>
-          )}
-        </div>
       </section>
     </div>
   );

@@ -30,13 +30,3 @@ export async function buscarModulos() {
   return resposta.data;
 }
 
-// Rotas de exemplo desta fase, só para provar o bloqueio (research R11)
-export async function consultarExemplo(modulo: ModuloPago) {
-  const resposta = await apiClient.get(`/modulos/${ROTA_DO_MODULO[modulo]}/exemplo`);
-  return resposta.data as { ok: boolean };
-}
-
-export async function lancarExemplo(modulo: ModuloPago) {
-  const resposta = await apiClient.post(`/modulos/${ROTA_DO_MODULO[modulo]}/exemplo`);
-  return resposta.data as { ok: boolean };
-}

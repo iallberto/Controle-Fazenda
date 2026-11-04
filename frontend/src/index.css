@@ -1485,3 +1485,23 @@ tr.linha-descarte td {
   max-height: 90vh;
   overflow-y: auto;
 }
+
+/* --- Módulo Nutrição (spec 005) ---------------------------------------- */
+
+.linha-quantidade {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  align-items: end;
+}
+
+.item-trato {
+  display: grid;
+  gap: 4px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.item-trato:last-of-type {
+  border-bottom: none;
+}
