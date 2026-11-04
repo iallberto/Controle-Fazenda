@@ -11,8 +11,21 @@ import { Administrador } from '../modulos/admin/entities/administrador.entity';
 
 // Mínimo de 12 caracteres, com letras e números (FR-018a)
 export function senhaForte(senha: string) {
-  return senha.length >= 12 && /[A-Za-z]/.test(senha) && /\d/.test(senha);
+  return motivoSenhaFraca(senha) === null;
 }
+
+// O que falta na senha, em português simples; null quando está boa
+export function motivoSenhaFraca(senha: string): string | null {
+  const faltas: string[] = [];
+  if (senha.length < 12) {
+    faltas.push(`tem ${senha.length} caracteres e precisa de 12 ou mais`);
+  }
+  if (!/[A-Za-z]/.test(senha)) faltas.push('precisa de pelo menos uma letra');
+  if (!/\d/.test(senha)) faltas.push('precisa de pelo menos um número');
+  return faltas.length ? `A senha ${faltas.join(', ')}.` : null;
+}
+
+const TENTATIVAS = 3;
 
 // Uma interface só, com fila de linhas: funciona digitando no terminal e
 // também com as respostas vindas de um pipe (linhas que chegam antes da
@@ -26,13 +39,20 @@ const esperando: ((linha: string) => void)[] = [];
 function obterLeitor() {
   if (!leitor) {
     leitor = createInterface({ input: process.stdin, output: process.stdout });
-    // Não mostra a senha enquanto ela é digitada
+    // Na senha, mostra * no lugar de cada caractere digitado
     const interno = leitor as unknown as {
       _writeToOutput: (s: string) => void;
+      getPrompt: () => string;
     };
     const original = interno._writeToOutput.bind(leitor);
     interno._writeToOutput = (s: string) => {
-      if (!ocultando) original(s);
+      if (!ocultando) return original(s);
+      const prompt = interno.getPrompt();
+      if (s.startsWith(prompt)) {
+        original(prompt + '*'.repeat(s.length - prompt.length));
+      } else {
+        original(s.replace(/[^\r\n]/g, '*'));
+      }
     };
     leitor.on('line', (linha) => {
       const proximo = esperando.shift();
@@ -48,8 +68,16 @@ function obterLeitor() {
 }
 
 async function perguntar(texto: string, oculto = false): Promise<string> {
-  obterLeitor();
-  process.stdout.write(texto);
+  const rl = obterLeitor();
+  // O próprio readline desenha a pergunta; escrever direto no terminal faz o
+  // texto sumir debaixo do "> " padrão dele
+  if (fechado) {
+    // Entrada por pipe já terminou: as respostas estão todas na fila
+    process.stdout.write(texto);
+  } else {
+    rl.setPrompt(texto);
+    rl.prompt();
+  }
   ocultando = oculto;
   const resposta =
     fila.shift() ??
@@ -57,18 +85,38 @@ async function perguntar(texto: string, oculto = false): Promise<string> {
       ? ''
       : await new Promise<string>((resolve) => esperando.push(resolve)));
   ocultando = false;
-  if (oculto) process.stdout.write('\n');
+  if (!process.stdin.isTTY) process.stdout.write('\n');
   return resposta.trim();
+}
+
+// Repete a pergunta até a resposta valer, com o motivo de cada recusa
+async function perguntarAte(
+  texto: string,
+  validar: (resposta: string) => string | null,
+  oculto = false,
+) {
+  for (let tentativa = 1; tentativa <= TENTATIVAS; tentativa++) {
+    const resposta = await perguntar(texto, oculto);
+    const problema = validar(resposta);
+    if (!problema) return resposta;
+    console.log(`  ${problema}`);
+    if (fechado && fila.length === 0) break;
+  }
+  throw new Error('Tentativas esgotadas. Nada foi alterado.');
 }
 
 async function principal() {
   await dataSource.initialize();
   const repositorio = dataSource.getRepository(Administrador);
 
-  const email = (await perguntar('E-mail do administrador: ')).toLowerCase();
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-    throw new Error('E-mail inválido');
-  }
+  console.log('Criar ou redefinir o administrador do sistema\n');
+  const email = (
+    await perguntarAte('E-mail do administrador: ', (resposta) =>
+      /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(resposta)
+        ? null
+        : 'E-mail inválido. Exemplo: nome@dominio.com',
+    )
+  ).toLowerCase();
   const existente = await repositorio.findOneBy({ email });
   if (existente) {
     const confirma = await perguntar(
@@ -81,20 +129,22 @@ async function principal() {
   }
   const nome = existente
     ? existente.nome
-    : await perguntar('Nome do administrador: ');
-  if (!nome) throw new Error('Informe o nome');
+    : await perguntarAte('Nome do administrador: ', (resposta) =>
+        resposta ? null : 'Informe o nome.',
+      );
 
-  const senha = await perguntar(
-    'Senha (mínimo 12, com letras e números): ',
-    true,
+  console.log(
+    'A senha precisa de 12 caracteres ou mais, com letras e números. Ela aparece como *.',
   );
-  if (!senhaForte(senha)) {
-    throw new Error(
-      'Senha fraca: use 12 caracteres ou mais, com letras e números',
-    );
-  }
-  if ((await perguntar('Repita a senha: ', true)) !== senha) {
-    throw new Error('As senhas não conferem');
+  let senha = '';
+  for (let tentativa = 1; ; tentativa++) {
+    senha = await perguntarAte('Senha: ', motivoSenhaFraca, true);
+    const repetida = await perguntar('Repita a senha: ', true);
+    if (repetida === senha) break;
+    console.log('  As senhas não conferem. Digite de novo.');
+    if (tentativa >= TENTATIVAS || (fechado && fila.length === 0)) {
+      throw new Error('Tentativas esgotadas. Nada foi alterado.');
+    }
   }
 
   const senhaHash = await bcrypt.hash(senha, 10);
