@@ -23,6 +23,7 @@ export interface VacaResumo {
   inicio: string | null;
   del: number | null;
   carenciaAte: string | null;
+  secagemPlanejada: string | null;
 }
 
 export interface ResumoLactacao {
@@ -41,7 +42,14 @@ export interface VacaDetalhe {
   ehVacaDeLeite: boolean;
   situacao: SituacaoLeiteira;
   lactacaoAtual:
-    | (ResumoLactacao & { id: string; inicio: string; origem: 'PARTO' | 'MANUAL'; del: number })
+    | (ResumoLactacao & {
+        id: string;
+        inicio: string;
+        origem: 'PARTO' | 'MANUAL';
+        del: number;
+        partoPrevisto: string | null;
+        secagemPlanejada: string | null;
+      })
     | null;
   encerradas: (ResumoLactacao & {
     id: string;
@@ -49,6 +57,7 @@ export interface VacaDetalhe {
     fim: string;
     motivoFim: 'SECAGEM' | 'SAIDA' | 'NOVO_PARTO';
     dias: number;
+    secagemId: string | null;
   })[];
   carenciaAte: string | null;
   partoRecente: { partoId: string; data: string } | null;
@@ -198,10 +207,122 @@ export function formatarLitros(litros: number | null | undefined) {
   return `${litros.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} L`;
 }
 
-// "12,5" → 12.5; vazio ou inválido → null
+// "12,5" → 12.5; "1.050,5" → 1050.5; "12.5" → 12.5; vazio ou inválido → null
 export function litrosDeTexto(texto: string): number | null {
-  const limpo = texto.trim().replace(',', '.');
+  const aparado = texto.trim().replace(/\s|L$/gi, '');
+  // Com vírgula, o ponto é separador de milhar; sem vírgula, o ponto é decimal
+  const limpo = aparado.includes(',') ? aparado.replace(/\./g, '').replace(',', '.') : aparado;
   if (limpo === '') return null;
   const valor = Number(limpo);
   return Number.isFinite(valor) ? valor : null;
+}
+
+// --- Secagem (US3) -----------------------------------------------------------
+
+export interface VacaASecar {
+  animalId: string;
+  brinco: string;
+  del: number;
+  partoPrevisto: string;
+  secagemPlanejada: string;
+  atrasada: boolean;
+  mediaUltimos7Dias: number | null;
+}
+
+export async function listarASecar(dias?: number) {
+  return (
+    await apiClient.get<VacaASecar[]>(`${BASE}/secagens/a-secar`, { params: dias ? { dias } : {} })
+  ).data;
+}
+
+export async function registrarSecagem(dados: { animalId: string; data: string; observacao?: string }) {
+  return (await apiClient.post(`${BASE}/secagens`, dados)).data;
+}
+
+export async function cancelarSecagem(id: string, motivo: string) {
+  return (await apiClient.post(`${BASE}/secagens/${id}/cancelar`, { motivo })).data;
+}
+
+// --- Entregas e análises (US4) -----------------------------------------------
+
+export interface EntregaLeite {
+  id: string;
+  data: string;
+  litros: number;
+  observacao: string | null;
+  cancelamento: { cancelado: boolean; motivoCancelamento: string | null };
+  // Só para o dono
+  precoLitroCentavos?: number | null;
+  valorCentavos?: number | null;
+}
+
+export interface MesDeEntregas {
+  mes: string;
+  entregas: EntregaLeite[];
+  totalLitros: number;
+  paraTanque: number;
+  diferenca: number;
+  // Só para o dono
+  totalCentavos?: number;
+  entregasSemPreco?: number;
+}
+
+export interface AnaliseLeite {
+  id: string;
+  mes: string;
+  entrega: { id: string; data: string } | null;
+  ccsMil: number | null;
+  cbtMil: number | null;
+  gordura: number | null;
+  proteina: number | null;
+  cancelamento: { cancelado: boolean; motivoCancelamento: string | null };
+}
+
+export async function listarEntregas(mes: string) {
+  return (await apiClient.get<MesDeEntregas>(`${BASE}/entregas`, { params: { mes } })).data;
+}
+
+export async function criarEntrega(dados: {
+  data: string;
+  litros: number;
+  observacao?: string;
+  precoLitroCentavos?: number;
+}) {
+  return (await apiClient.post(`${BASE}/entregas`, dados)).data;
+}
+
+export async function cancelarEntrega(id: string, motivo: string) {
+  return (await apiClient.post(`${BASE}/entregas/${id}/cancelar`, { motivo })).data;
+}
+
+export async function informarPrecoDoMes(mes: string, precoLitroCentavos: number) {
+  return (
+    await apiClient.post<{ atualizadas: number }>(`${BASE}/entregas/preco-do-mes`, {
+      mes,
+      precoLitroCentavos,
+    })
+  ).data;
+}
+
+export async function informarPrecoDaEntrega(id: string, precoLitroCentavos: number) {
+  return (await apiClient.post(`${BASE}/entregas/${id}/preco`, { precoLitroCentavos })).data;
+}
+
+export async function listarAnalises() {
+  return (await apiClient.get<AnaliseLeite[]>(`${BASE}/analises`)).data;
+}
+
+export async function criarAnalise(dados: {
+  mes: string;
+  entregaId?: string;
+  ccsMil?: number;
+  cbtMil?: number;
+  gordura?: number;
+  proteina?: number;
+}) {
+  return (await apiClient.post(`${BASE}/analises`, dados)).data;
+}
+
+export async function cancelarAnalise(id: string, motivo: string) {
+  return (await apiClient.post(`${BASE}/analises/${id}/cancelar`, { motivo })).data;
 }

@@ -47,6 +47,9 @@ export function LeiteInicio() {
           <Link className="botao botao-grande" to="/modulos/leite/ordenha">
             Lançar ordenha
           </Link>
+          <Link className="botao" to="/modulos/leite/entregas">
+            Lançar entrega
+          </Link>
         </section>
       )}
 

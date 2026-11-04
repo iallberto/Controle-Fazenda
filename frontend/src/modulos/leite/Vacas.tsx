@@ -72,6 +72,7 @@ export function Vacas() {
                   {v.raca ?? 'Sem raça'} · {SITUACAO[v.situacao]}
                   {v.del !== null && ` · DEL ${v.del}`}
                 </span>
+                {v.secagemPlanejada && <span>Secar em {formatarData(v.secagemPlanejada)}</span>}
                 {v.carenciaAte && (
                   <span className="texto-descarte">Leite descarte até {formatarData(v.carenciaAte)}</span>
                 )}

@@ -109,9 +109,9 @@ ao lado do arquivo; regras em funções puras testadas sem banco.
 
 **Independent Test**: quickstart.md, cenário 4
 
-- [ ] T035 [P] [US3] Testes do `SecagensService`: registrar encerra a lactação (data futura ou antes do início → 400; sem lactação aberta → 400); cancelar com motivo reabre (lactação mais nova → 409); "a secar" usa `previsoesParto` da reprodução, prazo e janela da configuração, atrasadas primeiro, média de 7 dias; em backend/src/modulos/leite/secagens.service.spec.ts
-- [ ] T036 [US3] Implementar `SecagensService` e `SecagensController` (`GET /secagens/a-secar`, `POST /secagens`, `POST /secagens/:id/cancelar`) até T035 passar; secagem planejada também em `GET /vacas` e `GET /vacas/:animalId`
-- [ ] T037 [US3] Tela `ASecar.tsx` em frontend/src/modulos/leite/ e botão "Registrar secagem" (com data) e "Cancelar secagem" em `VacaLeite.tsx` e no bloco do animal
+- [X] T035 [P] [US3] Testes do `SecagensService`: registrar encerra a lactação (data futura ou antes do início → 400; sem lactação aberta → 400); cancelar com motivo reabre (lactação mais nova → 409); "a secar" usa `previsoesParto` da reprodução, prazo e janela da configuração, atrasadas primeiro, média de 7 dias; em backend/src/modulos/leite/secagens.service.spec.ts
+- [X] T036 [US3] Implementar `SecagensService` e `SecagensController` (`GET /secagens/a-secar`, `POST /secagens`, `POST /secagens/:id/cancelar`) até T035 passar; secagem planejada também em `GET /vacas` e `GET /vacas/:animalId`
+- [X] T037 [US3] Tela `ASecar.tsx` em frontend/src/modulos/leite/ e botão "Registrar secagem" (com data) e "Cancelar secagem" em `VacaLeite.tsx` e no bloco do animal
 
 **Checkpoint**: secagem controlada; a ordenha só tem quem dá leite
 
@@ -123,10 +123,10 @@ ao lado do arquivo; regras em funções puras testadas sem banco.
 
 **Independent Test**: quickstart.md, cenário 5
 
-- [ ] T038 [P] [US4] Testes do `EntregasService` e `AnalisesService`: litros ≤ 0 → 400; data futura → 400; total do mês × leite para o tanque e diferença; preço por entrega e do mês (só não canceladas); valor arredondado ao centavo; resposta ao funcionário sem campos de dinheiro; análise sem nenhum valor → 400; cancelamento com motivo; em backend/src/modulos/leite/entregas.service.spec.ts e analises.service.spec.ts
-- [ ] T039 [US4] Implementar `EntregasService`/`EntregasController` e `AnalisesService`/`AnalisesController` (rotas do contrato; `POST /entregas/:id/preco` e `/entregas/preco-do-mes` dono; preço no `POST /entregas` vindo de funcionário → 403) até T038 passar
-- [ ] T040 [P] [US4] Teste de papéis em backend/src/modulos/leite/papeis.spec.ts: rotas de preço exigem DONO; `PATCH /configuracao` e `vaca-de-leite` exigem DONO; as demais aceitam os dois papéis
-- [ ] T041 [US4] Telas `Entregas.tsx` (mês, lista, total × tanque, preço para o dono) e `Analises.tsx` (mês a mês) em frontend/src/modulos/leite/
+- [X] T038 [P] [US4] Testes do `EntregasService` e `AnalisesService`: litros ≤ 0 → 400; data futura → 400; total do mês × leite para o tanque e diferença; preço por entrega e do mês (só não canceladas); valor arredondado ao centavo; resposta ao funcionário sem campos de dinheiro; análise sem nenhum valor → 400; cancelamento com motivo; em backend/src/modulos/leite/entregas.service.spec.ts e analises.service.spec.ts
+- [X] T039 [US4] Implementar `EntregasService`/`EntregasController` e `AnalisesService`/`AnalisesController` (rotas do contrato; `POST /entregas/:id/preco` e `/entregas/preco-do-mes` dono; preço no `POST /entregas` vindo de funcionário → 403) até T038 passar
+- [X] T040 [P] [US4] Teste de papéis em backend/src/modulos/leite/papeis.spec.ts: rotas de preço exigem DONO; `PATCH /configuracao` e `vaca-de-leite` exigem DONO; as demais aceitam os dois papéis
+- [X] T041 [US4] Telas `Entregas.tsx` (mês, lista, total × tanque, preço para o dono) e `Analises.tsx` (mês a mês) em frontend/src/modulos/leite/
 
 **Checkpoint**: conferência com o laticínio e qualidade
 
@@ -221,4 +221,26 @@ Task: "T010 Entidades ProdutoLeite, CarenciaLeite, Secagem, EntregaLeite, Analis
   375 px: início, ordenha (gravar e próxima com foco, faixa de descarte, confirmação de 95 L),
   cadastro rápido do produto repetindo o tratamento, "Leite em descarte" no Manejo, bloco do
   Leite na página do animal, vacas, produtos, configuração e ordenha do dia, sem rolagem lateral.
+
+## Registro de US3 e US4 (T035–T041, 2026-11-04)
+
+- Sem migration nova: as tabelas de secagem, entregas e análises já vieram na `Leite`.
+- Secagem: `SecagensService` usa `SituacaoService.previsoesParto` da reprodução (o
+  `LeiteModule` importa o `ReproducaoModule`) e `ConfiguracaoLeiteService.valores` (lê sem gravar
+  o padrão). A secagem planejada também aparece na lista e no detalhe da vaca; o detalhe traz o
+  `secagemId` da lactação encerrada por secagem, para o cancelamento.
+- Entregas: a resposta ao funcionário não tem nenhum campo de dinheiro (nem preço, nem valor, nem
+  total); preço no `POST /entregas` vindo do funcionário → 403; preço por entrega e do mês só dono.
+  Análises: pelo menos um valor; de uma entrega, só da fazenda e do mesmo mês.
+- Correção encontrada na tela: os litros digitados com ponto de milhar ("1.050,5") eram recusados;
+  `litrosDeTexto` passou a aceitar "1.050,5", "12,5" e "12.5".
+- 436 testes no backend (20 novos: secagem, entregas, análises e o teste de papéis do Leite, que
+  exige DONO só no preço, na configuração e em "vaca de leite"). Validação na cópia, em fazendas de
+  teste: 36 verificações pela API (secagem planejada pela idade gestacional do toque com a
+  Holandesa de 280 dias, atrasada primeiro, janela de 15 e de 80 dias, média de 7 dias; registrar
+  e cancelar a secagem, 400/409; entregas e preço do mês com a conta em centavos; funcionário sem
+  dinheiro e 403 no preço; análises; 404 de outra fazenda; só consulta) e, nas telas em 375 px,
+  "A secar", registrar e cancelar a secagem na vaca, entregas do dono (lançar, preço do mês
+  R$ 2,60 sobre 3.471 L = R$ 9.024,60) e do funcionário (sem nenhum R$), e análises, sem rolagem
+  lateral.
 

@@ -55,7 +55,8 @@ describe('VacasService e LactacoesService (spec 004, US1)', () => {
 
   beforeEach(() => {
     manager = managerFalso();
-    vacas = new VacasService(manager as never);
+    const secagens = { planejadas: jest.fn(async () => new Map()), daLactacao: jest.fn(async () => new Map()) };
+    vacas = new VacasService(manager as never, secagens as never);
     lactacoes = new LactacoesService(manager as never, vacas);
   });
 

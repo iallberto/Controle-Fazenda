@@ -10,10 +10,11 @@ import {
 import { Parto } from '../../parto/entities/parto.entity';
 import { hojeLocal } from '../../common/datas';
 import { diasEntre, somarDias } from '../../reproducao/dominio/datas';
-import { Lactacao } from './entities/lactacao.entity';
+import { Lactacao, MotivoFimLactacao } from './entities/lactacao.entity';
 import { Ordenha, TipoOrdenha } from './entities/ordenha.entity';
 import { calcularDel, carenciaAte, ehVacaDeLeite } from './dominio/regras';
 import { carenciasDasVacas } from './lactacao-base';
+import { SecagensService } from './secagens.service';
 
 export type SituacaoLeiteira = 'EM_LACTACAO' | 'SECA' | 'NENHUMA';
 
@@ -29,6 +30,7 @@ const porBrinco = (a: { brinco: string }, b: { brinco: string }) =>
 export class VacasService {
   constructor(
     @InjectEntityManager() private readonly manager: EntityManager,
+    private readonly secagensService: SecagensService,
   ) {}
 
   async listar(
@@ -54,6 +56,10 @@ export class VacasService {
     for (const l of lactacoes) {
       porVaca.set(l.animalId, [...(porVaca.get(l.animalId) ?? []), l]);
     }
+    const emLactacao = femeas.filter((f) =>
+      (porVaca.get(f.id) ?? []).some((l) => l.fim === null),
+    );
+    const planejadas = await this.secagensService.planejadas(fazendaId, emLactacao);
 
     return femeas
       .map((femea) => {
@@ -74,6 +80,7 @@ export class VacasService {
           inicio: atual?.inicio ?? null,
           del: atual ? calcularDel(atual.inicio, hoje) : null,
           carenciaAte: carenciaAte(carencias.get(femea.id) ?? [], hoje),
+          secagemPlanejada: atual ? (planejadas.get(femea.id)?.secagem ?? null) : null,
         };
       })
       .filter((v): v is NonNullable<typeof v> => v !== null)
@@ -112,6 +119,14 @@ export class VacasService {
 
     const atual = lactacoes.find((l) => l.fim === null) ?? null;
     const deLeite = ehVacaDeLeite(animal);
+    const [planejadas, secagens] = await Promise.all([
+      atual
+        ? this.secagensService.planejadas(fazendaId, [animal])
+        : Promise.resolve(new Map<string, { partoPrevisto: string; secagem: string }>()),
+      this.secagensService.daLactacao(
+        lactacoes.filter((l) => l.motivoFim === MotivoFimLactacao.SECAGEM).map((l) => l.id),
+      ),
+    ]);
     return {
       animalId: animal.id,
       brinco: animal.brinco,
@@ -130,6 +145,8 @@ export class VacasService {
             inicio: atual.inicio,
             origem: atual.origem,
             del: calcularDel(atual.inicio, hoje),
+            partoPrevisto: planejadas.get(animal.id)?.partoPrevisto ?? null,
+            secagemPlanejada: planejadas.get(animal.id)?.secagem ?? null,
             ...resumo(atual),
           }
         : null,
@@ -141,6 +158,7 @@ export class VacasService {
           fim: l.fim,
           motivoFim: l.motivoFim,
           dias: diasEntre(l.inicio, l.fim!) + 1,
+          secagemId: secagens.get(l.id)?.id ?? null,
           ...resumo(l),
         })),
       carenciaAte: carenciaAte(carencias.get(animalId) ?? [], hoje),

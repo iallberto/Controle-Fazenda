@@ -1,5 +1,12 @@
 import { Module } from '@nestjs/common';
 import { AcessoModule } from '../acesso/acesso.module';
+import { ReproducaoModule } from '../../reproducao/reproducao.module';
+import { SecagensService } from './secagens.service';
+import { SecagensController } from './secagens.controller';
+import { EntregasService } from './entregas.service';
+import { EntregasController } from './entregas.controller';
+import { AnalisesService } from './analises.service';
+import { AnalisesController } from './analises.controller';
 import { GanchosLeite } from './ganchos-leite';
 import { ConfiguracaoLeiteService } from './configuracao.service';
 import { ConfiguracaoLeiteController } from './configuracao.controller';
@@ -18,7 +25,7 @@ import { CarenciasController } from './carencias.controller';
 // tratamento) e reage a ele pelos ganchos do rebanho (research R1); o pacote
 // inicial nunca importa o Leite, e o Leite não importa outro módulo pago.
 @Module({
-  imports: [AcessoModule],
+  imports: [AcessoModule, ReproducaoModule],
   controllers: [
     ConfiguracaoLeiteController,
     VacasController,
@@ -26,6 +33,9 @@ import { CarenciasController } from './carencias.controller';
     OrdenhasController,
     ProdutosController,
     CarenciasController,
+    SecagensController,
+    EntregasController,
+    AnalisesController,
   ],
   providers: [
     GanchosLeite,
@@ -35,6 +45,9 @@ import { CarenciasController } from './carencias.controller';
     OrdenhasService,
     ProdutosService,
     CarenciasService,
+    SecagensService,
+    EntregasService,
+    AnalisesService,
   ],
 })
 export class LeiteModule {}

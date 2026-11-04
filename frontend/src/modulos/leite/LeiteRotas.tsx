@@ -8,6 +8,9 @@ import { Vacas } from './Vacas';
 import { VacaLeite } from './VacaLeite';
 import { Produtos } from './Produtos';
 import { ConfiguracaoLeite } from './ConfiguracaoLeite';
+import { ASecar } from './ASecar';
+import { Entregas } from './Entregas';
+import { Analises } from './Analises';
 
 // Telas do Leite (spec 004) dentro de /modulos/leite. Só consulta: as telas
 // escondem os botões de lançar; o backend recusa de qualquer forma.
@@ -23,6 +26,8 @@ export function LeiteRotas({ soConsulta }: { soConsulta: boolean }) {
         </NavLink>
         <NavLink to="/modulos/leite/ordenha">Ordenha</NavLink>
         <NavLink to="/modulos/leite/vacas">Vacas</NavLink>
+        <NavLink to="/modulos/leite/a-secar">A secar</NavLink>
+        <NavLink to="/modulos/leite/entregas">Entregas</NavLink>
         <NavLink to="/modulos/leite/produtos">Produtos</NavLink>
         {ehDono && <NavLink to="/modulos/leite/configuracao">Configuração</NavLink>}
       </nav>
@@ -33,6 +38,9 @@ export function LeiteRotas({ soConsulta }: { soConsulta: boolean }) {
         <Route path="vacas" element={<Vacas />} />
         <Route path="vacas/:animalId" element={<VacaLeite />} />
         <Route path="produtos" element={<Produtos />} />
+        <Route path="a-secar" element={<ASecar />} />
+        <Route path="entregas" element={<Entregas />} />
+        <Route path="analises" element={<Analises />} />
         {ehDono && <Route path="configuracao" element={<ConfiguracaoLeite />} />}
         <Route path="*" element={<LeiteInicio />} />
       </Routes>

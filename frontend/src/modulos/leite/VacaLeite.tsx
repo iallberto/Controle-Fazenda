@@ -7,6 +7,8 @@ import { hojeLocal } from '../../utils/datas';
 import {
   alterarVacaDeLeite,
   buscarVaca,
+  cancelarSecagem,
+  registrarSecagem,
   formatarLitros,
   iniciarLactacao,
   type VacaDeLeite,
@@ -35,6 +37,7 @@ export function VacaLeite() {
   const [erro, setErro] = useState('');
   const [aviso, setAviso] = useState<EstadoAviso>(null);
   const [inicio, setInicio] = useState(hojeLocal());
+  const [dataSecagem, setDataSecagem] = useState(hojeLocal());
 
   const carregar = useCallback(() => {
     buscarVaca(animalId)
@@ -58,6 +61,29 @@ export function VacaLeite() {
     try {
       await iniciarLactacao({ animalId, inicio: data ?? inicio, partoId });
       setAviso({ tipo: 'sucesso', texto: 'Lactação iniciada. A vaca já aparece na ordenha.' });
+      carregar();
+    } catch (e) {
+      setAviso({ tipo: 'erro', texto: mensagemDeErro(e) });
+    }
+  }
+
+  async function secar(evento: FormEvent) {
+    evento.preventDefault();
+    try {
+      await registrarSecagem({ animalId, data: dataSecagem });
+      setAviso({ tipo: 'sucesso', texto: 'Secagem registrada. A vaca saiu da ordenha.' });
+      carregar();
+    } catch (e) {
+      setAviso({ tipo: 'erro', texto: mensagemDeErro(e) });
+    }
+  }
+
+  async function desfazerSecagem(id: string) {
+    const motivo = window.prompt('Motivo do cancelamento da secagem');
+    if (!motivo) return;
+    try {
+      await cancelarSecagem(id, motivo);
+      setAviso({ tipo: 'sucesso', texto: 'Secagem cancelada. A vaca voltou à ordenha.' });
       carregar();
     } catch (e) {
       setAviso({ tipo: 'erro', texto: mensagemDeErro(e) });
@@ -132,7 +158,37 @@ export function VacaLeite() {
             <dd>{formatarLitros(atual.mediaPorDia)}</dd>
             <dt>Pico</dt>
             <dd>{formatarLitros(atual.pico)}</dd>
+            {atual.partoPrevisto && (
+              <>
+                <dt>Parto previsto</dt>
+                <dd>{formatarData(atual.partoPrevisto)}</dd>
+              </>
+            )}
+            {atual.secagemPlanejada && (
+              <>
+                <dt>Secar em</dt>
+                <dd className={atual.secagemPlanejada < hojeLocal() ? 'valor-despesa' : undefined}>
+                  {formatarData(atual.secagemPlanejada)}
+                </dd>
+              </>
+            )}
           </dl>
+          {!soConsulta && (
+            <form onSubmit={secar}>
+              <h3>Registrar secagem</h3>
+              <label htmlFor="data-secagem">Data da secagem</label>
+              <input
+                id="data-secagem"
+                type="date"
+                value={dataSecagem}
+                min={atual.inicio}
+                max={hojeLocal()}
+                onChange={(e) => setDataSecagem(e.target.value)}
+                required
+              />
+              <button type="submit">Registrar secagem</button>
+            </form>
+          )}
         </section>
       ) : (
         vaca.ehVacaDeLeite &&
@@ -171,6 +227,15 @@ export function VacaLeite() {
               <li key={l.id}>
                 {formatarData(l.inicio)} a {formatarData(l.fim)} · {l.dias} dias ·{' '}
                 {formatarLitros(l.totalLitros)} · fim por {MOTIVO_FIM[l.motivoFim]}
+                {!soConsulta && !atual && l.secagemId && l.id === vaca.encerradas[0].id && (
+                  <button
+                    type="button"
+                    className="botao-secundario"
+                    onClick={() => desfazerSecagem(l.secagemId!)}
+                  >
+                    Cancelar secagem
+                  </button>
+                )}
               </li>
             ))}
           </ul>

@@ -14,6 +14,22 @@ export class ConfiguracaoLeiteService {
     @InjectEntityManager() private readonly manager: EntityManager,
   ) {}
 
+  // Valores em vigor, sem gravar o padrão (para quem lê sem usuário à mão)
+  async valores(fazendaId: string) {
+    const existente = await this.manager.findOne(ConfiguracaoLeite, {
+      where: { fazendaId },
+    });
+    return (
+      existente ?? {
+        fazendaId,
+        modo: ModoOrdenha.POR_VACA,
+        ordenhasPorDia: 2,
+        prazoSecagemDias: 60,
+        janelaSecarDias: 15,
+      }
+    );
+  }
+
   async obter(fazendaId: string, usuarioId: string) {
     const existente = await this.manager.findOne(ConfiguracaoLeite, {
       where: { fazendaId },
