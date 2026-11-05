@@ -208,7 +208,19 @@ Para fazendas com vacas de ordenha. Usa os animais, partos, tratamentos e a cobe
 
 ---
 
-## 6. Módulo Nutrição
+## 6. Módulo Nutrição ✔️ Concluído
+
+> **Concluído em 04/11/2026** pela spec `specs/005-modulo-nutricao`. Decisões do clarify:
+> - cada insumo tem uma **unidade base** (kg, litro ou unidade) e uma tabela de unidades (saco de
+>   25 kg, tonelada, fardo…); cada lançamento escolhe a unidade e o sistema converte;
+> - dieta por **lote de alimentação com nome**, criado na Nutrição; o animal fica num lote por vez,
+>   e sai sozinho quando deixa o rebanho (gancho do rebanho);
+> - preço em cada **entrada de compra**, só pelo dono; as do funcionário ficam aguardando preço;
+>   o custo é a **média** das entradas com preço;
+> - o silo fechado é **reserva**; a silagem entra no estoque na abertura;
+> - o funcionário lança entradas, baixas e tratos, abre silo e mexe nos animais dos lotes, sem ver
+>   dinheiro; o dono cadastra insumos, dietas, lotes e silos.
+> - A integração compra → despesa no Financeiro fica para a fase de integrações.
 
 Pode ser feito em paralelo ao Leite.
 
@@ -236,8 +248,8 @@ Pode ser feito em paralelo ao Leite.
 | 0 | ✔️ Migrations · módulos por fazenda · bloqueio no backend e no menu · painel do administrador — concluída | — |
 | — | ✔️ **Cobertura e inseminação** no pacote inicial (monta natural, IA/IATF opcional, diagnóstico, previsão de parto) — concluída | Nada; pode entrar antes, durante ou depois da fase 0 |
 | 1 | ✔️ **Financeiro** (lançamentos, venda de animais, gráficos) — concluído | Fase 0 |
-| 2a | **Leite** (lactação, ordenha, carência, entregas) | Fase 0 e cobertura/inseminação |
-| 2b | **Nutrição** (insumos, silo, dietas, fornecimento) | Fase 0 |
+| 2a | ✔️ **Leite** (lactação, ordenha, carência, entregas) — concluído | Fase 0 e cobertura/inseminação |
+| 2b | ✔️ **Nutrição** (insumos, silo, dietas, fornecimento) — concluído | Fase 0 |
 | 3 | Integrações com o Financeiro (leite → receita, compras → despesa) | 1 e 2 |
 
 O Financeiro vem primeiro por ser o mais simples, por aproveitar a venda de animais que já existe e por ser a base das integrações. Leite e Nutrição não dependem um do outro e podem andar em paralelo.

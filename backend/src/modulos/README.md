@@ -21,5 +21,6 @@ inicial, Reprodução e Rebanho, continua nas pastas de `src/` e está sempre di
 - Quando um módulo pago precisa reagir ao rebanho, ele usa os **ganchos do rebanho**
   (`src/common/ganchos-rebanho.ts`, spec 004): o pacote inicial emite `partoRegistrado`,
   `partoAlterado`, `saidaDoRebanho` e `tratamentoGravado` dentro da própria transação, e o módulo
-  registra os seus no `onModuleInit` (o Leite em `leite/ganchos-leite.ts`). Um gancho que lança
+  registra os seus no `onModuleInit` (o Leite em `leite/ganchos-leite.ts`, a Nutrição em
+  `nutricao/ganchos-nutricao.ts`). Um gancho que lança
   erro desfaz a operação inteira.

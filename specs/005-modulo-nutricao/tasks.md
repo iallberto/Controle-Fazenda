@@ -125,9 +125,9 @@ ao lado do arquivo; regras em funções puras testadas sem banco.
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
-- [ ] T032 [P] Atualizar docs/modulos/Planejamento-modulos.md (seção 6 concluída) e backend/src/modulos/README.md
-- [ ] T033 Medir na cópia: 30 insumos e um ano de tratos de 10 lotes (estoque e custo do mês < 2 s, SC-006)
-- [ ] T034 Rodar o quickstart completo na cópia, em fazenda de teste, e registrar o resultado neste arquivo
+- [X] T032 [P] Atualizar docs/modulos/Planejamento-modulos.md (seção 6 concluída) e backend/src/modulos/README.md
+- [X] T033 Medir na cópia: 30 insumos e um ano de tratos de 10 lotes (estoque e custo do mês < 2 s, SC-006)
+- [X] T034 Rodar o quickstart completo na cópia, em fazenda de teste, e registrar o resultado neste arquivo
 
 ---
 
@@ -205,4 +205,18 @@ ao lado do arquivo; regras em funções puras testadas sem banco.
   ração 51,6% e silagem 48,4%; custo de cada trato só para o dono; silo encerrado no histórico) e,
   nas telas em 375 px (dono): aviso de preço pendente no painel, silos com reserva e encerrado,
   custo do mês com barras por insumo, informar preço pela lista — sem rolagem lateral.
+
+## Registro do acabamento (T032–T034, 2026-11-04)
+
+- T032: docs/modulos/Planejamento-modulos.md (seção 6 concluída, com as decisões do clarify; fases
+  2a e 2b concluídas na ordem de execução) e backend/src/modulos/README.md (ganchos da Nutrição).
+- T033: na cópia, uma fazenda de teste com 30 insumos, 10 lotes e um ano de tratos diários com 3
+  insumos cada (3.660 tratos e 11.370 movimentos): estoque 28 ms, custo do mês 37 ms, custo de
+  12 meses 517 ms, tratos do dia 28 ms, sugestão do trato 17 ms e histórico de um insumo 39 ms
+  (meta: < 2 s, SC-006). O trato em menos de 30 s (SC-001) não foi cronometrado com gente; a tela
+  já abre com o lote lembrado e as quantidades sugeridas.
+- T034: quickstart coberto pelas validações registradas acima — cenário 1 (estoque e preço), 2
+  (lotes, dietas e trato), 3 (silo), 4 (custo) e 5 (só consulta e isolamento) — com 49
+  verificações pela API e as telas do dono e do funcionário em 375 px.
+- Módulo completo: 34 de 34 tarefas, 487 testes no backend.
 
