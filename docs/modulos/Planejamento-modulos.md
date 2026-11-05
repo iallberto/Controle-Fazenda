@@ -1,12 +1,12 @@
 # Controle Fazenda — Planejamento dos módulos
 
 > Como o sistema passa a ser vendido em partes: um pacote inicial e módulos adicionais liberados por cliente.
-> Este documento registra as decisões, o escopo de cada módulo e a ordem de execução. As seções 2 (infraestrutura, fase 0), 3 (cobertura e inseminação) e 5 (Financeiro) já foram implementadas; Leite e Nutrição ainda não.
+> Este documento registra as decisões, o escopo de cada módulo e a ordem de execução. Todas as fases da seção 7 foram implementadas: infraestrutura (fase 0), cobertura e inseminação, Financeiro, Leite, Nutrição e as integrações com o Financeiro (fase 3).
 
 | | |
 |---|---|
-| **Data** | 03/11/2026 |
-| **Status** | Decisões tomadas, sem questões em aberto · seção 3 concluída (spec 001) · fase 0 concluída (spec 002) · Financeiro concluído (spec 003) · Leite e Nutrição não iniciados |
+| **Data** | 05/11/2026 |
+| **Status** | Decisões tomadas, sem questões em aberto · seção 3 concluída (spec 001) · fase 0 concluída (spec 002) · Financeiro concluído (spec 003) · Leite concluído (spec 004) · Nutrição concluída (spec 005) · integrações concluídas (spec 006) |
 | **Base** | Versão atual (reprodução e rebanho), com o bloco pós-V1 concluído |
 | **Legenda** | ✅ Decidido · ❓ Em aberto · ⏸️ Depois · ✔️ Concluído |
 
@@ -182,7 +182,7 @@ Para fazendas com vacas de ordenha. Usa os animais, partos, tratamentos e a cobe
 > - compra de animal com valor (0,00 para não lançar); compras cadastradas pelo funcionário ficam
 >   pendentes, com aviso ao dono a cada login;
 > - valores em centavos inteiros; gráficos em SVG próprio, sem biblioteca nova.
-> - Integrações com Leite e Nutrição (5.4) ficam para quando esses módulos existirem.
+> - Integrações com Leite e Nutrição (5.4) concluídas depois, pela spec 006.
 
 ### 5.1 Lançamentos
 - **Receitas e despesas** com data, valor, categoria, descrição e, quando fizer sentido, o animal ou lote ligado.
@@ -198,10 +198,20 @@ Para fazendas com vacas de ordenha. Usa os animais, partos, tratamentos e a cobe
 - **Valores de venda**: total vendido, preço médio da arroba ao longo do tempo, animais vendidos por categoria.
 - **Custo por categoria de despesa** (para onde vai o dinheiro).
 
-### 5.4 Integrações
-- Leite: entregas ao laticínio → receitas.
-- Nutrição: compras de insumos → despesas.
-- Tratamentos (opcional): custo do produto → despesa.
+### 5.4 Integrações ✔️ Concluído
+
+> **Concluído em 05/11/2026** pela spec `specs/006-integracoes-financeiro`. Só lança com o Financeiro
+> e o outro módulo ativos; nada retroativo; o lançamento gerado não é editado no Financeiro, a
+> correção é na origem e reflete na mesma operação.
+
+- Leite: o dono confirma o **recebimento do mês** (data e valor, que vem do total das entregas e
+  pode ser ajustado) → receita em "Venda de leite". Todas as entregas do mês precisam de preço;
+  mês recebido trava as entregas até desfazer o recebimento.
+- Nutrição: compra com valor (ou quando o dono informa o preço) → despesa em "Ração e sal" ou
+  "Outras despesas" pelo tipo do insumo, ou na categoria escolhida no insumo. Produção própria e
+  silo não lançam.
+- Lançamentos do Financeiro mostram a origem, com link para o registro e filtro por origem.
+- ⏸️ Tratamentos: custo do produto → despesa (preço fixo do produto), para depois.
 
 ### ⏸️ Depois
 - Contas a pagar e a receber com vencimento, conciliação bancária, emissão de notas.
@@ -250,7 +260,7 @@ Pode ser feito em paralelo ao Leite.
 | 1 | ✔️ **Financeiro** (lançamentos, venda de animais, gráficos) — concluído | Fase 0 |
 | 2a | ✔️ **Leite** (lactação, ordenha, carência, entregas) — concluído | Fase 0 e cobertura/inseminação |
 | 2b | ✔️ **Nutrição** (insumos, silo, dietas, fornecimento) — concluído | Fase 0 |
-| 3 | Integrações com o Financeiro (leite → receita, compras → despesa) | 1 e 2 |
+| 3 | ✔️ Integrações com o Financeiro (recebimento do leite → receita, compras de insumo → despesa) — concluída | 1 e 2 |
 
 O Financeiro vem primeiro por ser o mais simples, por aproveitar a venda de animais que já existe e por ser a base das integrações. Leite e Nutrição não dependem um do outro e podem andar em paralelo.
 

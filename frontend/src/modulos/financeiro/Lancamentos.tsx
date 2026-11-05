@@ -10,10 +10,39 @@ import {
   listarLancamentos,
   type CategoriaFinanceira,
   type MesFinanceiro,
+  type OrigemLancamento,
   type TipoLancamento,
 } from './api';
+import { useModulos } from '../../contexts/useModulos';
 import { useFinanceiro } from './FinanceiroContext';
 import { mesAtual, nomeDoMes, somarMeses } from '../../utils/meses';
+
+// Origem de cada lançamento e para onde leva o link (spec 006, FR-011)
+const ORIGENS: { valor: OrigemLancamento; rotulo: string; link?: string }[] = [
+  { valor: 'MANUAL', rotulo: 'Manual' },
+  { valor: 'VENDA', rotulo: 'Venda de animais' },
+  { valor: 'COMPRA', rotulo: 'Compra de animais' },
+  { valor: 'USO', rotulo: 'Uso' },
+  { valor: 'LEITE', rotulo: 'Leite', link: 'Ver no Leite' },
+  { valor: 'NUTRICAO', rotulo: 'Nutrição', link: 'Ver na Nutrição' },
+];
+const CHAVE_AVISO = 'financeiro.avisoIntegracoes';
+
+function avisoJaVisto() {
+  try {
+    return sessionStorage.getItem(CHAVE_AVISO) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function marcarAvisoVisto() {
+  try {
+    sessionStorage.setItem(CHAVE_AVISO, '1');
+  } catch {
+    // sem sessionStorage o aviso só volta a aparecer
+  }
+}
 
 // Lançamentos do mês com receita, despesa e saldo (spec 003, FR-007). Os
 // cancelados ficam na lista, riscados, e fora dos totais (FR-008).
@@ -22,19 +51,34 @@ export function Lancamentos() {
   const [mes, setMes] = useState(mesAtual);
   const [tipo, setTipo] = useState<TipoLancamento | ''>('');
   const [categoriaId, setCategoriaId] = useState('');
+  const [origem, setOrigem] = useState<OrigemLancamento | ''>('');
+  const { situacaoDe } = useModulos();
+  const comIntegracao = (['LEITE', 'NUTRICAO'] as const).some((m) => situacaoDe(m)?.situacao === 'ATIVO');
+  const [avisoIntegracao, setAvisoIntegracao] = useState(() => !avisoJaVisto());
   const [categorias, setCategorias] = useState<CategoriaFinanceira[]>([]);
   const [dados, setDados] = useState<MesFinanceiro | null>(null);
   const [aviso, setAviso] = useState<EstadoAviso>(null);
 
   const carregar = useCallback(() => {
-    listarLancamentos({ mes, tipo: tipo || undefined, categoriaId: categoriaId || undefined })
+    listarLancamentos({
+      mes,
+      tipo: tipo || undefined,
+      categoriaId: categoriaId || undefined,
+      origem: origem || undefined,
+    })
       .then(setDados)
       .catch((e) => setAviso({ tipo: 'erro', texto: mensagemDeErro(e) }));
-  }, [mes, tipo, categoriaId]);
+  }, [mes, tipo, categoriaId, origem]);
 
   useEffect(() => {
     carregar();
   }, [carregar]);
+
+  // Aviso de duplicidade uma vez por sessão (research R6): conta como visto ao aparecer
+  const mostrarAvisoIntegracao = comIntegracao && avisoIntegracao;
+  useEffect(() => {
+    if (mostrarAvisoIntegracao) marcarAvisoVisto();
+  }, [mostrarAvisoIntegracao]);
 
   useEffect(() => {
     listarCategorias({ incluirInativas: true })
@@ -95,7 +139,23 @@ export function Lancamentos() {
               </option>
             ))}
         </select>
+        <label htmlFor="filtro-origem">Origem</label>
+        <select id="filtro-origem" value={origem} onChange={(e) => setOrigem(e.target.value as OrigemLancamento | '')}>
+          <option value="">Todas</option>
+          {ORIGENS.map((o) => (
+            <option key={o.valor} value={o.valor}>
+              {o.rotulo}
+            </option>
+          ))}
+        </select>
       </div>
+
+      {mostrarAvisoIntegracao && (
+        <Aviso tipo="atencao" aoFechar={() => setAvisoIntegracao(false)}>
+          Receitas do leite e compras de insumo agora entram sozinhas. Confira os lançamentos manuais de "Venda de
+          leite" e "Ração e sal" para não duplicar.
+        </Aviso>
+      )}
 
       {aviso && (
         <Aviso tipo={aviso.tipo} aoFechar={() => setAviso(null)}>
@@ -130,6 +190,7 @@ export function Lancamentos() {
                         <br />
                         <small>
                           {formatarData(l.data)} · {l.categoria?.nome}
+                          {l.origem !== 'MANUAL' && ` · ${ORIGENS.find((o) => o.valor === l.origem)?.rotulo}`}
                           {l.animal && ` · ${rotuloBrinco(l.animal.brinco)}`}
                           {l.pasto && ` · ${l.pasto.nome}`}
                         </small>
@@ -145,6 +206,11 @@ export function Lancamentos() {
                     {l.vendaId && (
                       <small>
                         <Link to={`/modulos/financeiro/vendas/${l.vendaId}`}>Ver a venda</Link>
+                      </small>
+                    )}
+                    {l.origemCaminho && (
+                      <small>
+                        <Link to={l.origemCaminho}>{ORIGENS.find((o) => o.valor === l.origem)?.link ?? 'Ver a origem'}</Link>
                       </small>
                     )}
                     {editavel && (

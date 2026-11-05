@@ -61,6 +61,24 @@ describe('LancamentosService (US1, FR-004, FR-007, FR-008)', () => {
     expect(r.lancamentos).toHaveLength(3);
   });
 
+  it('filtra por origem e devolve o caminho do registro de origem (spec 006, FR-011)', async () => {
+    repo.find.mockResolvedValue([
+      {
+        ...lanc(TipoLancamento.RECEITA, 902460),
+        origem: OrigemLancamento.LEITE,
+        origemCaminho: '/modulos/leite/entregas?mes=2026-10',
+      },
+    ]);
+    const r = await service.listarMes('f1', { mes: '2026-11', origem: OrigemLancamento.LEITE });
+    expect(repo.find).toHaveBeenCalledWith(
+      expect.objectContaining({ where: expect.objectContaining({ origem: OrigemLancamento.LEITE }) }),
+    );
+    expect(r.lancamentos[0]).toMatchObject({
+      origem: 'LEITE',
+      origemCaminho: '/modulos/leite/entregas?mes=2026-10',
+    });
+  });
+
   const dto = {
     tipo: TipoLancamento.DESPESA,
     data: '2026-11-03',

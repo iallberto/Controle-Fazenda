@@ -22,6 +22,7 @@ import {
 import { CreateAnimalDto } from '../../../animal/dto/create-animal.dto';
 import { TipoLancamento } from '../entities/categoria-financeira.entity';
 import { FormaPrecoVenda } from '../entities/venda-animais.entity';
+import { OrigemLancamento } from '../entities/lancamento.entity';
 
 // Teto por lançamento: R$ 20 milhões, em centavos (research R1)
 const MAX_CENTAVOS = 2_000_000_000;
@@ -131,6 +132,11 @@ export class FiltroLancamentosDto {
   @IsOptional()
   @IsUUID()
   categoriaId?: string;
+
+  // Filtro por origem (spec 006, FR-011)
+  @IsOptional()
+  @IsEnum(OrigemLancamento)
+  origem?: OrigemLancamento;
 }
 
 export class MotivoDto {

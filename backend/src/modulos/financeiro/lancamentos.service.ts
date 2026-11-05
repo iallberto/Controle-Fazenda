@@ -55,7 +55,12 @@ export class LancamentosService {
   // dos totais (FR-007, FR-008)
   async listarMes(
     fazendaId: string,
-    filtro: { mes: string; tipo?: TipoLancamento; categoriaId?: string },
+    filtro: {
+      mes: string;
+      tipo?: TipoLancamento;
+      categoriaId?: string;
+      origem?: OrigemLancamento;
+    },
   ) {
     const [inicio, fim] = limitesDoMes(filtro.mes);
     const lancamentos = await this.lancamentoRepository.find({
@@ -64,6 +69,7 @@ export class LancamentosService {
         data: Between(inicio, fim),
         ...(filtro.tipo && { tipo: filtro.tipo }),
         ...(filtro.categoriaId && { categoriaId: filtro.categoriaId }),
+        ...(filtro.origem && { origem: filtro.origem }),
       },
       relations: { categoria: true, animal: true, pasto: true },
       order: { data: 'DESC', criadoEm: 'DESC' },
@@ -88,6 +94,7 @@ export class LancamentosService {
         animal: l.animal ? { id: l.animal.id, brinco: l.animal.brinco } : null,
         pasto: l.pasto ? { id: l.pasto.id, nome: l.pasto.nome } : null,
         origem: l.origem,
+        origemCaminho: l.origemCaminho,
         vendaId: l.vendaId,
         cancelamento: l.cancelamento,
       })),

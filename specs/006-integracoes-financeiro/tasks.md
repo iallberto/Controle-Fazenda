@@ -70,15 +70,15 @@ description: "Tarefas da feature 006: integrações dos módulos com o Financeir
 
 ## Phase 5: User Story 3 - Ver de onde veio cada lançamento (P2)
 
-- [ ] T017 [US3] Filtro `origem` em `GET /lancamentos` e `origem`/`origemCaminho` na resposta (`LancamentosService`), com teste
-- [ ] T018 [US3] Tela de lançamentos do Financeiro: rótulo da origem, link para a tela de origem, filtro por origem e o aviso de duplicidade uma vez por sessão (R6) em frontend/src/modulos/financeiro/Lancamentos.tsx
+- [X] T017 [US3] Filtro `origem` em `GET /lancamentos` e `origem`/`origemCaminho` na resposta (`LancamentosService`), com teste
+- [X] T018 [US3] Tela de lançamentos do Financeiro: rótulo da origem, link para a tela de origem, filtro por origem e o aviso de duplicidade uma vez por sessão (R6) em frontend/src/modulos/financeiro/Lancamentos.tsx
 
 ---
 
 ## Phase 6: Polish
 
-- [ ] T019 [P] Atualizar docs/modulos/Planejamento-modulos.md (fase 3 e seção 5.4 concluídas; cabeçalho com o estado atual) e backend/src/modulos/README.md (ganchos entre módulos)
-- [ ] T020 Rodar o quickstart completo na cópia e registrar neste arquivo
+- [X] T019 [P] Atualizar docs/modulos/Planejamento-modulos.md (fase 3 e seção 5.4 concluídas; cabeçalho com o estado atual) e backend/src/modulos/README.md (ganchos entre módulos)
+- [X] T020 Rodar o quickstart completo na cópia e registrar neste arquivo
 
 ---
 
@@ -102,4 +102,15 @@ description: "Tarefas da feature 006: integrações dos módulos com o Financeir
 - Ajuste achado na validação: a tela de Entregas passa a abrir o mês do `?mes=AAAA-MM` (o link do lançamento).
 - Dev: backup `backup_dev_antes_integracoes.dump`; rebuild aplicou a migration; só mudaram `migrations` (+1) e a
   tabela nova `recebimentos_leite`.
+
+## Registro da US3 e do acabamento (T017–T020)
+
+- `GET /lancamentos?origem=` filtra por origem (valor inválido → 400) e cada lançamento traz `origemCaminho`;
+  teste novo em `lancamentos.service.spec.ts` (510 testes, 84 suítes).
+- Tela de lançamentos: filtro "Origem", rótulo da origem na linha, link "Ver no Leite"/"Ver na Nutrição" e o aviso
+  de duplicidade uma vez por sessão (some ao reabrir a tela). Conferido a 375 px, sem rolagem lateral; o link abre
+  as entregas do mês recebido.
+- Quickstart completo na cópia: 31 verificações, nenhuma falha.
+- Documentação: `docs/modulos/Planejamento-modulos.md` (fase 3 e 5.4 concluídas, cabeçalho atualizado) e
+  `backend/src/modulos/README.md` (ganchos dos módulos).
 

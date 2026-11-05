@@ -24,3 +24,9 @@ inicial, Reprodução e Rebanho, continua nas pastas de `src/` e está sempre di
   registra os seus no `onModuleInit` (o Leite em `leite/ganchos-leite.ts`, a Nutrição em
   `nutricao/ganchos-nutricao.ts`). Um gancho que lança
   erro desfaz a operação inteira.
+- Quando um módulo pago gera dinheiro, ele avisa pelos **ganchos dos módulos**
+  (`src/common/ganchos-modulos.ts`, spec 006): o Leite emite `leiteRecebido` e
+  `leiteRecebimentoDesfeito`, a Nutrição emite `nutricaoCompraValorada` e
+  `nutricaoEntradaCancelada`, sempre dentro da própria transação. O Financeiro registra os seus em
+  `financeiro/ganchos-financeiro.ts` e só lança se ele e o módulo de origem estiverem ativos. O
+  lançamento guarda `origem`, `origemId` e `origemCaminho` e não é editado no Financeiro.

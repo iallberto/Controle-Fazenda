@@ -5,7 +5,7 @@ import type { Categoria } from '../../utils/formatadores';
 const BASE = '/modulos/financeiro';
 
 export type TipoLancamento = 'RECEITA' | 'DESPESA';
-export type OrigemLancamento = 'MANUAL' | 'VENDA' | 'COMPRA' | 'USO';
+export type OrigemLancamento = 'MANUAL' | 'VENDA' | 'COMPRA' | 'USO' | 'LEITE' | 'NUTRICAO';
 export type FormaPreco = 'POR_ARROBA' | 'VALOR_TOTAL';
 
 export interface Cancelamento {
@@ -33,6 +33,7 @@ export interface Lancamento {
   animal: { id: string; brinco: string } | null;
   pasto: { id: string; nome: string } | null;
   origem: OrigemLancamento;
+  origemCaminho?: string | null;
   vendaId: string | null;
   cancelamento: Cancelamento;
 }
@@ -78,7 +79,12 @@ export async function editarCategoria(id: string, dados: { nome?: string; ativa?
 
 // --- Lançamentos ---------------------------------------------------------------
 
-export async function listarLancamentos(filtro: { mes: string; tipo?: TipoLancamento; categoriaId?: string }) {
+export async function listarLancamentos(filtro: {
+  mes: string;
+  tipo?: TipoLancamento;
+  categoriaId?: string;
+  origem?: OrigemLancamento;
+}) {
   const resposta = await apiClient.get<MesFinanceiro>(`${BASE}/lancamentos`, { params: filtro });
   return resposta.data;
 }
