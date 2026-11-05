@@ -63,7 +63,7 @@ describe('RacaService', () => {
       const usuarioLogadoId = 'usuario-logado-1';
       const dto = { nome: 'Nelore x Simental', gestacaoMediaDias: 288 };
 
-      mockRepository.findOne.mockResolvedValue(null);
+      mockRepository.find.mockResolvedValue([]);
       mockRepository.create.mockImplementation((entrada) => entrada);
       mockRepository.save.mockResolvedValue({ id: 'raca-1', ...dto, fazendaId, criadoPorId: usuarioLogadoId });
 
@@ -82,9 +82,19 @@ describe('RacaService', () => {
       const usuarioLogadoId = 'usuario-logado-1';
       const dto = { nome: 'Nelore', gestacaoMediaDias: 291 };
 
-      mockRepository.findOne.mockResolvedValue({ id: 'existente', nome: 'Nelore' });
+      mockRepository.find.mockResolvedValue([{ id: 'existente', nome: 'Nelore' }]);
 
       await expect(service.create(fazendaId, usuarioLogadoId, dto as any)).rejects.toThrow(ConflictException);
+    });
+
+    it('nome repetido sem diferença de maiúsculas, acentos ou espaços → 409', async () => {
+      mockRepository.find.mockResolvedValue([{ id: 'r1', nome: 'Girolando 3/4' }, { id: 'r2', nome: 'Simental' }]);
+      for (const nome of ['girolando 3/4', '  GIROLANDO  3/4 ', 'Símental']) {
+        await expect(
+          service.create('fazenda-1', 'u1', { nome, gestacaoMediaDias: 283 } as any),
+        ).rejects.toThrow(ConflictException);
+      }
+      expect(mockRepository.save).not.toHaveBeenCalled();
     });
   });
 

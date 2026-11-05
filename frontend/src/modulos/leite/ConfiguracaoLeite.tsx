@@ -18,6 +18,11 @@ export function ConfiguracaoLeite() {
   const [config, setConfig] = useState<Config | null>(null);
   const [racas, setRacas] = useState<RacaDaFazenda[]>([]);
   const [aviso, setAviso] = useState<EstadoAviso>(null);
+  // Nova raça da fazenda (ex.: um mestiço leiteiro), 2026-11-05
+  const [nomeRaca, setNomeRaca] = useState('');
+  const [gestacaoRaca, setGestacaoRaca] = useState('283');
+  const [racaLeiteira, setRacaLeiteira] = useState(true);
+  const [avisoRaca, setAvisoRaca] = useState<EstadoAviso>(null);
 
   useEffect(() => {
     buscarConfiguracao()
@@ -43,6 +48,30 @@ export function ConfiguracaoLeite() {
       setRacas(racas.map((r) => (r.id === raca.id ? { ...r, leiteira: !r.leiteira } : r)));
     } catch (e) {
       setAviso({ tipo: 'erro', texto: mensagemDeErro(e) });
+    }
+  }
+
+  async function criarRaca(evento: FormEvent) {
+    evento.preventDefault();
+    setAvisoRaca(null);
+    try {
+      const nova = (
+        await apiClient.post<RacaDaFazenda>('/raca', {
+          nome: nomeRaca.trim(),
+          gestacaoMediaDias: Number(gestacaoRaca),
+          leiteira: racaLeiteira,
+        })
+      ).data;
+      setRacas([...racas, nova].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')));
+      setAvisoRaca({
+        tipo: 'sucesso',
+        texto: `Raça ${nova.nome} cadastrada${nova.leiteira ? ' como leiteira' : ''}. Ela já aparece no cadastro de animal.`,
+      });
+      setNomeRaca('');
+      setGestacaoRaca('283');
+      setRacaLeiteira(true);
+    } catch (e) {
+      setAvisoRaca({ tipo: 'erro', texto: mensagemDeErro(e) });
     }
   }
 
@@ -118,9 +147,44 @@ export function ConfiguracaoLeite() {
       <section>
         <h2>Raças leiteiras</h2>
         <p className="dica">
-          O parto de uma vaca de raça leiteira abre a lactação sozinho. As raças padrão já vêm
-          marcadas; marque aqui as raças da fazenda (ex.: um mestiço).
+          O parto de uma vaca de raça leiteira abre a lactação sozinho. As raças padrão não mudam;
+          cadastre aqui as raças da fazenda (ex.: um mestiço) e marque se são leiteiras.
         </p>
+        {avisoRaca && (
+          <Aviso tipo={avisoRaca.tipo} aoFechar={() => setAvisoRaca(null)}>
+            {avisoRaca.texto}
+          </Aviso>
+        )}
+        {!soConsulta && (
+          <form onSubmit={criarRaca}>
+            <h3>Nova raça</h3>
+            <label htmlFor="nova-raca-nome">Nome</label>
+            <input
+              id="nova-raca-nome"
+              maxLength={100}
+              placeholder="Ex.: Girolando 3/4"
+              value={nomeRaca}
+              onChange={(e) => setNomeRaca(e.target.value)}
+              required
+            />
+            <label htmlFor="nova-raca-gestacao">Gestação média (dias)</label>
+            <input
+              id="nova-raca-gestacao"
+              type="number"
+              inputMode="numeric"
+              min={200}
+              max={400}
+              value={gestacaoRaca}
+              onChange={(e) => setGestacaoRaca(e.target.value)}
+              required
+            />
+            <label className="campo-checkbox">
+              <input type="checkbox" checked={racaLeiteira} onChange={(e) => setRacaLeiteira(e.target.checked)} />
+              Leiteira (o parto abre a lactação sozinho)
+            </label>
+            <button type="submit">Cadastrar raça</button>
+          </form>
+        )}
         <ul className="lista-vacas">
           {racas.map((r) => (
             <li key={r.id} className="cartao-vaca">

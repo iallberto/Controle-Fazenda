@@ -49,7 +49,12 @@ export class RacaService implements OnModuleInit {
 
   async create(fazendaId: string, usuarioLogadoId: string, dto: CreateRacaDto) {
     await this.garantirNomeDisponivel(fazendaId, dto.nome);
-    const raca = this.racaRepository.create({ ...dto, fazendaId, criadoPorId: usuarioLogadoId });
+    const raca = this.racaRepository.create({
+      ...dto,
+      nome: dto.nome.trim(),
+      fazendaId,
+      criadoPorId: usuarioLogadoId,
+    });
     return this.racaRepository.save(raca);
   }
 
@@ -77,19 +82,28 @@ export class RacaService implements OnModuleInit {
       throw new ForbiddenException('Raças padrão do sistema não podem ser alteradas');
     }
     if (dto.nome && dto.nome !== raca.nome) {
-      await this.garantirNomeDisponivel(fazendaId, dto.nome);
+      await this.garantirNomeDisponivel(fazendaId, dto.nome, raca.id);
+      dto.nome = dto.nome.trim();
     }
     Object.assign(raca, dto);
     return this.racaRepository.save(raca);
   }
 
-  private async garantirNomeDisponivel(fazendaId: string, nome: string) {
-    const existente = await this.racaRepository.findOne({
-      where: [
-        { nome, fazendaId: IsNull() },
-        { nome, fazendaId },
-      ],
+  // Sem diferença de maiúsculas, acentos ou espaços: "girolando 3/4" é a mesma
+  // raça que "Girolando 3/4" (o cadastro pela tela do Leite deixou isso visível)
+  private async garantirNomeDisponivel(fazendaId: string, nome: string, ignorarId?: string) {
+    const normalizar = (texto: string) =>
+      texto
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/\s+/g, ' ')
+        .trim();
+    const alvo = normalizar(nome);
+    const racas = await this.racaRepository.find({
+      where: [{ fazendaId: IsNull() }, { fazendaId }],
     });
+    const existente = racas.find((r) => r.id !== ignorarId && normalizar(r.nome) === alvo);
     if (existente) {
       throw new ConflictException('Já existe uma raça com este nome disponível para esta fazenda');
     }
