@@ -11,6 +11,9 @@ const SO_DO_DONO = new Set([
   'VacasController.vacaDeLeite',
   'EntregasController.preco',
   'EntregasController.precoDoMes',
+  'RecebimentosController.doMes',
+  'RecebimentosController.confirmar',
+  'RecebimentosController.desfazer',
 ]);
 
 describe('Papéis nas rotas do Leite (FR-002)', () => {

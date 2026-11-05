@@ -19,6 +19,7 @@ import {
   type MovimentoHistorico,
 } from './api';
 import { useNutricao } from './NutricaoContext';
+import { CategoriaNoFinanceiro } from './CategoriaNoFinanceiro';
 
 // Insumo: estoque, unidades e histórico (spec 005, FR-004a, FR-009)
 export function InsumoDetalhe() {
@@ -108,6 +109,18 @@ export function InsumoDetalhe() {
             Dar baixa
           </Link>
         </section>
+      )}
+
+      {ehDono && (
+        <CategoriaNoFinanceiro
+          insumo={insumo}
+          podeEditar={podeEditar}
+          aoSalvar={() => {
+            setAviso({ tipo: 'sucesso', texto: 'Categoria no Financeiro salva.' });
+            carregar();
+          }}
+          aoErro={(texto) => setAviso({ tipo: 'erro', texto })}
+        />
       )}
 
       <section>

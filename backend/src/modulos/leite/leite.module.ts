@@ -9,6 +9,8 @@ import { AnalisesService } from './analises.service';
 import { AnalisesController } from './analises.controller';
 import { ProducaoService } from './producao.service';
 import { ProducaoController } from './producao.controller';
+import { RecebimentosService } from './recebimentos.service';
+import { RecebimentosController } from './recebimentos.controller';
 import { GanchosLeite } from './ganchos-leite';
 import { ConfiguracaoLeiteService } from './configuracao.service';
 import { ConfiguracaoLeiteController } from './configuracao.controller';
@@ -39,6 +41,7 @@ import { CarenciasController } from './carencias.controller';
     EntregasController,
     AnalisesController,
     ProducaoController,
+    RecebimentosController,
   ],
   providers: [
     GanchosLeite,
@@ -52,6 +55,7 @@ import { CarenciasController } from './carencias.controller';
     EntregasService,
     AnalisesService,
     ProducaoService,
+    RecebimentosService,
   ],
 })
 export class LeiteModule {}

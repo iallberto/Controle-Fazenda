@@ -372,3 +372,36 @@ export async function buscarCurva(animalId: string, lactacaoId?: string) {
     })
   ).data;
 }
+
+// --- Recebimento do mês (spec 006, só dono) ----------------------------------
+
+export interface RecebimentoDoMes {
+  mes: string;
+  recebimento: {
+    id: string;
+    data: string;
+    litros: number;
+    totalCalculadoCentavos: number;
+    valorRecebidoCentavos: number;
+    diferencaCentavos: number;
+    observacao: string | null;
+  } | null;
+  previsto: {
+    entregas: number;
+    litros: number;
+    totalCalculadoCentavos: number;
+    entregasSemPreco: { id: string; data: string; litros: number }[];
+  };
+}
+
+export async function buscarRecebimento(mes: string) {
+  return (await apiClient.get<RecebimentoDoMes>(`${BASE}/recebimentos`, { params: { mes } })).data;
+}
+
+export async function confirmarRecebimento(dados: { mes: string; data: string; valorRecebidoCentavos?: number; observacao?: string }) {
+  return (await apiClient.post(`${BASE}/recebimentos`, dados)).data;
+}
+
+export async function desfazerRecebimento(id: string, motivo: string) {
+  return (await apiClient.post(`${BASE}/recebimentos/${id}/desfazer`, { motivo })).data;
+}

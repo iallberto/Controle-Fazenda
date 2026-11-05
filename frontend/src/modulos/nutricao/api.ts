@@ -55,6 +55,7 @@ export interface InsumoEstoque {
   situacao: SituacaoEstoque;
   reservaSilosFechadosBase: number;
   custoMedioCentavosPorBase?: number | null;
+  categoriaDespesaId?: string | null;
 }
 
 export interface MovimentoHistorico {
@@ -151,7 +152,13 @@ export async function criarInsumo(dados: { nome: string; tipo: TipoInsumo; unida
 
 export async function editarInsumo(
   id: string,
-  dados: { nome?: string; estoqueMinimo?: number | null; unidadeCompraId?: string | null; ativo?: boolean },
+  dados: {
+    nome?: string;
+    estoqueMinimo?: number | null;
+    unidadeCompraId?: string | null;
+    ativo?: boolean;
+    categoriaDespesaId?: string | null;
+  },
 ) {
   return (await apiClient.patch(`${BASE}/insumos/${id}`, dados)).data;
 }

@@ -67,6 +67,11 @@ export class Insumo extends RegistroAuditado {
   @Column({ default: true })
   ativo: boolean;
 
+  // Categoria de despesa do Financeiro para as compras deste insumo (spec 006,
+  // FR-009). Sem relação: a Nutrição não importa o Financeiro; nulo = padrão
+  @Column({ name: 'categoria_despesa_id', type: 'uuid', nullable: true })
+  categoriaDespesaId: string | null;
+
   @OneToMany(() => UnidadeInsumo, (unidade) => unidade.insumo)
   unidades?: UnidadeInsumo[];
 }

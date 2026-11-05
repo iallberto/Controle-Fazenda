@@ -11,6 +11,7 @@ import { MotivoMovimento, MovimentoInsumo, TipoMovimento } from './entities/movi
 import { paraBase } from './dominio/regras';
 import { buscarInsumo, ehDono, unidadeDoInsumo } from './estoque-base';
 import { BaixaDto, EntradaDto } from './dto/nutricao.dto';
+import { avisarCompraCancelada, avisarCompraValorada } from './integracao';
 
 // Entradas e baixas avulsas (spec 005, US1, FR-005, FR-006, FR-008; R2, R3)
 @Injectable()
@@ -27,8 +28,12 @@ export class MovimentosService {
     // Compra sem valor fica para o dono informar (FR-021)
     movimento.aguardandoPreco =
       dto.motivo === MotivoMovimento.COMPRA && dto.valorCentavos === undefined;
-    const salvo = await this.manager.save(movimento);
-    return { id: salvo.id, quantidadeBase: salvo.quantidadeBase, aguardandoPreco: salvo.aguardandoPreco };
+    // Compra com valor vira despesa no Financeiro na mesma transação (spec 006)
+    return this.manager.transaction(async (manager) => {
+      const salvo = await manager.save(movimento);
+      await avisarCompraValorada(manager, salvo, usuarioId);
+      return { id: salvo.id, quantidadeBase: salvo.quantidadeBase, aguardandoPreco: salvo.aguardandoPreco };
+    });
   }
 
   async baixa(fazendaId: string, usuarioId: string, dto: BaixaDto, hoje = hojeLocal()) {
@@ -61,7 +66,11 @@ export class MovimentosService {
       motivoCancelamento: motivo,
     };
     movimento.atualizadoPorId = usuarioId;
-    await this.manager.save(movimento);
+    // Cancela também a despesa gerada no Financeiro (spec 006)
+    await this.manager.transaction(async (manager) => {
+      await manager.save(movimento);
+      await avisarCompraCancelada(manager, movimento, motivo, usuarioId);
+    });
     return { cancelado: true };
   }
 

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { mensagemDeErro } from '../../api/client';
 import { Aviso, type EstadoAviso } from '../../components/Aviso';
 import { centavosDeTexto, formatarData, formatarReais } from '../../utils/formatadores';
@@ -15,22 +15,32 @@ import {
   type MesDeEntregas,
 } from './api';
 import { useLeite } from './LeiteContext';
+import { RecebimentoDoMes } from './RecebimentoDoMes';
 
 // Entregas ao laticínio (spec 004, US4, FR-022, FR-023). Todos lançam os
 // litros; preço e valores só aparecem para o dono (FR-002).
 export function Entregas() {
   const { soConsulta, ehDono } = useLeite();
-  const [mes, setMes] = useState(mesAtual());
+  // ?mes=AAAA-MM: o link do lançamento do Financeiro abre o mês recebido (spec 006)
+  const [parametros] = useSearchParams();
+  const [mes, setMes] = useState(() => {
+    const doLink = parametros.get('mes');
+    return doLink && /^\d{4}-(0[1-9]|1[0-2])$/.test(doLink) && doLink <= mesAtual() ? doLink : mesAtual();
+  });
   const [dados, setDados] = useState<MesDeEntregas | null>(null);
   const [data, setData] = useState(hojeLocal());
   const [litros, setLitros] = useState('');
   const [observacao, setObservacao] = useState('');
   const [preco, setPreco] = useState('');
   const [aviso, setAviso] = useState<EstadoAviso>(null);
+  const [versao, setVersao] = useState(0);
 
   const carregar = useCallback(() => {
     listarEntregas(mes)
-      .then(setDados)
+      .then((d) => {
+        setDados(d);
+        setVersao((v) => v + 1);
+      })
       .catch((e) => setAviso({ tipo: 'erro', texto: mensagemDeErro(e) }));
   }, [mes]);
 
@@ -161,6 +171,9 @@ export function Entregas() {
               </>
             )}
           </dl>
+          {ehDono && (
+            <RecebimentoDoMes mes={mes} soConsulta={soConsulta} versao={versao} aoMudar={carregar} />
+          )}
           {ehDono && (dados.entregasSemPreco ?? 0) > 0 && (
             <p className="dica">{dados.entregasSemPreco} entrega(s) ainda sem preço.</p>
           )}

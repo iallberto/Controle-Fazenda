@@ -11,6 +11,7 @@ import { Fornecimento } from './entities/fornecimento.entity';
 import { MotivoMovimento, MovimentoInsumo, TipoMovimento } from './entities/movimento-insumo.entity';
 import { custoMedio, custoPorAnimalDia, situacaoEstoque } from './dominio/regras';
 import { estoques } from './estoque-base';
+import { avisarCompraCancelada, avisarCompraValorada } from './integracao';
 
 // Preço das entradas, pendências e custo da alimentação (spec 005, US4,
 // FR-020 a FR-022; research R3, R8, R9). Tudo só do dono.
@@ -42,10 +43,17 @@ export class CustoService {
       throw new BadRequestException('O preço é de uma entrada de compra ou de produção');
     }
     if (entrada.cancelamento.cancelado) throw new BadRequestException('Esta entrada foi cancelada');
+    const tinhaValor = entrada.valorCentavos !== null;
     entrada.valorCentavos = valorCentavos;
     entrada.aguardandoPreco = false;
     entrada.atualizadoPorId = usuarioId;
-    await this.manager.save(entrada);
+    // A despesa no Financeiro acompanha o preço (spec 006): preço corrigido
+    // cancela a despesa anterior e lança a nova
+    await this.manager.transaction(async (manager) => {
+      await manager.save(entrada);
+      if (tinhaValor) await avisarCompraCancelada(manager, entrada, 'Preço da compra corrigido', usuarioId);
+      await avisarCompraValorada(manager, entrada, usuarioId);
+    });
     return { id, valorCentavos };
   }
 

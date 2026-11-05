@@ -22,12 +22,16 @@ export enum OrigemLancamento {
   VENDA = 'VENDA',
   COMPRA = 'COMPRA',
   USO = 'USO',
+  // Gerados pelos outros módulos (spec 006, R2)
+  LEITE = 'LEITE',
+  NUTRICAO = 'NUTRICAO',
 }
 
 // Receita ou despesa (spec 003, US1). Valor em centavos inteiros (research R1).
 // Nunca é apagado: o dono corrige ou cancela com motivo (FR-008).
 @Entity('lancamentos')
 @Index(['fazendaId', 'data'])
+@Index(['origem', 'origemId'])
 export class Lancamento extends RegistroAuditado {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -87,6 +91,14 @@ export class Lancamento extends RegistroAuditado {
 
   @Column({ name: 'registro_uso_id', type: 'uuid', nullable: true })
   registroUsoId: string | null;
+
+  // Registro de origem num outro módulo (recebimento do leite, entrada de
+  // insumo) e a rota da tela de origem, para o link (spec 006, R2)
+  @Column({ name: 'origem_id', type: 'uuid', nullable: true })
+  origemId: string | null;
+
+  @Column({ name: 'origem_caminho', type: 'varchar', length: 200, nullable: true })
+  origemCaminho: string | null;
 
   @Column(() => Cancelamento, { prefix: false })
   cancelamento: Cancelamento;

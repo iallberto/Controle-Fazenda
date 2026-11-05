@@ -24,6 +24,8 @@ import { ResultadoService } from './resultado.service';
 import { ResultadoController } from './resultado.controller';
 import { AnimalModule } from '../../animal/animal.module';
 import { ModuloFazenda } from '../acesso/entities/modulo-fazenda.entity';
+import { AcessoModule } from '../acesso/acesso.module';
+import { GanchosFinanceiro } from './ganchos-financeiro';
 
 // Módulo pago Financeiro (spec 003). Importa o pacote inicial quando precisa;
 // o pacote inicial nunca importa o Financeiro (teste de fronteira, spec 002).
@@ -43,6 +45,7 @@ import { ModuloFazenda } from '../acesso/entities/modulo-fazenda.entity';
       ModuloFazenda,
     ]),
     AnimalModule,
+    AcessoModule,
   ],
   controllers: [
     CategoriasController,
@@ -54,6 +57,7 @@ import { ModuloFazenda } from '../acesso/entities/modulo-fazenda.entity';
     ResultadoController,
   ],
   providers: [
+    GanchosFinanceiro,
     CategoriasService,
     LancamentosService,
     VendasService,

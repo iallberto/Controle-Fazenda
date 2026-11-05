@@ -10,6 +10,7 @@ import { PapelUsuario } from '../../usuario/entities/usuario.entity';
 import { hojeLocal } from '../../common/datas';
 import { EntregaLeite } from './entities/entrega-leite.entity';
 import { Ordenha } from './entities/ordenha.entity';
+import { garantirMesAberto } from './mes-recebido';
 import {
   CriarEntregaDto,
   EditarEntregaDto,
@@ -101,6 +102,7 @@ export class EntregasService {
     if (dto.data > hoje) {
       throw new BadRequestException('A entrega não pode ser no futuro');
     }
+    await garantirMesAberto(this.manager, fazendaId, [dto.data]);
     const salva = await this.manager.save(
       this.manager.create(EntregaLeite, {
         fazendaId,
@@ -125,6 +127,7 @@ export class EntregasService {
     if (dto.data && dto.data > hoje) {
       throw new BadRequestException('A entrega não pode ser no futuro');
     }
+    await garantirMesAberto(this.manager, fazendaId, [entrega.data, dto.data ?? entrega.data]);
     Object.assign(entrega, dto, { atualizadoPorId: usuarioId });
     const salva = await this.manager.save(entrega);
     return { id: salva.id, data: salva.data, litros: salva.litros };
@@ -132,6 +135,7 @@ export class EntregasService {
 
   async cancelar(fazendaId: string, usuarioId: string, id: string, motivo: string) {
     const entrega = await this.buscar(fazendaId, id);
+    await garantirMesAberto(this.manager, fazendaId, [entrega.data]);
     entrega.cancelamento = {
       cancelado: true,
       canceladoEm: new Date(),
@@ -146,6 +150,7 @@ export class EntregasService {
   // Só o dono (rota com @Roles)
   async informarPreco(fazendaId: string, usuarioId: string, id: string, preco: number) {
     const entrega = await this.buscar(fazendaId, id);
+    await garantirMesAberto(this.manager, fazendaId, [entrega.data]);
     entrega.precoLitroCentavos = preco;
     entrega.atualizadoPorId = usuarioId;
     await this.manager.save(entrega);
@@ -154,6 +159,7 @@ export class EntregasService {
 
   // Só o dono: o mesmo preço para todas as entregas não canceladas do mês
   async informarPrecoDoMes(fazendaId: string, usuarioId: string, mes: string, preco: number) {
+    await garantirMesAberto(this.manager, fazendaId, [`${mes}-01`]);
     const { de, ate } = limitesDoMes(mes);
     const entregas = await this.manager.find(EntregaLeite, {
       where: { fazendaId, data: Between(de, ate), cancelamento: { cancelado: false } },

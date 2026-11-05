@@ -66,6 +66,11 @@ export class EditarInsumoDto {
   @IsUUID()
   unidadeCompraId?: string | null;
 
+  // Categoria de despesa do Financeiro para as compras (spec 006, FR-009)
+  @IsOptional()
+  @IsUUID()
+  categoriaDespesaId?: string | null;
+
   @IsOptional()
   @IsBoolean()
   ativo?: boolean;

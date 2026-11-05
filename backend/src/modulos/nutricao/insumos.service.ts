@@ -72,7 +72,10 @@ export class InsumosService {
           entradas.filter((e) => e.insumoId === insumo.id),
           hoje,
         );
-        return { ...base, custoMedioCentavosPorBase: media === null ? null : Math.round(media * 10000) / 10000 };
+        return {
+          ...base,
+          categoriaDespesaId: insumo.categoriaDespesaId,
+          custoMedioCentavosPorBase: media === null ? null : Math.round(media * 10000) / 10000 };
       });
   }
 
@@ -123,6 +126,7 @@ export class InsumosService {
       insumo.unidadeCompraId = dto.unidadeCompraId;
     }
     if (dto.estoqueMinimo !== undefined) insumo.estoqueMinimoBase = dto.estoqueMinimo;
+    if (dto.categoriaDespesaId !== undefined) insumo.categoriaDespesaId = dto.categoriaDespesaId;
     if (dto.ativo !== undefined) insumo.ativo = dto.ativo;
     insumo.atualizadoPorId = usuarioId;
     const { unidades: _u, ...semUnidades } = insumo;

@@ -34,6 +34,8 @@ export interface NovoLancamentoInterno {
   vendaId?: string | null;
   compraId?: string | null;
   registroUsoId?: string | null;
+  origemId?: string | null;
+  origemCaminho?: string | null;
 }
 
 // Receitas e despesas (spec 003, US1). Só o dono chega aqui (@Roles no controller).
@@ -189,6 +191,8 @@ export class LancamentosService {
         vendaId: dados.vendaId ?? null,
         compraId: dados.compraId ?? null,
         registroUsoId: dados.registroUsoId ?? null,
+        origemId: dados.origemId ?? null,
+        origemCaminho: dados.origemCaminho ?? null,
         criadoPorId: dados.usuarioId,
       }),
     );
@@ -228,16 +232,14 @@ export class LancamentosService {
     if (lancamento.cancelamento.cancelado) {
       throw new BadRequestException('Este lançamento já foi cancelado');
     }
-    if (
-      lancamento.origem === OrigemLancamento.VENDA ||
-      lancamento.origem === OrigemLancamento.COMPRA
-    ) {
-      throw new BadRequestException(
-        lancamento.origem === OrigemLancamento.VENDA
-          ? 'Este lançamento veio de uma venda: corrija ou cancele a venda'
-          : 'Este lançamento veio de uma compra de animal',
-      );
-    }
+    const mensagens: Partial<Record<OrigemLancamento, string>> = {
+      [OrigemLancamento.VENDA]: 'Este lançamento veio de uma venda: corrija ou cancele a venda',
+      [OrigemLancamento.COMPRA]: 'Este lançamento veio de uma compra de animal',
+      [OrigemLancamento.LEITE]: 'Este lançamento veio do Leite: corrija o recebimento do leite',
+      [OrigemLancamento.NUTRICAO]: 'Este lançamento veio da Nutrição: corrija a entrada do insumo',
+    };
+    const mensagem = mensagens[lancamento.origem];
+    if (mensagem) throw new BadRequestException(mensagem);
     return lancamento;
   }
 }
