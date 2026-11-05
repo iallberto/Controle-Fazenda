@@ -35,15 +35,6 @@ const GRUPOS_MENU: { titulo: string; itens: ItemMenu[] }[] = [
     ],
   },
   {
-    titulo: 'Reprodução',
-    itens: [
-      { rotulo: 'Estações de monta', destino: '/reproducao/estacoes' },
-      { rotulo: 'Diagnóstico de gestação', destino: '/reproducao/diagnostico' },
-      { rotulo: 'Inseminação', destino: '/reproducao/inseminacao' },
-      { rotulo: 'Sêmen', destino: '/reproducao/semens' },
-    ],
-  },
-  {
     titulo: 'Registrar',
     itens: [
       { rotulo: 'Cadastrar animal', destino: '/animais/novo' },
@@ -51,6 +42,15 @@ const GRUPOS_MENU: { titulo: string; itens: ItemMenu[] }[] = [
       { rotulo: 'Tratamento', destino: '/tratamentos/novo' },
       { rotulo: 'Pesagem', destino: '/pesagens/novo' },
       { rotulo: 'Mover animal', destino: '/animais/mover' },
+    ],
+  },
+  {
+    titulo: 'Reprodução',
+    itens: [
+      { rotulo: 'Estações de monta', destino: '/reproducao/estacoes' },
+      { rotulo: 'Diagnóstico de gestação', destino: '/reproducao/diagnostico' },
+      { rotulo: 'Inseminação', destino: '/reproducao/inseminacao' },
+      { rotulo: 'Sêmen', destino: '/reproducao/semens' },
     ],
   },
   {
