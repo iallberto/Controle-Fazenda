@@ -1220,6 +1220,28 @@ button.botao-confirmar {
   margin-bottom: 8px;
 }
 
+/* Grupo aberto: fundo verde bem claro, do verde do cabeçalho, como uma marca
+   d'água mostrando em que parte do menu a pessoa está (2026-11-05) */
+.menu-grupo {
+  border-radius: var(--radius);
+}
+
+.menu-grupo-aberto {
+  background: rgba(46, 125, 50, 0.1);
+  box-shadow: inset 3px 0 0 var(--cor-primaria);
+}
+
+.menu-grupo-aberto ul {
+  margin-bottom: 0;
+  padding-bottom: 8px;
+}
+
+.menu .menu-grupo-aberto button.menu-titulo,
+.menu .menu-grupo-aberto button.menu-titulo:hover {
+  color: var(--cor-primaria-escura);
+  background: transparent;
+}
+
 .menu ul li {
   padding: 0;
   margin: 0;

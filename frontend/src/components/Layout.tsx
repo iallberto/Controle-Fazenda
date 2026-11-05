@@ -114,10 +114,10 @@ export function Layout() {
 
   const fecharMenu = () => setMenuAberto(false);
 
-  // Grupos do menu recolhidos (pedido do dono do produto, 2026-11-05): só o grupo
-  // da tela atual começa aberto; clicar no título abre ou fecha. A escolha feita
-  // vale até recarregar a página.
-  const [gruposEscolhidos, setGruposEscolhidos] = useState<Record<string, boolean>>({});
+  // Menu em sanfona (pedido do dono do produto, 2026-11-05): um grupo aberto
+  // por vez. Começa aberto o grupo da tela atual; abrir outro fecha o anterior,
+  // e clicar no aberto fecha. undefined = ainda segue a tela atual.
+  const [grupoEscolhido, setGrupoEscolhido] = useState<string | null | undefined>(undefined);
 
   // Grupo Módulos para dono e funcionário: ativo, só consulta ou vitrine (FR-014)
   const { situacaoDe } = useModulos();
@@ -138,7 +138,21 @@ export function Layout() {
     }),
   };
   // Antes de Gestão, que fica por último
-  const grupos = [...GRUPOS_MENU.slice(0, -1), grupoModulos, GRUPOS_MENU[GRUPOS_MENU.length - 1]];
+  const grupos = [...GRUPOS_MENU.slice(0, -1), grupoModulos, GRUPOS_MENU[GRUPOS_MENU.length - 1]].map(
+    (grupo) => ({
+      ...grupo,
+      itens: grupo.itens.filter((item) => !item.somenteDono || usuario?.papel === 'DONO'),
+    }),
+  );
+  // Grupo da tela atual: endereço exato primeiro ("/animais/novo" é de Registrar),
+  // depois o começo do endereço ("/animais/123" é de Rebanho)
+  const caminho = location.pathname;
+  const grupoDaTela =
+    grupos.find((grupo) => grupo.itens.some((item) => item.destino === caminho)) ??
+    grupos.find((grupo) =>
+      grupo.itens.some((item) => item.destino !== '/' && caminho.startsWith(`${item.destino}/`)),
+    );
+  const grupoAberto = grupoEscolhido === undefined ? grupoDaTela?.titulo : grupoEscolhido;
 
   return (
     <div className="layout">
@@ -175,25 +189,17 @@ export function Layout() {
         </p>
         <p className="menu-usuario">Olá, {usuario?.nome}</p>
         {grupos.map((grupo) => {
-          const itens = grupo.itens.filter(
-            (item) => !item.somenteDono || usuario?.papel === 'DONO',
-          );
-          const temTelaAtual = itens.some(
-            (item) => item.destino === location.pathname ||
-              (item.destino !== '/' && location.pathname.startsWith(`${item.destino}/`)),
-          );
-          const aberto = gruposEscolhidos[grupo.titulo] ?? temTelaAtual;
+          const itens = grupo.itens;
+          const aberto = grupoAberto === grupo.titulo;
           const idLista = `menu-grupo-${grupo.titulo}`;
           return (
-            <div key={grupo.titulo} className="menu-grupo">
+            <div key={grupo.titulo} className={`menu-grupo${aberto ? ' menu-grupo-aberto' : ''}`}>
               <button
                 type="button"
                 className="menu-titulo"
                 aria-expanded={aberto}
                 aria-controls={idLista}
-                onClick={() =>
-                  setGruposEscolhidos((atual) => ({ ...atual, [grupo.titulo]: !aberto }))
-                }
+                onClick={() => setGrupoEscolhido(aberto ? null : grupo.titulo)}
               >
                 <span>{grupo.titulo}</span>
                 <span className="menu-seta" aria-hidden="true">
