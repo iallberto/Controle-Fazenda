@@ -6,6 +6,7 @@ import { formatarCategoria } from '../utils/formatadores';
 import { Aviso } from '../components/Aviso';
 import { AvisosDeVencimento } from '../modulos/vitrine/AvisosDeVencimento';
 import { AvisoPendencias } from '../modulos/financeiro/AvisoPendencias';
+import { AvisoPrecoPendente } from '../modulos/nutricao/AvisoPrecoPendente';
 
 export function Dashboard() {
   const { usuario } = useAuth();
@@ -30,6 +31,7 @@ export function Dashboard() {
       <main>
         <AvisosDeVencimento />
         <AvisoPendencias />
+        <AvisoPrecoPendente />
         {carregando && <p>Carregando...</p>}
         {erro && <Aviso tipo="erro">{erro}</Aviso>}
 

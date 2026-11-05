@@ -291,3 +291,96 @@ export function textoDoEstoque(insumo: InsumoEstoque) {
   if (!insumo.estoqueNaCompra) return base;
   return `${base} · ${formatarQuantidade(insumo.estoqueNaCompra.quantidade, insumo.estoqueNaCompra.unidade)}`;
 }
+
+// --- Silos (US3) -------------------------------------------------------------
+
+export type TipoSilo = 'TRINCHEIRA' | 'SUPERFICIE' | 'BAG';
+export const ROTULOS_SILO: Record<TipoSilo, string> = { TRINCHEIRA: 'Trincheira', SUPERFICIE: 'Superfície', BAG: 'Bag' };
+
+export interface SiloLista {
+  id: string;
+  nome: string;
+  tipo: TipoSilo;
+  insumo: { id: string; nome: string } | null;
+  toneladasEnsiladas: number;
+  fechamento: string;
+  abertura: string | null;
+  encerramento: string | null;
+  situacao: 'FECHADO' | 'ABERTO' | 'ENCERRADO';
+  consumidoKg: number;
+  saldoKg: number;
+  mediaKgDia: number | null;
+  diasRestantes: number | null;
+  acabaEm: string | null;
+  custoEnsilagemCentavos?: number | null;
+}
+
+export async function listarSilos() {
+  return (await apiClient.get<SiloLista[]>(`${BASE}/silos`)).data;
+}
+
+export async function criarSilo(dados: {
+  nome: string;
+  tipo: TipoSilo;
+  insumoId: string;
+  toneladasEnsiladas: number;
+  fechamento: string;
+  custoEnsilagemCentavos?: number;
+}) {
+  return (await apiClient.post(`${BASE}/silos`, dados)).data;
+}
+
+export async function abrirSilo(id: string, data: string) {
+  return (await apiClient.post(`${BASE}/silos/${id}/abrir`, { data })).data;
+}
+
+export async function cancelarAberturaSilo(id: string, motivo: string) {
+  return (await apiClient.post(`${BASE}/silos/${id}/cancelar-abertura`, { motivo })).data;
+}
+
+export async function encerrarSilo(id: string, data: string) {
+  return (await apiClient.post(`${BASE}/silos/${id}/encerrar`, { data })).data;
+}
+
+// --- Preço e custo (US4, só dono) --------------------------------------------
+
+export interface EntradaAguardando {
+  id: string;
+  data: string;
+  insumo: string;
+  quantidade: number;
+  unidade: string;
+  fornecedor: string | null;
+}
+
+export interface CustoPeriodo {
+  de: string;
+  ate: string;
+  lotes: {
+    loteId: string;
+    nome: string;
+    totalCentavos: number;
+    animaisDia: number;
+    porAnimalDiaCentavos: number | null;
+    insumos: { nome: string; unidadeBase: UnidadeBase; base: number; totalCentavos: number; percentual: number }[];
+  }[];
+  insumosSemPreco: string[];
+}
+
+export async function listarAguardandoPreco() {
+  return (await apiClient.get<EntradaAguardando[]>(`${BASE}/entradas/aguardando-preco`)).data;
+}
+
+export async function informarPrecoEntrada(id: string, valorCentavos: number) {
+  return (await apiClient.post(`${BASE}/entradas/${id}/preco`, { valorCentavos })).data;
+}
+
+export async function buscarPendencias() {
+  return (
+    await apiClient.get<{ entradasAguardandoPreco: number; insumosAbaixoDoMinimo: number }>(`${BASE}/pendencias`)
+  ).data;
+}
+
+export async function buscarCusto(de: string, ate: string) {
+  return (await apiClient.get<CustoPeriodo>(`${BASE}/custo`, { params: { de, ate } })).data;
+}

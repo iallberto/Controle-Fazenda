@@ -39,7 +39,7 @@ describe('Lotes, dietas e fornecimento (spec 005, US2)', () => {
     manager = managerFalso();
     lotes = new LotesService(manager as never);
     dietas = new DietasService(manager as never);
-    fornecimentos = new FornecimentosService(manager as never, lotes);
+    fornecimentos = new FornecimentosService(manager as never, lotes, { custoDosFornecimentos: jest.fn(async () => new Map()) } as never);
     manager.dados.set(LoteAlimentacao, [{ id: 'l1', fazendaId: 'f1', nome: 'Lactação', dietaId: 'd1', ativo: true }]);
     manager.dados.set(Insumo, [insumo('silagem', 'Silagem'), insumo('racao', 'Ração'), insumo('sal', 'Sal')]);
     // 20 animais no lote desde outubro; um saiu ontem

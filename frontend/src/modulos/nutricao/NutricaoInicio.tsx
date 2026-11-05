@@ -4,6 +4,7 @@ import { mensagemDeErro } from '../../api/client';
 import { Aviso } from '../../components/Aviso';
 import { listarInsumos, textoDoEstoque, type InsumoEstoque } from './api';
 import { useNutricao } from './NutricaoContext';
+import { AvisoPrecoPendente } from './AvisoPrecoPendente';
 
 // Início da Nutrição: atalhos do dia e os insumos em alerta (spec 005)
 export function NutricaoInicio() {
@@ -28,6 +29,7 @@ export function NutricaoInicio() {
         <Aviso tipo="atencao">Módulo desativado: só consulta · fale com o suporte para reativar</Aviso>
       )}
       {erro && <Aviso tipo="erro">{erro}</Aviso>}
+      <AvisoPrecoPendente />
 
       {!soConsulta && (
         <section className="atalhos-modulo">

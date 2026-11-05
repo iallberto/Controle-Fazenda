@@ -10,6 +10,9 @@ import { Lotes } from './Lotes';
 import { LoteDetalhe } from './LoteDetalhe';
 import { Dietas } from './Dietas';
 import { Fornecimento } from './Fornecimento';
+import { Silos } from './Silos';
+import { Custo } from './Custo';
+import { AguardandoPreco } from './AguardandoPreco';
 
 // Telas da Nutrição (spec 005) dentro de /modulos/nutricao. Só consulta: as
 // telas escondem os botões de lançar; o backend recusa de qualquer forma.
@@ -27,6 +30,8 @@ export function NutricaoRotas({ soConsulta }: { soConsulta: boolean }) {
         <NavLink to="/modulos/nutricao/estoque">Estoque</NavLink>
         <NavLink to="/modulos/nutricao/lotes">Lotes</NavLink>
         <NavLink to="/modulos/nutricao/dietas">Dietas</NavLink>
+        <NavLink to="/modulos/nutricao/silos">Silos</NavLink>
+        {ehDono && <NavLink to="/modulos/nutricao/custo">Custo</NavLink>}
       </nav>
       <Routes>
         <Route index element={<NutricaoInicio />} />
@@ -38,6 +43,9 @@ export function NutricaoRotas({ soConsulta }: { soConsulta: boolean }) {
         <Route path="lotes" element={<Lotes />} />
         <Route path="lotes/:id" element={<LoteDetalhe />} />
         <Route path="dietas" element={<Dietas />} />
+        <Route path="silos" element={<Silos />} />
+        {ehDono && <Route path="custo" element={<Custo />} />}
+        {ehDono && <Route path="aguardando-preco" element={<AguardandoPreco />} />}
         <Route path="*" element={<NutricaoInicio />} />
       </Routes>
     </NutricaoContext.Provider>

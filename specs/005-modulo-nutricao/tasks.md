@@ -100,9 +100,9 @@ ao lado do arquivo; regras em funções puras testadas sem banco.
 
 **Independent Test**: quickstart.md, cenário 3
 
-- [ ] T025 [P] [US3] Testes do `SilosService`: cadastro (insumo SILAGEM em KG, nome único); abrir lança ENTRADA/SILO de toneladas × 1000 kg com o custo da ensilagem, data ≥ fechamento e não futura; cancelar abertura só sem baixas; encerrar; saldo, média dos últimos 7 dias e previsão; fornecimento de silagem com `siloId` de silo aberto do mesmo insumo; em backend/src/modulos/nutricao/silos.service.spec.ts
-- [ ] T026 [US3] Implementar `SilosService` e `SilosController` (rotas do contrato) até T025 passar; o fornecimento valida e grava o `siloId` (silo aberto do insumo) e a sugestão marca o aberto há mais tempo
-- [ ] T027 [US3] Tela `Silos.tsx` (lista com situação, saldo, média e "dura mais N dias, até DD/MM"; dono cadastra; abrir e encerrar) e escolha do silo no item de silagem do `Fornecimento.tsx`
+- [X] T025 [P] [US3] Testes do `SilosService`: cadastro (insumo SILAGEM em KG, nome único); abrir lança ENTRADA/SILO de toneladas × 1000 kg com o custo da ensilagem, data ≥ fechamento e não futura; cancelar abertura só sem baixas; encerrar; saldo, média dos últimos 7 dias e previsão; fornecimento de silagem com `siloId` de silo aberto do mesmo insumo; em backend/src/modulos/nutricao/silos.service.spec.ts
+- [X] T026 [US3] Implementar `SilosService` e `SilosController` (rotas do contrato) até T025 passar; o fornecimento valida e grava o `siloId` (silo aberto do insumo) e a sugestão marca o aberto há mais tempo
+- [X] T027 [US3] Tela `Silos.tsx` (lista com situação, saldo, média e "dura mais N dias, até DD/MM"; dono cadastra; abrir e encerrar) e escolha do silo no item de silagem do `Fornecimento.tsx`
 
 **Checkpoint**: silagem controlada
 
@@ -114,10 +114,10 @@ ao lado do arquivo; regras em funções puras testadas sem banco.
 
 **Independent Test**: quickstart.md, cenários 1 (item 4) e 4
 
-- [ ] T028 [P] [US4] Testes: `GET /entradas/aguardando-preco` e `POST /entradas/:id/preco` (só COMPRA, valor > 0); `GET /pendencias`; `GET /custo` (custo médio na data, total por lote, animais-dia com um por dia, custo por animal-dia, parte de cada insumo, insumos sem preço); funcionário sem nenhum campo de dinheiro em todas as respostas; em backend/src/modulos/nutricao/custo.service.spec.ts
-- [ ] T029 [US4] Implementar preço da entrada, `PendenciasController` e `CustoService`/`CustoController` até T028 passar
-- [ ] T030 [P] [US4] Teste de papéis em backend/src/modulos/nutricao/papeis.spec.ts: as rotas **dono** do contrato exigem DONO; as demais aceitam os dois papéis
-- [ ] T031 [US4] Telas `Custo.tsx` (dono: período, lotes lado a lado com custo por animal-dia, barras de insumo por lote, insumos sem preço) e `AguardandoPreco.tsx` (lista e informar valor) em frontend/src/modulos/nutricao/; `AvisoPrecoPendente.tsx` no início da Nutrição e em frontend/src/pages/Dashboard.tsx (dono, Nutrição ativa)
+- [X] T028 [P] [US4] Testes: `GET /entradas/aguardando-preco` e `POST /entradas/:id/preco` (só COMPRA, valor > 0); `GET /pendencias`; `GET /custo` (custo médio na data, total por lote, animais-dia com um por dia, custo por animal-dia, parte de cada insumo, insumos sem preço); funcionário sem nenhum campo de dinheiro em todas as respostas; em backend/src/modulos/nutricao/custo.service.spec.ts
+- [X] T029 [US4] Implementar preço da entrada, `PendenciasController` e `CustoService`/`CustoController` até T028 passar
+- [X] T030 [P] [US4] Teste de papéis em backend/src/modulos/nutricao/papeis.spec.ts: as rotas **dono** do contrato exigem DONO; as demais aceitam os dois papéis
+- [X] T031 [US4] Telas `Custo.tsx` (dono: período, lotes lado a lado com custo por animal-dia, barras de insumo por lote, insumos sem preço) e `AguardandoPreco.tsx` (lista e informar valor) em frontend/src/modulos/nutricao/; `AvisoPrecoPendente.tsx` no início da Nutrição e em frontend/src/pages/Dashboard.tsx (dono, Nutrição ativa)
 
 **Checkpoint**: todas as histórias
 
@@ -181,4 +181,28 @@ ao lado do arquivo; regras em funções puras testadas sem banco.
   de estoque negativo com "Lançar mesmo assim", estoque "794 kg · 31,76 saco" e negativo em
   destaque, lote com o filtro de pasto e categoria, entrada sem campo de valor — sem nenhum R$ e sem
   rolagem lateral.
+
+## Registro de US3 e US4 (T025–T031, 2026-11-04)
+
+- Sem migration nova: silos e preço usam as tabelas da `Nutricao`.
+- Silo: abrir lança a entrada `SILO` de toneladas × 1000 kg com o custo da ensilagem como valor;
+  toneladas e custo só mudam com o silo fechado; cancelar a abertura só sem silagem fornecida
+  (409); encerrar é do dono. A lista traz consumido, saldo, média dos últimos 7 dias com baixa e
+  previsão.
+- Custo: `CustoService` (rotas só do dono) com preço da entrada, aguardando preço, pendências e
+  custo por lote (custo médio na data, animais-dia contando um por dia, parte de cada insumo com a
+  unidade base); a lista de tratos traz o custo de cada um só para o dono. Aviso de entradas
+  aguardando preço no início da Nutrição e no painel inicial (dono, Nutrição ativa).
+- Correção feita na tela: as quantidades do relatório de custo vinham sem unidade; agora vêm com a
+  unidade base do insumo.
+- 487 testes no backend (12 novos: silos, custo e o teste de papéis da Nutrição). Validação na
+  cópia, em fazenda de teste: 19 verificações pela API (403 do funcionário no cadastro e
+  encerramento do silo, no preço, nas pendências e no custo; silo de insumo que não é silagem →
+  400; reserva de 30 t e disponível zero; abrir antes do fechamento → 400; abrir lança 30.000 kg e
+  custo médio R$ 0,20/kg; 10 dias de 300 kg → saldo 27 t, média 300 kg/dia, 90 dias; cancelar
+  abertura com silagem fornecida → 409; trato com silo fechado → 400; ração sem preço listada; com
+  R$ 3.200,00 nos 40 sacos, custo do lote R$ 1.240,00 em 100 animais-dia = R$ 12,40 por animal-dia,
+  ração 51,6% e silagem 48,4%; custo de cada trato só para o dono; silo encerrado no histórico) e,
+  nas telas em 375 px (dono): aviso de preço pendente no painel, silos com reserva e encerrado,
+  custo do mês com barras por insumo, informar preço pela lista — sem rolagem lateral.
 

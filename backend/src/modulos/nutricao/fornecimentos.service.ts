@@ -15,6 +15,8 @@ import { Silo } from './entities/silo.entity';
 import { daBase, paraBase, sugestao } from './dominio/regras';
 import { estoques, unidadeDoInsumo } from './estoque-base';
 import { LotesService } from './lotes.service';
+import { CustoService } from './custo.service';
+import { ehDono } from './estoque-base';
 import { FornecimentoDto } from './dto/nutricao.dto';
 
 // Fornecimento do dia (spec 005, US2, FR-011 a FR-015; research R5)
@@ -23,6 +25,7 @@ export class FornecimentosService {
   constructor(
     @InjectEntityManager() private readonly manager: EntityManager,
     private readonly lotesService: LotesService,
+    private readonly custoService: CustoService,
   ) {}
 
   // Quantidades sugeridas = dieta × animais no lote na data, com estoque e
@@ -162,7 +165,12 @@ export class FornecimentosService {
     });
   }
 
-  async listar(fazendaId: string, filtro: { de?: string; ate?: string; loteId?: string }, hoje = hojeLocal()) {
+  async listar(
+    fazendaId: string,
+    filtro: { de?: string; ate?: string; loteId?: string },
+    papel = 'FUNCIONARIO',
+    hoje = hojeLocal(),
+  ) {
     const ate = filtro.ate ?? hoje;
     const de = filtro.de ?? ate;
     const fornecimentos = await this.manager.find(Fornecimento, {
@@ -170,7 +178,11 @@ export class FornecimentosService {
       relations: { lote: true, itens: { insumo: true, unidade: true } },
       order: { data: 'DESC', criadoEm: 'DESC' },
     });
+    const custos = ehDono(papel)
+      ? await this.custoService.custoDosFornecimentos(fornecimentos.filter((f) => !f.cancelamento.cancelado))
+      : null;
     return fornecimentos.map((f) => ({
+      ...(custos ? { custoCentavos: custos.get(f.id) ?? null } : {}),
       id: f.id,
       data: f.data,
       lote: f.lote ? { id: f.lote.id, nome: f.lote.nome } : null,

@@ -32,7 +32,7 @@ export class FornecimentosController {
 
   @Get()
   listar(@CurrentUser() user: JwtPayload, @Query() filtro: FiltroPeriodoDto) {
-    return this.fornecimentosService.listar(user.fazendaId, filtro);
+    return this.fornecimentosService.listar(user.fazendaId, filtro, user.papel);
   }
 
   @Post(':id/cancelar')
