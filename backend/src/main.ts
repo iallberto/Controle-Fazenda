@@ -1,10 +1,18 @@
 import { NestFactory, Reflector } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { ValidationPipe, ClassSerializerInterceptor, INestApplication } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  // Em produção o Caddy fica na frente: o endereço real de quem acessa vem no
+  // cabeçalho do proxy (spec 007, R8). Só com TRUST_PROXY ligado, para ninguém
+  // forjar o endereço quando o backend estiver exposto direto (desenvolvimento).
+  if (process.env.TRUST_PROXY === '1') {
+    app.set('trust proxy', 1);
+  }
 
   const origensPermitidas = (
     process.env.CORS_ORIGINS ?? 'http://localhost:5173,http://localhost:8080'

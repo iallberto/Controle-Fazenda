@@ -31,6 +31,7 @@ import { LeiteModule } from './modulos/leite/leite.module';
 import { FinanceiroModule } from './modulos/financeiro/financeiro.module';
 import { NutricaoModule } from './modulos/nutricao/nutricao.module';
 import { AdminModule } from './modulos/admin/admin.module';
+import { SaudeModule } from './saude/saude.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { AdminModule } from './modulos/admin/admin.module';
         migrationsTransactionMode: 'all',
       }),
     }),
+    SaudeModule,
     FazendaModule,
     UsuarioModule,
     PastoModule,

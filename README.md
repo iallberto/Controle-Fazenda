@@ -57,6 +57,13 @@ Pré-requisitos: Docker Desktop instalado.
    - API: http://localhost:3000
    - Documentação da API (Swagger): http://localhost:3000/docs
 
+### Produção (servidor com domínio)
+
+O `docker-compose.prod.yml` sobe o sistema com HTTPS automático (Caddy), banco e backend fechados para
+a internet, backup diário na nuvem e reinício automático do que travar. Passo a passo em
+[docs/publicacao/Roteiro-de-publicacao.md](docs/publicacao/Roteiro-de-publicacao.md); variáveis em
+`.env.producao.example`.
+
 ### Opção 2 - Desenvolvimento local (back-end e front-end separados)
 
 Pré-requisitos: Node.js 24+, Docker (para o banco de dados).
@@ -105,4 +112,6 @@ controle-fazenda/
 ├── docs/ # Enunciado e modelagem do projeto
 ├── backend/ # API em NestJS
 ├── frontend/ # Aplicação em React
-└── docker-compose.yml
+├── deploy/ # Caddy e backup de produção
+├── docker-compose.yml # desenvolvimento
+└── docker-compose.prod.yml # produção

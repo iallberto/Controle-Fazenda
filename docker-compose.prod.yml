@@ -1,0 +1,129 @@
+# Produção (spec 007). Uso no servidor:
+#   docker compose -f docker-compose.prod.yml --env-file .env up -d --build
+# Só o Caddy publica portas (80 e 443). Banco, backend e site ficam na rede
+# interna do Docker. Roteiro completo em docs/publicacao/Roteiro-de-publicacao.md.
+
+# Nome próprio: nunca se mistura com os containers de desenvolvimento
+# (docker-compose.yml), mesmo rodando na mesma pasta.
+name: controle-fazenda-prod
+
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Defina DB_PASSWORD no .env}
+      POSTGRES_DB: controle_fazenda
+      TZ: America/Sao_Paulo
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres} -d controle_fazenda"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  backend:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_DATABASE: controle_fazenda
+      JWT_SECRET: ${JWT_SECRET:?Defina JWT_SECRET no .env}
+      # Documentação técnica da API desligada em produção (FR-012)
+      SWAGGER_ENABLED: "false"
+      CORS_ORIGINS: https://${DOMINIO:?Defina DOMINIO no .env}
+      # Endereço real de quem acessa vem do Caddy (limite da consulta pública)
+      TRUST_PROXY: "1"
+      TZ: America/Sao_Paulo
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:3000/saude || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    labels:
+      autoheal: "true"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # Site e API no mesmo endereço (R1)
+        VITE_API_URL: /api
+    restart: unless-stopped
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/ || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    labels:
+      autoheal: "true"
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - backend
+      - frontend
+    environment:
+      DOMINIO: ${DOMINIO}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+  # Backup diário às 03:00, enviado à nuvem (R4)
+  backup:
+    build:
+      context: ./deploy/backup
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGHOST: db
+      PGUSER: ${DB_USERNAME:-postgres}
+      PGPASSWORD: ${DB_PASSWORD}
+      PGDATABASE: controle_fazenda
+      TZ: America/Sao_Paulo
+      BACKUP_REMOTO: ${BACKUP_REMOTO:-}
+      BACKUP_AVISO_URL: ${BACKUP_AVISO_URL:-}
+      RCLONE_CONFIG_NUVEM_TYPE: s3
+      RCLONE_CONFIG_NUVEM_PROVIDER: ${BACKUP_S3_PROVEDOR:-Other}
+      RCLONE_CONFIG_NUVEM_ENDPOINT: ${BACKUP_S3_ENDPOINT:-}
+      RCLONE_CONFIG_NUVEM_ACCESS_KEY_ID: ${BACKUP_S3_CHAVE:-}
+      RCLONE_CONFIG_NUVEM_SECRET_ACCESS_KEY: ${BACKUP_S3_SEGREDO:-}
+      RCLONE_CONFIG_NUVEM_NO_CHECK_BUCKET: "true"
+    volumes:
+      - backups:/backups
+
+  # Reinicia o container que ficar "unhealthy" (travado) (R3)
+  autoheal:
+    image: willfarrell/autoheal:1.2.0
+    restart: unless-stopped
+    environment:
+      AUTOHEAL_CONTAINER_LABEL: autoheal
+      AUTOHEAL_INTERVAL: 30
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+volumes:
+  db_data:
+  caddy_data:
+  caddy_config:
+  backups:

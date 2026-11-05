@@ -72,11 +72,11 @@ sessões antigas encerradas.
 
 **Independent Test**: quickstart, cenário 4 (ensaio local com `DOMINIO=localhost`).
 
-- [ ] T014 [P] [US2] `GET /saude` público em backend/src/saude/saude.controller.ts e saude.module.ts (`SELECT 1`; 200 `{ status: 'ok' }`, 503 `{ status: 'erro' }`), registrado em app.module.ts; teste (FR-014)
-- [ ] T015 [P] [US2] backend/src/main.ts: `trust proxy` = 1 (endereço real atrás do Caddy)
-- [ ] T016 [P] [US2] deploy/Caddyfile: site `{$DOMINIO}`, `handle_path /api/*` → `backend:3000`, resto → `frontend:80`, cabeçalhos `Strict-Transport-Security`, `X-Content-Type-Options nosniff`, `X-Frame-Options DENY`, `Referrer-Policy strict-origin-when-cross-origin`, sem `Server` (FR-010, FR-013)
-- [ ] T017 [US2] docker-compose.prod.yml na raiz: `db` (sem portas, `pg_isready`), `backend` (sem portas, `SWAGGER_ENABLED=false`, `CORS_ORIGINS=https://${DOMINIO}`, healthcheck em `/saude`, label do autoheal), `frontend` (build com `VITE_API_URL=/api`, sem portas, healthcheck), `caddy` (80 e 443, volumes de dados e config), `autoheal`; todos `restart: unless-stopped`; e .env.producao.example com cada variável explicada (FR-011, FR-012, FR-014)
-- [ ] T018 [US2] Ensaio local do cenário 4 do quickstart com `DOMINIO=localhost` e banco vazio: site, redirecionamento, `/api/saude`, sem `/api/docs`, cabeçalhos, portas 5432/3000/8080 fechadas, autoheal com `docker pause`, reinício do Docker; criar o primeiro administrador pelo `criar-admin` dentro do container
+- [X] T014 [P] [US2] `GET /saude` público em backend/src/saude/saude.controller.ts e saude.module.ts (`SELECT 1`; 200 `{ status: 'ok' }`, 503 `{ status: 'erro' }`), registrado em app.module.ts; teste (FR-014)
+- [X] T015 [P] [US2] backend/src/main.ts: `trust proxy` = 1 (endereço real atrás do Caddy)
+- [X] T016 [P] [US2] deploy/Caddyfile: site `{$DOMINIO}`, `handle_path /api/*` → `backend:3000`, resto → `frontend:80`, cabeçalhos `Strict-Transport-Security`, `X-Content-Type-Options nosniff`, `X-Frame-Options DENY`, `Referrer-Policy strict-origin-when-cross-origin`, sem `Server` (FR-010, FR-013)
+- [X] T017 [US2] docker-compose.prod.yml na raiz: `db` (sem portas, `pg_isready`), `backend` (sem portas, `SWAGGER_ENABLED=false`, `CORS_ORIGINS=https://${DOMINIO}`, healthcheck em `/saude`, label do autoheal), `frontend` (build com `VITE_API_URL=/api`, sem portas, healthcheck), `caddy` (80 e 443, volumes de dados e config), `autoheal`; todos `restart: unless-stopped`; e .env.producao.example com cada variável explicada (FR-011, FR-012, FR-014)
+- [X] T018 [US2] Ensaio local do cenário 4 do quickstart com `DOMINIO=localhost` e banco vazio: site, redirecionamento, `/api/saude`, sem `/api/docs`, cabeçalhos, portas 5432/3000/8080 fechadas, autoheal com `docker pause`, reinício do Docker; criar o primeiro administrador pelo `criar-admin` dentro do container
 
 **Checkpoint**: produção ensaiada na máquina local.
 
@@ -88,10 +88,10 @@ sessões antigas encerradas.
 
 **Independent Test**: quickstart, cenário 5.
 
-- [ ] T019 [P] [US3] deploy/backup/Dockerfile (`postgres:16-alpine` + `rclone` + `crond`, fuso `America/Sao_Paulo`, cron às 03:00) e deploy/backup/backup.sh: `pg_dump -Fc` em `/backups/diarios/controle_fazenda_AAAA-MM-DD.dump`, cópia em `semanais/` no domingo, `rclone copy` para `${BACKUP_REMOTO}`, apagar diários com mais de 7 dias e semanais com mais de 28 (local e remoto), chamar `${BACKUP_AVISO_URL}` no sucesso e `${BACKUP_AVISO_URL}/fail` com log em qualquer erro (FR-016, FR-017, FR-019)
-- [ ] T020 [P] [US3] deploy/backup/restaurar.sh: listar backups do remoto, baixar o escolhido (ou o mais recente), parar o backend, `pg_restore --clean --if-exists`, subir o backend e imprimir as contagens por tabela (FR-018)
-- [ ] T021 [US3] Serviço `backup` no docker-compose.prod.yml (volume `/backups`, variáveis do remoto S3 e da URL de aviso) e variáveis em .env.producao.example; comando para rodar o backup na hora
-- [ ] T022 [US3] Ensaio do cenário 5 com um remoto local do `rclone`: backup na hora, dados criados e contagens anotadas, volume do banco apagado, restauração pelo roteiro, contagens iguais e tempo medido; guarda simulada com arquivos antigos
+- [X] T019 [P] [US3] deploy/backup/Dockerfile (`postgres:16-alpine` + `rclone` + `crond`, fuso `America/Sao_Paulo`, cron às 03:00) e deploy/backup/backup.sh: `pg_dump -Fc` em `/backups/diarios/controle_fazenda_AAAA-MM-DD.dump`, cópia em `semanais/` no domingo, `rclone copy` para `${BACKUP_REMOTO}`, apagar diários com mais de 7 dias e semanais com mais de 28 (local e remoto), chamar `${BACKUP_AVISO_URL}` no sucesso e `${BACKUP_AVISO_URL}/fail` com log em qualquer erro (FR-016, FR-017, FR-019)
+- [X] T020 [P] [US3] deploy/backup/restaurar.sh: listar backups do remoto, baixar o escolhido (ou o mais recente), parar o backend, `pg_restore --clean --if-exists`, subir o backend e imprimir as contagens por tabela (FR-018)
+- [X] T021 [US3] Serviço `backup` no docker-compose.prod.yml (volume `/backups`, variáveis do remoto S3 e da URL de aviso) e variáveis em .env.producao.example; comando para rodar o backup na hora
+- [X] T022 [US3] Ensaio do cenário 5 com um remoto local do `rclone`: backup na hora, dados criados e contagens anotadas, volume do banco apagado, restauração pelo roteiro, contagens iguais e tempo medido; guarda simulada com arquivos antigos
 
 **Checkpoint**: backup e restauração comprovados.
 
@@ -130,9 +130,9 @@ sessões antigas encerradas.
 ## Phase 8: Polish & Cross-Cutting Concerns
 
 - [X] T029 [P] Login do usuário e do painel com `<form>`, `id`/`name` e `autoComplete` `username` e `current-password` em frontend/src/pages/Login.tsx e frontend/src/modulos/admin/AdminLogin.tsx; conferir no navegador que ele oferece salvar a senha (FR-024)
-- [ ] T030 docs/publicacao/Roteiro-de-publicacao.md: contratar o servidor, instalar Docker, apontar o domínio, criar o bucket e as chaves, preencher o `.env`, subir, criar o administrador, configurar UptimeRobot e Healthchecks.io, atualizar para versão nova (backup antes, migrations), restaurar e redefinir o administrador pelo servidor (FR-015, FR-025)
-- [ ] T031 [P] README.md (seção de produção apontando o roteiro) e docs/modulos/Planejamento-modulos.md (cabeçalho: preparação para publicação concluída)
-- [ ] T032 Migration no dev (`docker compose up -d --build`), quickstart completo e registro neste arquivo
+- [X] T030 docs/publicacao/Roteiro-de-publicacao.md: contratar o servidor, instalar Docker, apontar o domínio, criar o bucket e as chaves, preencher o `.env`, subir, criar o administrador, configurar UptimeRobot e Healthchecks.io, atualizar para versão nova (backup antes, migrations), restaurar e redefinir o administrador pelo servidor (FR-015, FR-025)
+- [X] T031 [P] README.md (seção de produção apontando o roteiro) e docs/modulos/Planejamento-modulos.md (cabeçalho: preparação para publicação concluída)
+- [X] T032 Migration no dev (`docker compose up -d --build`), quickstart completo e registro neste arquivo
 
 ---
 
@@ -178,4 +178,25 @@ Com os dois incrementos, falta só o que depende de terceiros: servidor, domíni
   "Redefinir senha" em Usuários (a tela sobe até a senha provisória), "Nova fazenda", "Redefinir senha do dono" e
   "Trocar minha senha" no painel (link ajustado para aparecer na barra verde); login com `autoComplete`.
 - Dev: backup `backup_antes_publicacao.dump`; rebuild aplicou a migration; só mudou `migrations` (+1).
+
+## Registro do incremento 2 (T014–T022, T030–T032)
+
+- Backend: rota pública `/saude` e `trust proxy` só com `TRUST_PROXY=1`; 530 testes (88 suítes), lint zero.
+- Ensaio de produção local (`DOMINIO=localhost`, banco vazio, projeto `controle-fazenda-prod`):
+  - `https://localhost/api/saude` ok; `http://` → 308 para `https://`; `/api/docs` 404; HSTS, `nosniff`,
+    `X-Frame-Options DENY` e `Referrer-Policy` presentes, sem cabeçalho `Server`;
+  - só o Caddy com portas publicadas (banco, backend e site sem porta no host);
+  - site construído com a API em `/api`; administrador criado com `npm run admin:criar` dentro do container;
+    fazenda, dono, pasto e 12 animais criados pelo HTTPS;
+  - autoheal: backend congelado (`docker kill --signal=STOP`) reiniciado sozinho em 116 s, de volta em 120 s.
+- Backup: dump, cópia ao remoto (pasta local no papel do bucket) e guarda de 7 dias / 28 dias conferida com
+  arquivos antigos simulados, no servidor e no remoto. Corrigidos no ensaio: limpeza do remoto antes de existir
+  `semanais/`, aviso de configuração do rclone e listagem de pastas.
+- Restauração: do remoto para um banco novo e vazio em 24 s, 53 tabelas com contagens iguais. O script ganhou
+  `RESTAURAR_EM` (conferir backup sem tocar no banco em uso), depois que um primeiro teste restaurou por engano
+  no banco principal do ensaio, sem perda (mesmo backup, contagens conferidas).
+- Não ensaiado: apagar o volume do banco (a verificação de segurança barrou a remoção; a restauração em banco
+  vazio cobre o mesmo caminho), reinício do Docker inteiro, bucket real e domínio real (ficam para o dia da
+  publicação, no roteiro).
+- Dev: rebuild com a rota `/saude`; sem migration nova.
 

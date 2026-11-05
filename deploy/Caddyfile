@@ -1,0 +1,32 @@
+# Porta de entrada do sistema em produção (spec 007, R1).
+# - Obtém e renova sozinho o certificado do domínio (Let's Encrypt) e
+#   redireciona http para https. Com DOMINIO=localhost, usa um certificado
+#   interno, para o ensaio na máquina local.
+# - /api/* vai para o backend (sem o prefixo /api); o resto vai para o site.
+# - Cabeçalhos de segurança em todas as respostas (FR-013).
+
+{$DOMINIO} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+		defer
+	}
+
+	handle_path /api/* {
+		reverse_proxy backend:3000
+	}
+
+	handle {
+		reverse_proxy frontend:80
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}

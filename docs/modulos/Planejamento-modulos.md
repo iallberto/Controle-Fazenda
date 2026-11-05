@@ -6,7 +6,7 @@
 | | |
 |---|---|
 | **Data** | 05/11/2026 |
-| **Status** | Decisões tomadas, sem questões em aberto · seção 3 concluída (spec 001) · fase 0 concluída (spec 002) · Financeiro concluído (spec 003) · Leite concluído (spec 004) · Nutrição concluída (spec 005) · integrações concluídas (spec 006) |
+| **Status** | Decisões tomadas, sem questões em aberto · seção 3 concluída (spec 001) · fase 0 concluída (spec 002) · Financeiro concluído (spec 003) · Leite concluído (spec 004) · Nutrição concluída (spec 005) · integrações concluídas (spec 006) · preparação para publicação concluída (spec 007) |
 | **Base** | Versão atual (reprodução e rebanho), com o bloco pós-V1 concluído |
 | **Legenda** | ✅ Decidido · ❓ Em aberto · ⏸️ Depois · ✔️ Concluído |
 
