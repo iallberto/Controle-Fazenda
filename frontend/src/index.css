@@ -1231,6 +1231,29 @@ button.botao-confirmar {
   box-shadow: inset 3px 0 0 var(--cor-primaria);
 }
 
+/* Módulo liberado: item direto do menu, no mesmo estilo dos títulos dos grupos */
+.menu a.menu-modulo {
+  justify-content: space-between;
+  margin-bottom: 4px;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.menu a.menu-modulo .selo-menu {
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.menu a.menu-modulo[aria-current='page'],
+.menu a.menu-modulo.active {
+  background: rgba(46, 125, 50, 0.1);
+  color: var(--cor-primaria-escura);
+  box-shadow: inset 3px 0 0 var(--cor-primaria);
+}
+
 .menu-grupo-aberto ul {
   margin-bottom: 0;
   padding-bottom: 8px;

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/useAuth';
 import { Aviso } from './Aviso';
@@ -119,31 +119,25 @@ export function Layout() {
   // e clicar no aberto fecha. undefined = ainda segue a tela atual.
   const [grupoEscolhido, setGrupoEscolhido] = useState<string | null | undefined>(undefined);
 
-  // Grupo Módulos para dono e funcionário: ativo, só consulta ou vitrine (FR-014)
+  // Módulos liberados como itens diretos do menu, acima de Gestão, na ordem
+  // Leite, Financeiro, Nutrição (pedido do dono do produto, 2026-11-05). Os não
+  // contratados não aparecem; o desativado continua, só para consulta (FR-014).
   const { situacaoDe } = useModulos();
-  const grupoModulos = {
-    titulo: 'Módulos',
-    itens: MODULOS_NO_MENU.map((modulo): ItemMenu => {
-      const situacao = situacaoDe(modulo)?.situacao ?? 'NAO_CONTRATADO';
-      return {
+  const modulosNoMenu = MODULOS_NO_MENU.flatMap((modulo): ItemMenu[] => {
+    const situacao = situacaoDe(modulo)?.situacao ?? 'NAO_CONTRATADO';
+    if (situacao === 'NAO_CONTRATADO') return [];
+    return [
+      {
         rotulo: ROTULOS_MODULO[modulo],
         destino: `/modulos/${ROTA_DO_MODULO[modulo]}`,
-        selo:
-          situacao === 'ATIVO'
-            ? undefined
-            : situacao === 'SO_CONSULTA'
-              ? { texto: 'só consulta', classe: 'selo selo-consulta' }
-              : { texto: 'disponível', classe: 'selo selo-inativo' },
-      };
-    }),
-  };
-  // Antes de Gestão, que fica por último
-  const grupos = [...GRUPOS_MENU.slice(0, -1), grupoModulos, GRUPOS_MENU[GRUPOS_MENU.length - 1]].map(
-    (grupo) => ({
-      ...grupo,
-      itens: grupo.itens.filter((item) => !item.somenteDono || usuario?.papel === 'DONO'),
-    }),
-  );
+        selo: situacao === 'SO_CONSULTA' ? { texto: 'só consulta', classe: 'selo selo-consulta' } : undefined,
+      },
+    ];
+  });
+  const grupos = GRUPOS_MENU.map((grupo) => ({
+    ...grupo,
+    itens: grupo.itens.filter((item) => !item.somenteDono || usuario?.papel === 'DONO'),
+  }));
   // Grupo da tela atual: endereço exato primeiro ("/animais/novo" é de Registrar),
   // depois o começo do endereço ("/animais/123" é de Rebanho)
   const caminho = location.pathname;
@@ -193,31 +187,49 @@ export function Layout() {
           const aberto = grupoAberto === grupo.titulo;
           const idLista = `menu-grupo-${grupo.titulo}`;
           return (
-            <div key={grupo.titulo} className={`menu-grupo${aberto ? ' menu-grupo-aberto' : ''}`}>
-              <button
-                type="button"
-                className="menu-titulo"
-                aria-expanded={aberto}
-                aria-controls={idLista}
-                onClick={() => setGrupoEscolhido(aberto ? null : grupo.titulo)}
-              >
-                <span>{grupo.titulo}</span>
-                <span className="menu-seta" aria-hidden="true">
-                  {aberto ? '▾' : '▸'}
-                </span>
-              </button>
-              <ul id={idLista} hidden={!aberto}>
-                {itens.map((item) => (
-                  <li key={item.destino}>
-                    {/* end: "/animais" não fica ativo em "/animais/novo" */}
-                    <NavLink to={item.destino} end onClick={fecharMenu}>
-                      {item.rotulo}
-                      {item.selo && <span className={`${item.selo.classe} selo-menu`}>{item.selo.texto}</span>}
-                    </NavLink>
-                  </li>
+            <Fragment key={grupo.titulo}>
+              {grupo.titulo === 'Gestão' &&
+                modulosNoMenu.map((modulo) => (
+                  <NavLink
+                    key={modulo.destino}
+                    to={modulo.destino}
+                    className="menu-modulo"
+                    onClick={() => {
+                      // O destaque passa para o módulo: fecha o grupo que estava aberto
+                      setGrupoEscolhido(undefined);
+                      fecharMenu();
+                    }}
+                  >
+                    <span>{modulo.rotulo}</span>
+                    {modulo.selo && <span className={`${modulo.selo.classe} selo-menu`}>{modulo.selo.texto}</span>}
+                  </NavLink>
                 ))}
-              </ul>
-            </div>
+              <div className={`menu-grupo${aberto ? ' menu-grupo-aberto' : ''}`}>
+                <button
+                  type="button"
+                  className="menu-titulo"
+                  aria-expanded={aberto}
+                  aria-controls={idLista}
+                  onClick={() => setGrupoEscolhido(aberto ? null : grupo.titulo)}
+                >
+                  <span>{grupo.titulo}</span>
+                  <span className="menu-seta" aria-hidden="true">
+                    {aberto ? '▾' : '▸'}
+                  </span>
+                </button>
+                <ul id={idLista} hidden={!aberto}>
+                  {itens.map((item) => (
+                    <li key={item.destino}>
+                      {/* end: "/animais" não fica ativo em "/animais/novo" */}
+                      <NavLink to={item.destino} end onClick={fecharMenu}>
+                        {item.rotulo}
+                        {item.selo && <span className={`${item.selo.classe} selo-menu`}>{item.selo.texto}</span>}
+                      </NavLink>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </Fragment>
           );
         })}
         <Link to="/trocar-senha" className="menu-trocar-senha" onClick={fecharMenu}>
