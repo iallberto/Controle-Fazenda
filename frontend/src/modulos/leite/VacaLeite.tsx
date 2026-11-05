@@ -135,7 +135,7 @@ export function VacaLeite() {
       {ehDono && !soConsulta && (
         <section>
           <h2>Vaca de leite</h2>
-          <div className="nav-modulo" role="group" aria-label="Vaca de leite">
+          <div className="grupo-botoes" role="group" aria-label="Vaca de leite">
             {(Object.keys(ROTULO_VACA_DE_LEITE) as VacaDeLeite[]).map((valor) => (
               <button
                 key={valor}

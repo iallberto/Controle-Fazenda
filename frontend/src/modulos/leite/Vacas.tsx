@@ -38,7 +38,7 @@ export function Vacas() {
       <header>
         <h1>Vacas</h1>
       </header>
-      <div className="nav-modulo" role="group" aria-label="Filtro">
+      <div className="grupo-botoes" role="group" aria-label="Filtro">
         {(Object.keys(ROTULOS) as Filtro[]).map((f) => (
           <button
             key={f}

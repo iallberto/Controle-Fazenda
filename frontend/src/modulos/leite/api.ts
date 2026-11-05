@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { apiClient } from '../../api/client';
+import { hojeLocal } from '../../utils/datas';
 
 // Módulo Leite (spec 004). Litros com uma casa decimal.
 const BASE = '/modulos/leite';
@@ -140,6 +141,13 @@ export async function alterarVacaDeLeite(animalId: string, vacaDeLeite: VacaDeLe
 
 export async function iniciarLactacao(dados: { animalId: string; inicio: string; partoId?: string }) {
   return (await apiClient.post(`${BASE}/lactacoes`, dados)).data;
+}
+
+// Matriz recém-cadastrada como vaca de leite: marca e abre a lactação a partir
+// de hoje, para ela já aparecer na ordenha (pedido do dono do produto, 2026-11-05)
+export async function colocarNaOrdenha(animalId: string) {
+  await alterarVacaDeLeite(animalId, 'SIM');
+  await iniciarLactacao({ animalId, inicio: hojeLocal() });
 }
 
 // --- Ordenha -----------------------------------------------------------------

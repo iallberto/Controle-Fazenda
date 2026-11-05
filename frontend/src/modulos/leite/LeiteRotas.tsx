@@ -1,4 +1,5 @@
-import { NavLink, Route, Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
+import { MenuDoModulo } from '../../components/MenuDoModulo';
 import { useAuth } from '../../contexts/useAuth';
 import { LeiteContext } from './LeiteContext';
 import { LeiteInicio } from './LeiteInicio';
@@ -21,18 +22,19 @@ export function LeiteRotas({ soConsulta }: { soConsulta: boolean }) {
 
   return (
     <LeiteContext.Provider value={{ soConsulta, ehDono }}>
-      <nav className="nav-modulo" aria-label="Leite">
-        <NavLink to="/modulos/leite" end>
-          Início
-        </NavLink>
-        <NavLink to="/modulos/leite/ordenha">Ordenha</NavLink>
-        <NavLink to="/modulos/leite/vacas">Vacas</NavLink>
-        <NavLink to="/modulos/leite/a-secar">A secar</NavLink>
-        <NavLink to="/modulos/leite/entregas">Entregas</NavLink>
-        <NavLink to="/modulos/leite/producao">Produção</NavLink>
-        <NavLink to="/modulos/leite/produtos">Produtos</NavLink>
-        {ehDono && <NavLink to="/modulos/leite/configuracao">Configuração</NavLink>}
-      </nav>
+      <MenuDoModulo
+        modulo="Leite"
+        itens={[
+          { rotulo: 'Início', destino: '/modulos/leite', exato: true },
+          { rotulo: 'Ordenha', destino: '/modulos/leite/ordenha' },
+          { rotulo: 'Vacas', destino: '/modulos/leite/vacas' },
+          { rotulo: 'A secar', destino: '/modulos/leite/a-secar' },
+          { rotulo: 'Entregas', destino: '/modulos/leite/entregas' },
+          { rotulo: 'Produção', destino: '/modulos/leite/producao' },
+          { rotulo: 'Produtos', destino: '/modulos/leite/produtos' },
+          ...(ehDono ? [{ rotulo: 'Configuração', destino: '/modulos/leite/configuracao' }] : []),
+        ]}
+      />
       <Routes>
         <Route index element={<LeiteInicio />} />
         <Route path="ordenha" element={<Ordenha />} />

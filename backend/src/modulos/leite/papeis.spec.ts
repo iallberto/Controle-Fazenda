@@ -4,11 +4,10 @@ import { PapelUsuario } from '../../usuario/entities/usuario.entity';
 import { LeiteModule } from './leite.module';
 
 // No Leite, dono e funcionário lançam e consultam quase tudo; só o dono mexe
-// em dinheiro (preço do leite), na configuração e em "vaca de leite"
-// (spec 004, FR-002; research R9).
+// em dinheiro (preço do leite) e na configuração (spec 004, FR-002; research
+// R9). "Vaca de leite" passou a ser dos dois em 2026-11-05 (cadastro da matriz).
 const SO_DO_DONO = new Set([
   'ConfiguracaoLeiteController.editar',
-  'VacasController.vacaDeLeite',
   'EntregasController.preco',
   'EntregasController.precoDoMes',
   'RecebimentosController.doMes',

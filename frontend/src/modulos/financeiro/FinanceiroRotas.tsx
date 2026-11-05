@@ -1,4 +1,5 @@
-import { NavLink, Route, Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
+import { MenuDoModulo } from '../../components/MenuDoModulo';
 import { useAuth } from '../../contexts/useAuth';
 import { FinanceiroContext } from './FinanceiroContext';
 import { FinanceiroInicio } from './FinanceiroInicio';
@@ -23,17 +24,18 @@ export function FinanceiroRotas({ soConsulta }: { soConsulta: boolean }) {
   return (
     <FinanceiroContext.Provider value={{ soConsulta, ehDono }}>
       {ehDono && (
-        <nav className="nav-financeiro" aria-label="Financeiro">
-          <NavLink to="/modulos/financeiro" end>
-            Início
-          </NavLink>
-          <NavLink to="/modulos/financeiro/lancamentos">Lançamentos</NavLink>
-          <NavLink to="/modulos/financeiro/vendas">Vendas</NavLink>
-          <NavLink to="/modulos/financeiro/resultado">Resultado</NavLink>
-          <NavLink to="/modulos/financeiro/pendencias">Pendências</NavLink>
-          <NavLink to="/modulos/financeiro/usos">Usos</NavLink>
-          <NavLink to="/modulos/financeiro/categorias">Categorias</NavLink>
-        </nav>
+        <MenuDoModulo
+          modulo="Financeiro"
+          itens={[
+            { rotulo: 'Início', destino: '/modulos/financeiro', exato: true },
+            { rotulo: 'Lançamentos', destino: '/modulos/financeiro/lancamentos' },
+            { rotulo: 'Vendas', destino: '/modulos/financeiro/vendas' },
+            { rotulo: 'Resultado', destino: '/modulos/financeiro/resultado' },
+            { rotulo: 'Pendências', destino: '/modulos/financeiro/pendencias' },
+            { rotulo: 'Usos', destino: '/modulos/financeiro/usos' },
+            { rotulo: 'Categorias', destino: '/modulos/financeiro/categorias' },
+          ]}
+        />
       )}
       <Routes>
         <Route index element={<FinanceiroInicio />} />

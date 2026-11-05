@@ -9,9 +9,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
-import { Roles } from '../../auth/decorators/roles.decorator';
 import type { JwtPayload } from '../../auth/auth.service';
-import { PapelUsuario } from '../../usuario/entities/usuario.entity';
 import { Modulo } from '../acesso/modulo.decorator';
 import { ModuloPago } from '../acesso/modulo-pago';
 import { VacasService } from './vacas.service';
@@ -38,7 +36,8 @@ export class VacasController {
     return this.vacasService.detalhar(user.fazendaId, animalId);
   }
 
-  @Roles(PapelUsuario.DONO)
+  // Dono e funcionário: o funcionário marca "vaca de leite" ao cadastrar a
+  // matriz (decisão do dono do produto, 2026-11-05)
   @Patch(':animalId/vaca-de-leite')
   vacaDeLeite(
     @CurrentUser() user: JwtPayload,

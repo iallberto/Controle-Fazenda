@@ -1,4 +1,5 @@
-import { NavLink, Route, Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
+import { MenuDoModulo } from '../../components/MenuDoModulo';
 import { useAuth } from '../../contexts/useAuth';
 import { NutricaoContext } from './NutricaoContext';
 import { NutricaoInicio } from './NutricaoInicio';
@@ -22,17 +23,18 @@ export function NutricaoRotas({ soConsulta }: { soConsulta: boolean }) {
 
   return (
     <NutricaoContext.Provider value={{ soConsulta, ehDono }}>
-      <nav className="nav-modulo" aria-label="Nutrição">
-        <NavLink to="/modulos/nutricao" end>
-          Início
-        </NavLink>
-        <NavLink to="/modulos/nutricao/fornecimento">Trato</NavLink>
-        <NavLink to="/modulos/nutricao/estoque">Estoque</NavLink>
-        <NavLink to="/modulos/nutricao/lotes">Lotes</NavLink>
-        <NavLink to="/modulos/nutricao/dietas">Dietas</NavLink>
-        <NavLink to="/modulos/nutricao/silos">Silos</NavLink>
-        {ehDono && <NavLink to="/modulos/nutricao/custo">Custo</NavLink>}
-      </nav>
+      <MenuDoModulo
+        modulo="Nutrição"
+        itens={[
+          { rotulo: 'Início', destino: '/modulos/nutricao', exato: true },
+          { rotulo: 'Trato', destino: '/modulos/nutricao/fornecimento' },
+          { rotulo: 'Estoque', destino: '/modulos/nutricao/estoque' },
+          { rotulo: 'Lotes', destino: '/modulos/nutricao/lotes' },
+          { rotulo: 'Dietas', destino: '/modulos/nutricao/dietas' },
+          { rotulo: 'Silos', destino: '/modulos/nutricao/silos' },
+          ...(ehDono ? [{ rotulo: 'Custo', destino: '/modulos/nutricao/custo' }] : []),
+        ]}
+      />
       <Routes>
         <Route index element={<NutricaoInicio />} />
         <Route path="fornecimento" element={<Fornecimento />} />

@@ -114,6 +114,11 @@ export function Layout() {
 
   const fecharMenu = () => setMenuAberto(false);
 
+  // Grupos do menu recolhidos (pedido do dono do produto, 2026-11-05): só o grupo
+  // da tela atual começa aberto; clicar no título abre ou fecha. A escolha feita
+  // vale até recarregar a página.
+  const [gruposEscolhidos, setGruposEscolhidos] = useState<Record<string, boolean>>({});
+
   // Grupo Módulos para dono e funcionário: ativo, só consulta ou vitrine (FR-014)
   const { situacaoDe } = useModulos();
   const grupoModulos = {
@@ -173,10 +178,29 @@ export function Layout() {
           const itens = grupo.itens.filter(
             (item) => !item.somenteDono || usuario?.papel === 'DONO',
           );
+          const temTelaAtual = itens.some(
+            (item) => item.destino === location.pathname ||
+              (item.destino !== '/' && location.pathname.startsWith(`${item.destino}/`)),
+          );
+          const aberto = gruposEscolhidos[grupo.titulo] ?? temTelaAtual;
+          const idLista = `menu-grupo-${grupo.titulo}`;
           return (
             <div key={grupo.titulo} className="menu-grupo">
-              <p className="menu-titulo">{grupo.titulo}</p>
-              <ul>
+              <button
+                type="button"
+                className="menu-titulo"
+                aria-expanded={aberto}
+                aria-controls={idLista}
+                onClick={() =>
+                  setGruposEscolhidos((atual) => ({ ...atual, [grupo.titulo]: !aberto }))
+                }
+              >
+                <span>{grupo.titulo}</span>
+                <span className="menu-seta" aria-hidden="true">
+                  {aberto ? '▾' : '▸'}
+                </span>
+              </button>
+              <ul id={idLista} hidden={!aberto}>
                 {itens.map((item) => (
                   <li key={item.destino}>
                     {/* end: "/animais" não fica ativo em "/animais/novo" */}

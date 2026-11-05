@@ -15,6 +15,9 @@ import { Aviso } from '../components/Aviso';
 import { useAuth } from '../contexts/useAuth';
 import { useModulos } from '../contexts/useModulos';
 import { cadastrarAnimalComprado } from '../modulos/financeiro/api';
+import { colocarNaOrdenha } from '../modulos/leite/api';
+import { CampoVacaDeLeite } from '../modulos/leite/CampoVacaDeLeite';
+import { mensagemDeErro } from '../api/client';
 import { centavosDeTexto, formatarReais } from '../utils/formatadores';
 
 export function NovoAnimal() {
@@ -38,6 +41,10 @@ export function NovoAnimal() {
   const { situacaoDe } = useModulos();
   const comFinanceiro = usuario?.papel === 'DONO' && situacaoDe('FINANCEIRO')?.situacao === 'ATIVO';
   const [valorCompra, setValorCompra] = useState('');
+  // Leite ativo + fêmea matriz: "Vaca de leite?" já põe a vaca na ordenha
+  const comLeite = situacaoDe('LEITE')?.situacao === 'ATIVO';
+  const [vacaDeLeite, setVacaDeLeite] = useState(false);
+  const perguntarVacaDeLeite = comLeite && sexo === 'F' && categoria === 'MATRIZ';
 
   const [codigosDisponiveis, setCodigosDisponiveis] = useState<Codigo[]>([]);
   const [matrizes, setMatrizes] = useState<Animal[]>([]);
@@ -114,7 +121,17 @@ async function handleSubmit(evento: FormEvent) {
         : await criarAnimal(dadosAnimal);
       const compra =
         lancarCompra && centavosCompra! > 0 ? ` Compra de ${formatarReais(centavosCompra!)} lançada no Financeiro.` : '';
-      navigate('/animais', { state: { aviso: `${rotuloBrinco(novo.brinco)} cadastrado.${compra}` } });
+      let leite = '';
+      if (perguntarVacaDeLeite && vacaDeLeite) {
+        try {
+          await colocarNaOrdenha(novo.id);
+          leite = ' Já está na ordenha.';
+        } catch (erroLeite) {
+          // O animal já foi cadastrado: avisa e deixa colocar na ordenha pelo Leite
+          leite = ` Não entrou na ordenha: ${mensagemDeErro(erroLeite, 'tente pelo módulo Leite')}.`;
+        }
+      }
+      navigate('/animais', { state: { aviso: `${rotuloBrinco(novo.brinco)} cadastrado.${compra}${leite}` } });
     } catch (erroRequisicao) {
       // 409: outra pessoa usou este código enquanto a tela estava aberta
       if (axios.isAxiosError(erroRequisicao) && erroRequisicao.response?.status === 409) {
@@ -243,6 +260,8 @@ async function handleSubmit(evento: FormEvent) {
           ))}
           </select>
         </div>
+
+        {perguntarVacaDeLeite && <CampoVacaDeLeite valor={vacaDeLeite} aoMudar={setVacaDeLeite} />}
 
         {origem === 'NASCIDO_FAZENDA' && (
           <div>

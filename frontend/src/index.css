@@ -127,6 +127,31 @@ fieldset > div {
   margin-bottom: 8px;
 }
 
+/* "Vaca de leite?" no cadastro da matriz: Sim e Não grandes para o dedo */
+.campo-vaca-de-leite {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+}
+
+.campo-vaca-de-leite label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  font-weight: 600;
+}
+
+.campo-vaca-de-leite input[type='radio'] {
+  width: 22px;
+  height: 22px;
+}
+
+.campo-vaca-de-leite small {
+  flex-basis: 100%;
+  color: var(--cor-texto-suave);
+}
+
 button {
   background-color: var(--cor-primaria);
   color: white;
@@ -604,16 +629,101 @@ button.botao-sair-admin:hover {
 }
 
 /* --- Financeiro (spec 003) ---------------------------------------------- */
-.nav-financeiro,
+/* Telas do módulo (MenuDoModulo). Celular: botão com a tela atual que abre a
+   lista em coluna. A partir de 768 px: abas lado a lado, sem o botão. */
 .nav-modulo {
+  margin-bottom: 12px;
+}
+
+.nav-modulo button.nav-modulo-botao,
+.nav-modulo button.nav-modulo-botao:hover {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  min-height: 48px;
+  background: var(--cor-card);
+  color: var(--cor-texto);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--radius);
+  font-weight: 600;
+}
+
+.nav-modulo button.nav-modulo-botao strong {
+  color: var(--cor-primaria);
+}
+
+.nav-modulo-itens {
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+  padding: 6px;
+  background: var(--cor-card);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--radius);
+}
+
+.nav-modulo.aberto .nav-modulo-itens {
+  display: flex;
+}
+
+.nav-modulo-itens a {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: var(--radius);
+  color: var(--cor-texto);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.nav-modulo-itens a.active {
+  background: var(--cor-primaria);
+  color: white;
+}
+
+@media (min-width: 768px) {
+  .nav-modulo button.nav-modulo-botao {
+    display: none;
+  }
+
+  .nav-modulo .nav-modulo-itens {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 0;
+    padding: 0;
+    background: none;
+    border: none;
+  }
+
+  .nav-modulo .nav-modulo-itens a {
+    padding: 0 14px;
+    border: 1px solid var(--cor-borda);
+    border-radius: 999px;
+    background: var(--cor-card);
+  }
+
+  .nav-modulo .nav-modulo-itens a.active {
+    background: var(--cor-primaria);
+    border-color: var(--cor-primaria);
+    color: white;
+  }
+}
+
+/* Grupo de botões lado a lado dentro de uma tela (ex.: filtro de Vacas) */
+.nav-financeiro,
+.grupo-botoes {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 12px;
 }
 
-.nav-financeiro a,
-.nav-modulo a {
+.nav-financeiro a {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
@@ -1075,15 +1185,39 @@ button.botao-confirmar {
 }
 
 .menu-grupo {
-  margin-bottom: 16px;
+  margin-bottom: 4px;
 }
 
-.menu-titulo {
-  margin: 0 8px 4px;
-  font-size: 0.75rem;
+/* Título do grupo: botão que abre e fecha os itens (2026-11-05) */
+.menu button.menu-titulo,
+.menu button.menu-titulo:hover {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  min-height: 44px;
+  margin: 0;
+  padding: 8px 12px;
+  background: transparent;
+  color: var(--cor-texto);
+  border-radius: var(--radius);
+  font-size: 0.8rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  text-align: left;
+}
+
+.menu button.menu-titulo:hover {
+  background: var(--cor-fundo);
+}
+
+.menu-seta {
+  font-size: 0.9rem;
+}
+
+.menu-grupo ul {
+  margin-bottom: 8px;
 }
 
 .menu ul li {

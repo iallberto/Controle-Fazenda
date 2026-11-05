@@ -92,7 +92,7 @@ export function Movimento() {
         <h1>{tipo === 'ENTRADA' ? 'Lançar entrada' : 'Dar baixa'}</h1>
         <Link to="/modulos/nutricao/estoque">Estoque</Link>
       </header>
-      <div className="nav-modulo" role="group" aria-label="Tipo">
+      <div className="grupo-botoes" role="group" aria-label="Tipo">
         {(['ENTRADA', 'BAIXA'] as const).map((t) => (
           <button
             key={t}
