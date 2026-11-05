@@ -1,7 +1,10 @@
 import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { CurrentUser } from './decorators/current-user.decorator';
+import { PermiteSenhaProvisoria } from './decorators/permite-senha-provisoria.decorator';
+import { TrocarSenhaDto } from './dto/trocar-senha.dto';
+import type { JwtPayload } from './auth.service';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
-import { RegistrarFazendaDto } from './dto/registrar-fazenda.dto';
 import { Public } from './decorators/public.decorator';
 
 @Controller('auth')
@@ -15,9 +18,11 @@ export class AuthController {
     return this.authService.login(dto);
   }
 
-  @Public()
-  @Post('registrar-fazenda')
-  registrarFazenda(@Body() dto: RegistrarFazendaDto) {
-    return this.authService.registrarFazenda(dto);
+  // Troca da própria senha; aceita a senha provisória (spec 007, FR-001)
+  @PermiteSenhaProvisoria()
+  @Post('trocar-senha')
+  @HttpCode(HttpStatus.OK)
+  trocarSenha(@CurrentUser() usuario: JwtPayload, @Body() dto: TrocarSenhaDto) {
+    return this.authService.trocarSenha(usuario.sub, dto);
   }
 }

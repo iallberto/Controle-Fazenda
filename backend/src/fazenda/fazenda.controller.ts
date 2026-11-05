@@ -10,7 +10,7 @@ import { AcessoModulosService } from '../modulos/acesso/acesso-modulos.service';
 
 // A fazenda é sempre a do usuário logado: o id vem do token, nunca da URL,
 // para que um usuário não consiga ler ou alterar a fazenda de outro cliente.
-// A criação acontece em POST /auth/registrar-fazenda.
+// A criação acontece só pelo painel do administrador (POST /admin/fazendas, spec 007).
 @ApiTags('fazenda')
 @ApiBearerAuth()
 @Controller('fazenda')

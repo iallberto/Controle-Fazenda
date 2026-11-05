@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { CodigoIdentificacaoService } from './codigo-identificacao.service';
-import { CodigoIdentificacao, StatusCodigo } from './entities/codigo-identificacao.entity';
+import { CodigoIdentificacao } from './entities/codigo-identificacao.entity';
 import { Animal } from '../animal/entities/animal.entity';
 import { HistoricoNumero } from './entities/historico-numero.entity';
 

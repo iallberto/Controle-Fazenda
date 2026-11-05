@@ -577,10 +577,24 @@ form.entrada-doses {
 
 button.botao-sair-admin,
 button.botao-sair-admin:hover {
-  margin-left: auto;
+  margin-left: 12px;
   background: transparent;
   color: white;
   border: 1px solid white;
+}
+
+/* Troca de senha do administrador, na barra verde (spec 007) */
+.layout-admin .barra-topo a.link-trocar-senha-admin {
+  margin-left: auto;
+  color: white;
+  font-size: 0.9rem;
+}
+
+/* Troca da própria senha no menu das fazendas (spec 007) */
+.menu .menu-trocar-senha {
+  display: block;
+  padding: 10px 12px;
+  margin-top: 8px;
 }
 
 .lista-fazendas-admin li {

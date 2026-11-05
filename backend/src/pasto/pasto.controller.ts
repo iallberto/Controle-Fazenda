@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Query, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, ParseUUIDPipe } from '@nestjs/common';
 import { PastoService } from './pasto.service';
 import { CreatePastoDto } from './dto/create-pasto.dto';
 import { UpdatePastoDto } from './dto/update-pasto.dto';

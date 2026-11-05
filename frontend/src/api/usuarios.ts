@@ -42,3 +42,9 @@ export async function alterarAtivoUsuario(id: string, ativo: boolean): Promise<U
   const resposta = await apiClient.patch<Usuario>(`/usuario/${id}/${acao}`);
   return resposta.data;
 }
+
+// Senha provisória para o funcionário que esqueceu a senha (spec 007, FR-003)
+export async function redefinirSenhaUsuario(id: string): Promise<{ senhaProvisoria: string }> {
+  const resposta = await apiClient.post<{ senhaProvisoria: string }>(`/usuario/${id}/redefinir-senha`);
+  return resposta.data;
+}

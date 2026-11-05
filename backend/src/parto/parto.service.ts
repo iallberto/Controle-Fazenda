@@ -20,7 +20,7 @@ import {
 } from '../codigo-identificacao/entities/codigo-identificacao.entity';
 import { MovimentacaoPasto } from '../movimentacao-pasto/entities/movimentacao-pasto.entity';
 import { Pasto } from '../pasto/entities/pasto.entity';
-import { CreateCriaDto, CreatePartoDto } from './dto/create-parto.dto';
+import { CreatePartoDto } from './dto/create-parto.dto';
 import { UpdatePartoDto } from './dto/update-parto.dto';
 import {
   garantirAnimalAtivo,

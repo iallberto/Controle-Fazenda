@@ -131,4 +131,33 @@ describe('UsuarioService', () => {
       expect(resultado).toEqual([{ id: 'u1', nome: 'Ana', papel: PapelUsuario.DONO }]);
     });
   });
+
+  describe('redefinirSenha (spec 007, FR-003 a FR-006)', () => {
+    const funcionario = () => ({
+      id: 'u2', fazendaId: 'fazenda-1', papel: PapelUsuario.FUNCIONARIO, ativo: true,
+      senhaHash: 'antigo', precisaTrocarSenha: false, senhaAlteradaEm: null,
+    });
+
+    it('gera a provisória, guarda só o hash, liga a troca obrigatória e marca a hora', async () => {
+      const u = funcionario();
+      repository.findOneBy!.mockResolvedValue(u);
+      repository.save!.mockImplementation(async (x) => x);
+      const r = await service.redefinirSenha('fazenda-1', 'dono-1', 'u2');
+      expect(r.senhaProvisoria).toHaveLength(10);
+      expect(u.senhaHash).not.toBe(r.senhaProvisoria);
+      expect(await bcrypt.compare(r.senhaProvisoria, u.senhaHash)).toBe(true);
+      expect(u.precisaTrocarSenha).toBe(true);
+      expect(u.senhaAlteradaEm).toBeInstanceOf(Date);
+    });
+
+    it('usuário de outra fazenda: 404; outro dono: 403; desativado: 400', async () => {
+      repository.findOneBy!.mockResolvedValue({ ...funcionario(), fazendaId: 'fazenda-2' });
+      await expect(service.redefinirSenha('fazenda-1', 'dono-1', 'u2')).rejects.toMatchObject({ status: 404 });
+      repository.findOneBy!.mockResolvedValue({ ...funcionario(), papel: PapelUsuario.DONO });
+      await expect(service.redefinirSenha('fazenda-1', 'dono-1', 'u2')).rejects.toMatchObject({ status: 403 });
+      repository.findOneBy!.mockResolvedValue({ ...funcionario(), ativo: false });
+      await expect(service.redefinirSenha('fazenda-1', 'dono-1', 'u2')).rejects.toBeInstanceOf(BadRequestException);
+      expect(repository.save).not.toHaveBeenCalled();
+    });
+  });
 });

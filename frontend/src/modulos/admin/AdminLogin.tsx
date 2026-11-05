@@ -43,6 +43,7 @@ export function AdminLogin() {
           <label htmlFor="email-admin">E-mail</label>
           <input
             id="email-admin"
+            name="email"
             type="email"
             autoComplete="username"
             value={email}
@@ -54,6 +55,7 @@ export function AdminLogin() {
           <label htmlFor="senha-admin">Senha</label>
           <input
             id="senha-admin"
+            name="senha"
             type="password"
             autoComplete="current-password"
             value={senha}

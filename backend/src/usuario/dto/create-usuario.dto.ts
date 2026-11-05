@@ -1,4 +1,4 @@
-import { IsEmail, IsEnum, IsNotEmpty, IsString, IsUUID, MinLength } from 'class-validator';
+import { IsEmail, IsEnum, IsNotEmpty, IsString, MinLength } from 'class-validator';
 import { NormalizarEmail } from '../../common/transformacoes';
 import { PapelUsuario } from '../entities/usuario.entity';
 
@@ -13,7 +13,7 @@ export class CreateUsuarioDto {
   email: string;
 
   @IsString()
-  @MinLength(6)
+  @MinLength(8, { message: 'A senha precisa ter 8 caracteres ou mais' })
   senha: string;
 
   @IsEnum(PapelUsuario)

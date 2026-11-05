@@ -17,6 +17,9 @@ export function AdminLayout() {
           <Logo tamanho={26} />
           Painel do administrador
         </Link>
+        <Link to="/admin/trocar-senha" className="link-trocar-senha-admin">
+          Trocar minha senha
+        </Link>
         <button
           type="button"
           className="botao-sair-admin"

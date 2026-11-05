@@ -3,7 +3,7 @@ import * as bcrypt from 'bcryptjs';
 import { AdminAuthService } from './admin-auth.service';
 
 describe('AdminAuthService (FR-018, FR-018a)', () => {
-  const adminRepo = { findOneBy: jest.fn() };
+  const adminRepo = { findOneBy: jest.fn(), update: jest.fn() };
   const tentativaRepo = { find: jest.fn(), insert: jest.fn() };
   const jwt = { sign: jest.fn(() => 'token-admin') };
   let service: AdminAuthService;
@@ -107,5 +107,22 @@ describe('AdminAuthService (FR-018, FR-018a)', () => {
       { sucesso: false, criadoEm: minutosAtras(5) },
     ]);
     await expect(service.login(dto)).resolves.toHaveProperty('accessToken');
+  });
+
+  describe('trocarSenha (spec 007, FR-002, FR-005)', () => {
+    it('com a atual certa e a nova forte: grava hash e hora e devolve token novo', async () => {
+      const r = await service.trocarSenha('a1', { senhaAtual: 'SenhaForte123', novaSenha: 'OutraSenha456' });
+      expect(r.accessToken).toBe('token-admin');
+      const [, campos] = adminRepo.update.mock.calls[0];
+      expect(campos.senhaAlteradaEm).toBeInstanceOf(Date);
+      expect(await bcrypt.compare('OutraSenha456', campos.senhaHash)).toBe(true);
+    });
+
+    it('atual errada, nova com 11 caracteres ou igual à atual: 400 e nada gravado', async () => {
+      await expect(service.trocarSenha('a1', { senhaAtual: 'errada', novaSenha: 'OutraSenha456' })).rejects.toMatchObject({ status: 400 });
+      await expect(service.trocarSenha('a1', { senhaAtual: 'SenhaForte123', novaSenha: 'Curta123456' })).rejects.toMatchObject({ status: 400 });
+      await expect(service.trocarSenha('a1', { senhaAtual: 'SenhaForte123', novaSenha: 'SenhaForte123' })).rejects.toMatchObject({ status: 400 });
+      expect(adminRepo.update).not.toHaveBeenCalled();
+    });
   });
 });

@@ -16,6 +16,7 @@ import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './auth/guards/roles.guard';
+import { SenhaProvisoriaGuard } from './auth/guards/senha-provisoria.guard';
 import { MovimentacaoPastoModule } from './movimentacao-pasto/movimentacao-pasto.module';
 import { ConfiguracaoModule } from './configuracao/configuracao.module';
 import { RelatorioModule } from './relatorio/relatorio.module';
@@ -76,6 +77,10 @@ import { AdminModule } from './modulos/admin/admin.module';
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: SenhaProvisoriaGuard,
     },
     {
       provide: APP_GUARD,

@@ -53,6 +53,13 @@ export class UsuarioController {
     return this.usuarioService.alterarAtivo(user.fazendaId, user.sub, id, false);
   }
 
+  // Senha provisória para o funcionário que esqueceu a senha (spec 007, FR-003)
+  @Roles(PapelUsuario.DONO)
+  @Post(':id/redefinir-senha')
+  redefinirSenha(@CurrentUser() user: JwtPayload, @Param('id', ParseUUIDPipe) id: string) {
+    return this.usuarioService.redefinirSenha(user.fazendaId, user.sub, id);
+  }
+
   @Roles(PapelUsuario.DONO)
   @Patch(':id/reativar')
   reativar(@CurrentUser() user: JwtPayload, @Param('id', ParseUUIDPipe) id: string) {

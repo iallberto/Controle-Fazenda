@@ -27,8 +27,8 @@ export function Login() {
     setErro('');
 
     try {
-      await login(email, senha);
-      navigate('/');
+      const usuario = await login(email, senha);
+      navigate(usuario.precisaTrocarSenha ? '/trocar-senha' : '/');
     } catch (erroRequisicao) {
       // Sem resposta do servidor é API fora do ar, não senha errada
       setErro(
@@ -52,7 +52,9 @@ export function Login() {
           <label htmlFor="email">E-mail</label>
           <input
             id="email"
+            name="email"
             type="email"
+            autoComplete="username"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -62,7 +64,9 @@ export function Login() {
           <label htmlFor="senha">Senha</label>
           <input
             id="senha"
+            name="senha"
             type="password"
+            autoComplete="current-password"
             value={senha}
             onChange={(e) => setSenha(e.target.value)}
             required

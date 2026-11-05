@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Query, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, ParseUUIDPipe } from '@nestjs/common';
 import { RacaService } from './raca.service';
 import { CreateRacaDto } from './dto/create-raca.dto';
 import { UpdateRacaDto } from './dto/update-raca.dto';

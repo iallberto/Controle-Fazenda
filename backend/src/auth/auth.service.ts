@@ -1,32 +1,36 @@
 import {
   Injectable,
   UnauthorizedException,
-  ConflictException,
   ForbiddenException,
   HttpException,
   HttpStatus,
+  BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
+import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
-import { Usuario, PapelUsuario } from '../usuario/entities/usuario.entity';
-import { Fazenda } from '../fazenda/entities/fazenda.entity';
+import { Usuario } from '../usuario/entities/usuario.entity';
 import { LoginDto } from './dto/login.dto';
-import { RegistrarFazendaDto } from './dto/registrar-fazenda.dto';
 import { ACESSO_SUSPENSO } from './strategies/jwt.strategy';
+import { TrocarSenhaDto } from './dto/trocar-senha.dto';
 
 export interface JwtPayload {
   sub: string;
   fazendaId: string;
   papel: string;
+  // Só no usuário validado da requisição (spec 007, FR-004)
+  precisaTrocarSenha?: boolean;
 }
+
 
 const MAX_TENTATIVAS_LOGIN = 5;
 const JANELA_BLOQUEIO_MS = 15 * 60 * 1000;
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
   // Falhas de login por e-mail, em memória. Basta para uma instância só;
   // com várias instâncias, o controle precisaria ir para um armazenamento comum.
   private readonly falhasLogin = new Map<string, { quantidade: number; desde: number }>();
@@ -35,7 +39,6 @@ export class AuthService {
     @InjectRepository(Usuario)
     private readonly usuarioRepository: Repository<Usuario>,
     private readonly jwtService: JwtService,
-    private readonly dataSource: DataSource,
   ) {}
 
   async login(dto: LoginDto) {
@@ -58,13 +61,35 @@ export class AuthService {
       throw new ForbiddenException(ACESSO_SUSPENSO);
     }
     this.falhasLogin.delete(dto.email);
+    return this.sessao(usuario);
+  }
 
+  // Troca da própria senha (spec 007, FR-001, FR-002, FR-005). Desliga a senha
+  // provisória e devolve um token novo: os anteriores deixam de valer.
+  async trocarSenha(usuarioId: string, dto: TrocarSenhaDto) {
+    const usuario = await this.usuarioRepository.findOneBy({ id: usuarioId });
+    if (!usuario || !usuario.ativo) {
+      throw new UnauthorizedException('Sessão inválida');
+    }
+    if (!(await bcrypt.compare(dto.senhaAtual, usuario.senhaHash))) {
+      throw new BadRequestException('A senha atual não confere');
+    }
+    if (dto.novaSenha === dto.senhaAtual) {
+      throw new BadRequestException('A senha nova precisa ser diferente da atual');
+    }
+    usuario.senhaHash = await bcrypt.hash(dto.novaSenha, 10);
+    usuario.senhaAlteradaEm = new Date();
+    usuario.precisaTrocarSenha = false;
+    await this.usuarioRepository.save(usuario);
+    return this.sessao(usuario);
+  }
+
+  private sessao(usuario: Usuario) {
     const payload: JwtPayload = {
       sub: usuario.id,
       fazendaId: usuario.fazendaId,
       papel: usuario.papel,
     };
-
     return {
       accessToken: this.jwtService.sign(payload),
       usuario: {
@@ -73,6 +98,7 @@ export class AuthService {
         email: usuario.email,
         papel: usuario.papel,
         fazendaId: usuario.fazendaId,
+        precisaTrocarSenha: usuario.precisaTrocarSenha ?? false,
       },
     };
   }
@@ -87,6 +113,8 @@ export class AuthService {
       return;
     }
     if (falhas.quantidade >= MAX_TENTATIVAS_LOGIN) {
+      // Registro do bloqueio, sem a senha (spec 007, FR-009)
+      this.logger.warn(`Login bloqueado por tentativas: ${email}`);
       throw new HttpException(
         'Muitas tentativas de login. Tente novamente em alguns minutos.',
         HttpStatus.TOO_MANY_REQUESTS,
@@ -101,48 +129,5 @@ export class AuthService {
     } else {
       falhas.quantidade++;
     }
-  }
-
-  async registrarFazenda(dto: RegistrarFazendaDto) {
-    const emailExistente = await this.usuarioRepository.findOneBy({ email: dto.email });
-    if (emailExistente) {
-      throw new ConflictException('Já existe um usuário com este e-mail');
-    }
-
-    const senhaHash = await bcrypt.hash(dto.senha, 10);
-
-    const { fazenda, usuario } = await this.dataSource.transaction(async (manager) => {
-      const fazenda = await manager.save(
-        manager.create(Fazenda, { nome: dto.nomeFazenda }),
-      );
-      const usuario = await manager.save(
-        manager.create(Usuario, {
-          fazendaId: fazenda.id,
-          nome: dto.nome,
-          email: dto.email,
-          senhaHash,
-          papel: PapelUsuario.DONO,
-          criadoPorId: null,
-        }),
-      );
-      return { fazenda, usuario };
-    });
-
-    const payload: JwtPayload = {
-      sub: usuario.id,
-      fazendaId: fazenda.id,
-      papel: usuario.papel,
-    };
-
-    return {
-      accessToken: this.jwtService.sign(payload),
-      usuario: {
-        id: usuario.id,
-        nome: usuario.nome,
-        email: usuario.email,
-        papel: usuario.papel,
-        fazendaId: fazenda.id,
-      },
-    };
   }
 }

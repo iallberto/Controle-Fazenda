@@ -75,5 +75,45 @@ describe('AuthService', () => {
       });
       expect(mockJwtService.sign).not.toHaveBeenCalled();
     });
+
+    it('login devolve precisaTrocarSenha (spec 007, FR-004)', async () => {
+      const senhaHash = await bcrypt.hash('provisoria', 4);
+      mockUsuarioRepository.findOne.mockResolvedValue({
+        id: 'u1', fazendaId: 'f1', papel: 'FUNCIONARIO', senhaHash, ativo: true,
+        fazenda: { suspensa: false }, precisaTrocarSenha: true,
+      });
+      mockJwtService.sign.mockReturnValue('token');
+      const r = await service.login({ email: 'u@teste.com', senha: 'provisoria' });
+      expect(r.usuario.precisaTrocarSenha).toBe(true);
+    });
+  });
+
+  describe('trocarSenha (spec 007, FR-001, FR-002, FR-005)', () => {
+    let usuario: Record<string, unknown>;
+
+    beforeEach(async () => {
+      jest.clearAllMocks();
+      usuario = {
+        id: 'u1', fazendaId: 'f1', papel: 'FUNCIONARIO', ativo: true,
+        senhaHash: await bcrypt.hash('atual-123', 4), precisaTrocarSenha: true, senhaAlteradaEm: null,
+      };
+      mockUsuarioRepository.findOneBy.mockResolvedValue(usuario);
+      (mockUsuarioRepository as Record<string, jest.Mock>).save = jest.fn(async (u) => u);
+      mockJwtService.sign.mockReturnValue('token-novo');
+    });
+
+    it('com a senha atual certa: grava a nova, desliga a provisória, marca a hora e devolve token novo', async () => {
+      const r = await service.trocarSenha('u1', { senhaAtual: 'atual-123', novaSenha: 'nova-senha-9' });
+      expect(r.accessToken).toBe('token-novo');
+      expect(r.usuario.precisaTrocarSenha).toBe(false);
+      expect(usuario.senhaAlteradaEm).toBeInstanceOf(Date);
+      expect(await bcrypt.compare('nova-senha-9', usuario.senhaHash as string)).toBe(true);
+    });
+
+    it('senha atual errada ou nova igual à atual: 400 e nada gravado', async () => {
+      await expect(service.trocarSenha('u1', { senhaAtual: 'errada', novaSenha: 'nova-senha-9' })).rejects.toMatchObject({ status: 400 });
+      await expect(service.trocarSenha('u1', { senhaAtual: 'atual-123', novaSenha: 'atual-123' })).rejects.toMatchObject({ status: 400 });
+      expect((mockUsuarioRepository as Record<string, jest.Mock>).save).not.toHaveBeenCalled();
+    });
   });
 });

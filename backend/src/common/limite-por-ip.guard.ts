@@ -1,13 +1,23 @@
-import { CanActivate, ExecutionContext, HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 
-const MAX_REQUISICOES = 30;
+export const MAX_REQUISICOES_POR_MINUTO = 60;
 const JANELA_MS = 60 * 1000;
 
-// Limite simples de requisições por IP para rotas públicas (sem login), para
-// dificultar que alguém varra códigos de etiqueta em sequência. Fica em memória:
-// basta para uma instância; com várias, precisaria de um armazenamento comum.
+// Limite simples de requisições por endereço para rotas públicas (sem login),
+// para dificultar que alguém varra códigos de etiqueta em sequência (spec 007,
+// FR-008). Quem escaneia brincos no curral nunca chega perto de 60 por minuto.
+// Fica em memória: basta para uma instância; com várias, precisaria de um
+// armazenamento comum. Atrás do proxy, o endereço real vem do trust proxy.
 @Injectable()
 export class LimitePorIpGuard implements CanActivate {
+  private readonly logger = new Logger(LimitePorIpGuard.name);
   private readonly acessos = new Map<string, { quantidade: number; desde: number }>();
 
   canActivate(context: ExecutionContext): boolean {
@@ -26,9 +36,18 @@ export class LimitePorIpGuard implements CanActivate {
       this.acessos.set(ip, { quantidade: 1, desde: agora });
       return true;
     }
-    if (acesso.quantidade >= MAX_REQUISICOES) {
+    if (acesso.quantidade >= MAX_REQUISICOES_POR_MINUTO) {
+      // Registra só na primeira recusa do minuto, para não encher o log (FR-009)
+      if (acesso.quantidade === MAX_REQUISICOES_POR_MINUTO) {
+        this.logger.warn(`Consulta pública limitada para o endereço ${ip}`);
+        acesso.quantidade++;
+      }
       throw new HttpException(
-        'Muitas consultas seguidas. Aguarde um minuto e tente de novo.',
+        {
+          statusCode: HttpStatus.TOO_MANY_REQUESTS,
+          codigo: 'MUITAS_CONSULTAS',
+          message: 'Muitas consultas seguidas. Aguarde um minuto e tente de novo.',
+        },
         HttpStatus.TOO_MANY_REQUESTS,
       );
     }

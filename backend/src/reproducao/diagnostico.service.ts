@@ -12,7 +12,6 @@ import {
   StatusAnimal,
   StatusReprodutivo,
 } from '../animal/entities/animal.entity';
-import { Parto, ResultadoParto } from '../parto/entities/parto.entity';
 import { AplicadoPorTipo } from '../tratamento/entities/tratamento.entity';
 import { TratamentoService } from '../tratamento/tratamento.service';
 import {

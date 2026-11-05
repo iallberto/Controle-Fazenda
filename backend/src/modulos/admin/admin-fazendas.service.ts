@@ -5,10 +5,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as bcrypt from 'bcryptjs';
+import { gerarSenhaProvisoria } from '../../auth/senha-provisoria';
 import { EntityManager, IsNull, Repository } from 'typeorm';
 import { hojeLocal } from '../../common/datas';
 import { Fazenda } from '../../fazenda/entities/fazenda.entity';
-import { Usuario } from '../../usuario/entities/usuario.entity';
+import { PapelUsuario, Usuario } from '../../usuario/entities/usuario.entity';
 import { AcessoModulosService } from '../acesso/acesso-modulos.service';
 import { ModuloFazenda } from '../acesso/entities/modulo-fazenda.entity';
 import { MODULOS_PAGOS, type ModuloPago } from '../acesso/modulo-pago';
@@ -35,6 +37,49 @@ export class AdminFazendasService {
     private readonly suspensaoRepository: Repository<SuspensaoFazenda>,
     private readonly acesso: AcessoModulosService,
   ) {}
+
+  // Fazenda nova com o dono (spec 007, FR-023): o cadastro público acabou. O
+  // dono recebe uma senha provisória e troca no primeiro login.
+  async criarFazenda(dto: { nomeFazenda: string; nomeDono: string; emailDono: string }) {
+    const senhaProvisoria = gerarSenhaProvisoria();
+    const senhaHash = await bcrypt.hash(senhaProvisoria, 10);
+    const fazendaId = await this.fazendaRepository.manager.transaction(async (manager) => {
+      if (await manager.findOne(Usuario, { where: { email: dto.emailDono } })) {
+        throw new ConflictException('Já existe um usuário com este e-mail');
+      }
+      const fazenda = await manager.save(manager.create(Fazenda, { nome: dto.nomeFazenda.trim() }));
+      await manager.save(
+        manager.create(Usuario, {
+          fazendaId: fazenda.id,
+          nome: dto.nomeDono.trim(),
+          email: dto.emailDono,
+          senhaHash,
+          papel: PapelUsuario.DONO,
+          criadoPorId: null,
+          precisaTrocarSenha: true,
+        }),
+      );
+      return fazenda.id;
+    });
+    return { fazendaId, senhaProvisoria };
+  }
+
+  // O administrador redefine a senha do dono (spec 007, FR-003, FR-004): o dono
+  // ativo mais antigo da fazenda recebe uma senha provisória
+  async redefinirSenhaDono(fazendaId: string) {
+    await this.buscarFazenda(fazendaId);
+    const dono = await this.usuarioRepository.findOne({
+      where: { fazendaId, papel: PapelUsuario.DONO, ativo: true },
+      order: { criadoEm: 'ASC' },
+    });
+    if (!dono) throw new NotFoundException('A fazenda não tem dono ativo');
+    const senhaProvisoria = gerarSenhaProvisoria();
+    dono.senhaHash = await bcrypt.hash(senhaProvisoria, 10);
+    dono.precisaTrocarSenha = true;
+    dono.senhaAlteradaEm = new Date();
+    await this.usuarioRepository.save(dono);
+    return { senhaProvisoria, dono: { nome: dono.nome, email: dono.email } };
+  }
 
   async listar(busca?: string, hoje = hojeLocal()) {
     const [fazendas, periodos, usuarios] = await Promise.all([

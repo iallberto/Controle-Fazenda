@@ -190,6 +190,9 @@ export function Layout() {
             </div>
           );
         })}
+        <Link to="/trocar-senha" className="menu-trocar-senha" onClick={fecharMenu}>
+          Trocar minha senha
+        </Link>
         <button type="button" className="botao-sair" onClick={logout}>
           Sair
         </button>

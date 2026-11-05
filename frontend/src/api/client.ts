@@ -25,6 +25,13 @@ apiClient.interceptors.response.use(
     if (axios.isAxiosError(erro) && !ehLogin) {
       const suspensa =
         erro.response?.status === 403 && erro.response.data?.codigo === 'ACESSO_SUSPENSO';
+      // Senha provisória ainda não trocada (spec 007, FR-004)
+      if (erro.response?.status === 403 && erro.response.data?.codigo === 'SENHA_PROVISORIA') {
+        const salvo = localStorage.getItem('usuario');
+        if (salvo) localStorage.setItem('usuario', JSON.stringify({ ...JSON.parse(salvo), precisaTrocarSenha: true }));
+        if (window.location.pathname !== '/trocar-senha') window.location.assign('/trocar-senha');
+        return Promise.reject(erro);
+      }
       if (erro.response?.status === 401 || suspensa) {
         localStorage.removeItem('token');
         localStorage.removeItem('usuario');

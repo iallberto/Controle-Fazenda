@@ -19,6 +19,8 @@ import { AreaAdmin } from './area-admin.decorator';
 import type { AdminPayload } from './admin-jwt.strategy';
 import {
   AdminLoginDto,
+  AdminTrocarSenhaDto,
+  CriarFazendaDto,
   FiltroFazendasDto,
   LiberarModuloDto,
   SuspenderFazendaDto,
@@ -36,6 +38,15 @@ export class AdminAuthController {
   login(@Body() dto: AdminLoginDto, @Ip() ip: string) {
     return this.adminAuthService.login(dto, ip);
   }
+
+  // Troca da própria senha do administrador (spec 007, FR-002)
+  @AreaAdmin()
+  @ApiBearerAuth()
+  @Post('trocar-senha')
+  @HttpCode(HttpStatus.OK)
+  trocarSenha(@CurrentUser() admin: AdminPayload, @Body() dto: AdminTrocarSenhaDto) {
+    return this.adminAuthService.trocarSenha(admin.sub, dto);
+  }
 }
 
 // Painel do dono do software (FR-019 a FR-027). Só aceita token de administrador.
@@ -45,6 +56,18 @@ export class AdminAuthController {
 @Controller('admin')
 export class AdminController {
   constructor(private readonly adminFazendasService: AdminFazendasService) {}
+
+  // Fazenda nova com o dono, só pelo administrador (spec 007, FR-023)
+  @Post('fazendas')
+  criarFazenda(@Body() dto: CriarFazendaDto) {
+    return this.adminFazendasService.criarFazenda(dto);
+  }
+
+  // Senha provisória para o dono que esqueceu a senha (spec 007, FR-003)
+  @Post('fazendas/:id/redefinir-senha-dono')
+  redefinirSenhaDono(@Param('id', ParseUUIDPipe) id: string) {
+    return this.adminFazendasService.redefinirSenhaDono(id);
+  }
 
   @Get('fazendas')
   listar(@Query() filtro: FiltroFazendasDto) {

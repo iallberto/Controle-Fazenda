@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ConflictException, ForbiddenException, NotFoundException } from '@nestjs/common';
-import { IsNull } from 'typeorm';
 import { RacaService } from './raca.service';
 import { Raca } from './entities/raca.entity';
 

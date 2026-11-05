@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Query, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, ParseUUIDPipe } from '@nestjs/common';
 import { MovimentacaoPastoService } from './movimentacao-pasto.service';
 import { MoverAnimalDto } from './dto/mover-animal.dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';

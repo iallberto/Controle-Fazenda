@@ -26,6 +26,10 @@ export class Administrador {
   @Column({ default: true })
   ativo: boolean;
 
+  // Tokens emitidos antes desta hora deixam de valer (spec 007, FR-005)
+  @Column({ name: 'senha_alterada_em', type: 'timestamptz', nullable: true })
+  senhaAlteradaEm: Date | null;
+
   @CreateDateColumn({ name: 'criado_em', type: 'timestamptz' })
   criadoEm: Date;
 }

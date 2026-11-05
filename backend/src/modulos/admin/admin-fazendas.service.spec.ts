@@ -15,13 +15,15 @@ describe('AdminFazendasService (FR-019 a FR-027)', () => {
     find: jest.fn(),
     insert: jest.fn(),
     update: jest.fn(),
+    create: jest.fn(),
+    save: jest.fn(),
   };
   const fazendaRepo = {
     find: jest.fn(),
     findOneBy: jest.fn(),
     manager: { transaction: jest.fn() },
   };
-  const usuarioRepo = { createQueryBuilder: jest.fn() };
+  const usuarioRepo = { createQueryBuilder: jest.fn(), findOne: jest.fn(), save: jest.fn() };
   const moduloRepo = { find: jest.fn(), findOne: jest.fn(), update: jest.fn() };
   const suspensaoRepo = { find: jest.fn() };
   const acesso = { limparCache: jest.fn() };
@@ -283,6 +285,44 @@ describe('AdminFazendasService (FR-019 a FR-027)', () => {
       await expect(service.reativar('admin1', 'f1')).rejects.toThrow(
         BadRequestException,
       );
+    });
+  });
+
+  describe('fazenda nova e senha do dono pelo administrador (spec 007)', () => {
+    it('cria fazenda e dono na mesma transação, com senha provisória e troca obrigatória', async () => {
+      manager.findOne.mockResolvedValue(null);
+      manager.create.mockImplementation((_e: unknown, x: object) => ({ ...x }));
+      manager.save.mockImplementationOnce(async (x: object) => ({ id: 'f-nova', ...x }))
+        .mockImplementationOnce(async (x: object) => x);
+      const r = await service.criarFazenda({ nomeFazenda: ' Fazenda Nova ', nomeDono: 'Dono', emailDono: 'dono@teste.local' });
+      expect(r.fazendaId).toBe('f-nova');
+      expect(r.senhaProvisoria).toHaveLength(10);
+      const dono = manager.save.mock.calls[1][0];
+      expect(dono).toMatchObject({ fazendaId: 'f-nova', papel: 'DONO', precisaTrocarSenha: true, email: 'dono@teste.local' });
+      expect(dono.senhaHash).not.toBe(r.senhaProvisoria);
+      expect(manager.save.mock.calls[0][0]).toMatchObject({ nome: 'Fazenda Nova' });
+    });
+
+    it('e-mail já usado: 409 e nada criado', async () => {
+      manager.findOne.mockResolvedValue({ id: 'u-existente' });
+      await expect(
+        service.criarFazenda({ nomeFazenda: 'X', nomeDono: 'Y', emailDono: 'dono@teste.local' }),
+      ).rejects.toBeInstanceOf(ConflictException);
+      expect(manager.save).not.toHaveBeenCalled();
+    });
+
+    it('redefinir a senha do dono: provisória, troca obrigatória e hora gravada; sem dono ativo → 404', async () => {
+      const dono = { id: 'u1', nome: 'Dono', email: 'd@t.l', senhaHash: 'x', precisaTrocarSenha: false, senhaAlteradaEm: null };
+      usuarioRepo.findOne.mockResolvedValue(dono);
+      const r = await service.redefinirSenhaDono('f1');
+      expect(r.senhaProvisoria).toHaveLength(10);
+      expect(dono).toMatchObject({ precisaTrocarSenha: true });
+      expect(dono.senhaAlteradaEm).toBeInstanceOf(Date);
+      expect(usuarioRepo.findOne).toHaveBeenCalledWith(expect.objectContaining({
+        where: { fazendaId: 'f1', papel: 'DONO', ativo: true },
+      }));
+      usuarioRepo.findOne.mockResolvedValue(null);
+      await expect(service.redefinirSenhaDono('f1')).rejects.toBeInstanceOf(NotFoundException);
     });
   });
 });

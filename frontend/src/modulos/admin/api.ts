@@ -140,3 +140,26 @@ export const NOMES_SITUACOES: Record<SituacaoModulo, string> = {
   SO_CONSULTA: 'Só consulta',
   NAO_CONTRATADO: 'Não contratado',
 };
+
+// Fazenda nova com o dono (spec 007, FR-023): o cadastro público acabou
+export async function criarFazendaCliente(dados: { nomeFazenda: string; nomeDono: string; emailDono: string }) {
+  const resposta = await adminClient.post<{ fazendaId: string; senhaProvisoria: string }>('/admin/fazendas', dados);
+  return resposta.data;
+}
+
+// Senha provisória para o dono que esqueceu a senha (spec 007, FR-003)
+export async function redefinirSenhaDono(fazendaId: string) {
+  const resposta = await adminClient.post<{ senhaProvisoria: string; dono: { nome: string; email: string } }>(
+    `/admin/fazendas/${fazendaId}/redefinir-senha-dono`,
+  );
+  return resposta.data;
+}
+
+// Troca da senha do administrador; o token novo substitui o anterior (FR-005)
+export async function trocarSenhaDoPainel(senhaAtual: string, novaSenha: string) {
+  const resposta = await adminClient.post<{ accessToken: string }>('/admin/auth/trocar-senha', {
+    senhaAtual,
+    novaSenha,
+  });
+  localStorage.setItem(CHAVE_TOKEN_ADMIN, resposta.data.accessToken);
+}

@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Login } from './pages/Login';
+import { TrocarSenha } from './pages/TrocarSenha';
 import { Dashboard } from './pages/Dashboard';
 import { Animais } from './pages/Animais';
 import { RotaProtegida } from './components/RotaProtegida';
@@ -29,11 +30,14 @@ import { AdminLogin } from './modulos/admin/AdminLogin';
 import { AdminLayout } from './modulos/admin/AdminLayout';
 import { AdminFazendas } from './modulos/admin/AdminFazendas';
 import { AdminFazendaDetalhe } from './modulos/admin/AdminFazendaDetalhe';
+import { AdminTrocarSenha } from './modulos/admin/AdminTrocarSenha';
 
 function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      {/* Fora do Layout: é a única tela com senha provisória (spec 007) */}
+      <Route path="/trocar-senha" element={<TrocarSenha />} />
       {/* Pública: aberta por quem escaneia o QR da etiqueta, sem login */}
       <Route path="/a/:codigo" element={<ConsultaAnimal />} />
       {/* Painel do dono do software: login e sessão próprios (spec 002) */}
@@ -41,6 +45,7 @@ function App() {
       <Route element={<AdminLayout />}>
         <Route path="/admin" element={<AdminFazendas />} />
         <Route path="/admin/fazendas/:id" element={<AdminFazendaDetalhe />} />
+        <Route path="/admin/trocar-senha" element={<AdminTrocarSenha />} />
       </Route>
       <Route element={<RotaProtegida />}>
         <Route path="/" element={<Dashboard />} />

@@ -3,17 +3,20 @@ import {
   listarUsuarios,
   criarUsuario,
   alterarAtivoUsuario,
+  redefinirSenhaUsuario,
   type Usuario,
 } from '../api/usuarios';
 import { mensagemDeErro } from '../api/client';
 import { useAuth } from '../contexts/useAuth';
 import { formatarPapel } from '../utils/formatadores';
 import { Aviso } from '../components/Aviso';
+import { SenhaProvisoria } from '../components/SenhaProvisoria';
 
 export function Usuarios() {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [erro, setErro] = useState('');
   const [sucesso, setSucesso] = useState('');
+  const [provisoria, setProvisoria] = useState<{ para: string; senha: string } | null>(null);
   const { usuario: usuarioLogado } = useAuth();
 
   const [nome, setNome] = useState('');
@@ -37,8 +40,8 @@ export function Usuarios() {
     setErro('');
     setSucesso('');
 
-    if (senha.length < 6) {
-      setErro('A senha precisa ter pelo menos 6 caracteres.');
+    if (senha.length < 8) {
+      setErro('A senha precisa ter pelo menos 8 caracteres.');
       return;
     }
     if (senha !== confirmacaoSenha) {
@@ -72,11 +75,29 @@ export function Usuarios() {
     }
   }
 
+  async function handleRedefinirSenha(usuario: Usuario) {
+    setErro('');
+    setSucesso('');
+    if (!window.confirm(`Redefinir a senha de ${usuario.nome}? A senha atual dele deixa de funcionar.`)) return;
+    try {
+      const { senhaProvisoria } = await redefinirSenhaUsuario(usuario.id);
+      setProvisoria({ para: usuario.nome, senha: senhaProvisoria });
+      // O aviso fica no topo e o botão no fim da lista
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (erroRequisicao) {
+      setErro(mensagemDeErro(erroRequisicao, 'Não foi possível redefinir a senha.'));
+    }
+  }
+
   return (
     <div>
       <header>
         <h1>Usuários</h1>
       </header>
+
+      {provisoria && (
+        <SenhaProvisoria para={provisoria.para} senha={provisoria.senha} aoFechar={() => setProvisoria(null)} />
+      )}
 
       <form onSubmit={handleSubmit}>
         <div>
@@ -101,7 +122,7 @@ export function Usuarios() {
             value={senha}
             onChange={(e) => setSenha(e.target.value)}
             autoComplete="new-password"
-            minLength={6}
+            minLength={8}
             required
           />
         </div>
@@ -136,6 +157,11 @@ export function Usuarios() {
             {usuario.id !== usuarioLogado?.id && (
               <button type="button" onClick={() => handleAlterarAtivo(usuario)}>
                 {usuario.ativo ? 'Desativar' : 'Reativar'}
+              </button>
+            )}{' '}
+            {usuario.ativo && usuario.papel === 'FUNCIONARIO' && (
+              <button type="button" className="botao-secundario" onClick={() => handleRedefinirSenha(usuario)}>
+                Redefinir senha
               </button>
             )}
           </li>

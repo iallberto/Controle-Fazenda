@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { mensagemDeErro } from '../../api/client';
+import { SenhaProvisoria } from '../../components/SenhaProvisoria';
 import { Aviso, type EstadoAviso } from '../../components/Aviso';
 import { hojeLocal } from '../../utils/datas';
 import { formatarData, formatarMomento } from '../../utils/formatadores';
@@ -11,6 +12,7 @@ import {
   NOMES_MODULOS,
   reativarFazenda,
   suspenderFazenda,
+  redefinirSenhaDono,
   type FazendaClienteDetalhe,
   type ModuloPago,
 } from './api';
@@ -29,6 +31,7 @@ export function AdminFazendaDetalhe() {
   const [motivo, setMotivo] = useState('');
   const [confirmarDesativar, setConfirmarDesativar] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
+  const [provisoria, setProvisoria] = useState<{ para: string; senha: string } | null>(null);
 
   const carregar = useCallback(() => {
     buscarFazendaCliente(id)
@@ -203,6 +206,31 @@ export function AdminFazendaDetalhe() {
             </li>
           ))}
         </ul>
+      </section>
+
+      <section>
+        <h2>Senha do dono</h2>
+        <p>Use quando o dono esquecer a senha: ele recebe uma senha provisória e cria uma nova no próximo login.</p>
+        {provisoria && (
+          <SenhaProvisoria para={provisoria.para} senha={provisoria.senha} aoFechar={() => setProvisoria(null)} />
+        )}
+        <button
+          type="button"
+          className="botao-secundario"
+          disabled={enviando}
+          onClick={async () => {
+            if (!window.confirm('Redefinir a senha do dono? A senha atual dele deixa de funcionar.')) return;
+            setAviso(null);
+            try {
+              const r = await redefinirSenhaDono(id);
+              setProvisoria({ para: `${r.dono.nome} (${r.dono.email})`, senha: r.senhaProvisoria });
+            } catch (erro) {
+              setAviso({ tipo: 'erro', texto: mensagemDeErro(erro) });
+            }
+          }}
+        >
+          Redefinir senha do dono
+        </button>
       </section>
 
       <section>

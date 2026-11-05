@@ -8,6 +8,7 @@ import {
   MaxLength,
 } from 'class-validator';
 import { ModuloPago } from '../../acesso/modulo-pago';
+import { NormalizarEmail } from '../../../common/transformacoes';
 
 export class AdminLoginDto {
   @IsEmail()
@@ -43,4 +44,33 @@ export class SuspenderFazendaDto {
   @IsNotEmpty({ message: 'Informe o motivo da suspensão' })
   @MaxLength(200)
   motivo: string;
+}
+
+// Troca da senha do administrador (spec 007); a regra de 12 caracteres é
+// conferida no serviço, com a mesma mensagem do comando criar-admin
+export class AdminTrocarSenhaDto {
+  @IsString()
+  @IsNotEmpty({ message: 'Informe a senha atual' })
+  senhaAtual: string;
+
+  @IsString()
+  @IsNotEmpty({ message: 'Informe a senha nova' })
+  novaSenha: string;
+}
+
+// Fazenda nova criada pelo administrador (spec 007, FR-023)
+export class CriarFazendaDto {
+  @IsString()
+  @IsNotEmpty({ message: 'Informe o nome da fazenda' })
+  @MaxLength(150)
+  nomeFazenda: string;
+
+  @IsString()
+  @IsNotEmpty({ message: 'Informe o nome do dono' })
+  @MaxLength(150)
+  nomeDono: string;
+
+  @NormalizarEmail()
+  @IsEmail({}, { message: 'E-mail do dono inválido' })
+  emailDono: string;
 }

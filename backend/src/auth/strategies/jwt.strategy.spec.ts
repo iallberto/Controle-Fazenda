@@ -54,4 +54,16 @@ describe('JwtStrategy (spec 002, FR-018 e FR-026)', () => {
       UnauthorizedException,
     );
   });
+
+  it('token emitido antes da última troca de senha: 401; o emitido depois passa (spec 007)', async () => {
+    const trocaEm = new Date('2026-11-05T12:00:00Z');
+    usuarioRepository.findOne.mockResolvedValue({
+      id: 'u1', fazendaId: 'f1', papel: 'DONO', ativo: true, fazenda: { suspensa: false },
+      senhaAlteradaEm: trocaEm, precisaTrocarSenha: false,
+    });
+    const antes = Math.floor(trocaEm.getTime() / 1000) - 60;
+    await expect(strategy.validate({ ...payload, iat: antes })).rejects.toThrow(UnauthorizedException);
+    const depois = Math.floor(trocaEm.getTime() / 1000);
+    await expect(strategy.validate({ ...payload, iat: depois })).resolves.toMatchObject({ sub: 'u1', precisaTrocarSenha: false });
+  });
 });

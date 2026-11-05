@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ConflictException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -10,6 +11,7 @@ import * as bcrypt from 'bcryptjs';
 import { PapelUsuario, Usuario } from './entities/usuario.entity';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
+import { gerarSenhaProvisoria } from '../auth/senha-provisoria';
 
 @Injectable()
 export class UsuarioService {
@@ -95,6 +97,26 @@ export class UsuarioService {
     usuario.ativo = ativo;
     usuario.atualizadoPorId = usuarioLogadoId;
     return this.usuarioRepository.save(usuario);
+  }
+
+  // O dono redefine a senha de um funcionário que esqueceu (spec 007, FR-003,
+  // FR-004, FR-006): senha provisória mostrada uma vez e troca obrigatória no
+  // próximo login. As sessões abertas do funcionário deixam de valer.
+  async redefinirSenha(fazendaId: string, usuarioLogadoId: string, id: string) {
+    const usuario = await this.findOne(fazendaId, id);
+    if (usuario.papel === PapelUsuario.DONO) {
+      throw new ForbiddenException('A senha de um dono só é redefinida pelo suporte');
+    }
+    if (!usuario.ativo) {
+      throw new BadRequestException('Reative o usuário antes de redefinir a senha');
+    }
+    const senhaProvisoria = gerarSenhaProvisoria();
+    usuario.senhaHash = await bcrypt.hash(senhaProvisoria, 10);
+    usuario.precisaTrocarSenha = true;
+    usuario.senhaAlteradaEm = new Date();
+    usuario.atualizadoPorId = usuarioLogadoId;
+    await this.usuarioRepository.save(usuario);
+    return { senhaProvisoria };
   }
 
   // A fazenda nunca pode ficar sem um dono ativo

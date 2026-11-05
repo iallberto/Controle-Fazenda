@@ -10,20 +10,8 @@ import { Administrador } from '../modulos/admin/entities/administrador.entity';
 //   (fora do Docker: npm run build && npm run admin:criar)
 
 // Mínimo de 12 caracteres, com letras e números (FR-018a)
-export function senhaForte(senha: string) {
-  return motivoSenhaFraca(senha) === null;
-}
-
-// O que falta na senha, em português simples; null quando está boa
-export function motivoSenhaFraca(senha: string): string | null {
-  const faltas: string[] = [];
-  if (senha.length < 12) {
-    faltas.push(`tem ${senha.length} caracteres e precisa de 12 ou mais`);
-  }
-  if (!/[A-Za-z]/.test(senha)) faltas.push('precisa de pelo menos uma letra');
-  if (!/\d/.test(senha)) faltas.push('precisa de pelo menos um número');
-  return faltas.length ? `A senha ${faltas.join(', ')}.` : null;
-}
+import { motivoSenhaFraca } from '../modulos/admin/senha-admin';
+export { motivoSenhaFraca, senhaForte } from '../modulos/admin/senha-admin';
 
 const TENTATIVAS = 3;
 
@@ -149,7 +137,8 @@ async function principal() {
 
   const senhaHash = await bcrypt.hash(senha, 10);
   if (existente) {
-    await repositorio.update({ id: existente.id }, { senhaHash, ativo: true });
+    // Sessões abertas antes da redefinição deixam de valer (spec 007, FR-005)
+    await repositorio.update({ id: existente.id }, { senhaHash, ativo: true, senhaAlteradaEm: new Date() });
     console.log(`Senha do administrador ${email} redefinida.`);
   } else {
     await repositorio.insert({ nome, email, senhaHash, ativo: true });

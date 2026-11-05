@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { NotFoundException, ForbiddenException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { PesagemService } from './pesagem.service';
 import { Pesagem } from './entities/pesagem.entity';
 import { Animal } from '../animal/entities/animal.entity';

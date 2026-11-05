@@ -50,6 +50,15 @@ export class Usuario {
   @Column({ default: true })
   ativo: boolean;
 
+  // Senha provisória (redefinida pelo dono ou pelo administrador): só a troca de
+  // senha é aceita até ele criar uma nova (spec 007, FR-004)
+  @Column({ name: 'precisa_trocar_senha', default: false })
+  precisaTrocarSenha: boolean;
+
+  // Tokens emitidos antes desta hora deixam de valer (spec 007, FR-005)
+  @Column({ name: 'senha_alterada_em', type: 'timestamptz', nullable: true })
+  senhaAlteradaEm: Date | null;
+
   @CreateDateColumn({ name: 'criado_em' })
   criadoEm: Date;
 
