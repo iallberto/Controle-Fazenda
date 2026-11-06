@@ -43,6 +43,11 @@ services:
       CORS_ORIGINS: https://${DOMINIO:?Defina DOMINIO no .env}
       # Endereço real de quem acessa vem do Caddy (limite da consulta pública)
       TRUST_PROXY: "1"
+      # Endereço gravado no QR das etiquetas (spec 008): o domínio definitivo
+      URL_PUBLICA: https://${DOMINIO}
+      # Renovação por Pix e Ajuda (spec 008)
+      PIX_CHAVE: ${PIX_CHAVE:-}
+      SUPORTE_WHATSAPP: ${SUPORTE_WHATSAPP:-5535984776552}
       TZ: America/Sao_Paulo
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:3000/saude || exit 1"]

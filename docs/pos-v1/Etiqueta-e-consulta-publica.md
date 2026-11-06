@@ -5,7 +5,7 @@
 | | |
 |---|---|
 | **Data** | 03/11/2026 |
-| **Status** | Página pública implementada · etiqueta definida, impressão pendente |
+| **Status** | Página pública implementada · etiqueta definida · PDF para a gráfica pronto (spec 008); falta a folha de teste com o domínio definitivo |
 | **Foto de referência** | `docs/brinco-modelo.png` (o número "240" da foto é do fornecedor e não é usado) |
 
 ---
@@ -32,8 +32,8 @@
 ### Pendências
 
 - [ ] **Domínio definitivo**: fica para a publicação. Nenhuma etiqueta deve ser impressa antes, porque o endereço fica gravado no QR para sempre. Não usar endereço provisório (localhost, subdomínio de teste).
-- [ ] **Formato do arquivo para a gráfica**: aguardando resposta da gráfica (PDF em folha A4 com marcas de corte, rolo, sangria).
-- [ ] **Geração do QR na tela de QR codes**: hoje a impressão sai só com os números; o QR entra quando o domínio estiver definido.
+- [x] **Formato do arquivo para a gráfica**: PDF em folha A4 com marcas de corte; a gráfica imprime no adesivo e corta (decisão de 06/11/2026).
+- [x] **Geração do QR**: a tela de QR codes gera o PDF A4 para a gráfica (24 etiquetas por folha, marcas de corte), com o QR apontando para `URL_PUBLICA`, que vem do domínio definitivo (spec 008).
 
 ---
 

@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/useAuth';
 import { Aviso } from './Aviso';
 import { Logo } from './Logo';
 import { FaixaSuporte } from './FaixaSuporte';
+import { AvisoPrazo } from './AvisoPrazo';
 import { useModulos } from '../contexts/useModulos';
 import { ROTA_DO_MODULO, type ModuloPago } from '../api/modulos';
 import { ROTULOS_MODULO } from '../utils/formatadores';
@@ -74,6 +75,7 @@ const TITULOS: Record<string, string> = {
   '/pesagens/novo': 'Registrar pesagem',
   '/veterinarios/novo': 'Novo veterinário',
   '/reproducao/estacoes/nova': 'Nova estação de monta',
+  '/ajuda': 'Ajuda',
   '/modulos/leite': 'Leite',
   '/modulos/financeiro': 'Financeiro',
   '/modulos/nutricao': 'Nutrição',
@@ -238,6 +240,9 @@ export function Layout() {
             </Fragment>
           );
         })}
+        <NavLink to="/ajuda" className="menu-trocar-senha" onClick={fecharMenu}>
+          Ajuda
+        </NavLink>
         {!usuario?.suporte && (
           <Link to="/trocar-senha" className="menu-trocar-senha" onClick={fecharMenu}>
             Trocar minha senha
@@ -250,6 +255,7 @@ export function Layout() {
 
       <main className="conteudo">
         <FaixaSuporte />
+        <AvisoPrazo />
         {avisoNavegacao && (
           <Aviso
             tipo="sucesso"

@@ -57,6 +57,7 @@ export interface SessaoSuporte {
 
 export interface FazendaClienteDetalhe extends FazendaCliente {
   sessoesSuporte: SessaoSuporte[];
+  prazo: PrazoDaFazenda;
   periodos: {
     id: string;
     modulo: ModuloPago;
@@ -182,5 +183,74 @@ export async function entrarComoSuporte(fazendaId: string) {
     fazenda: { id: string; nome: string; suspensa: boolean };
   }>(`/admin/fazendas/${fazendaId}/suporte`);
   return resposta.data;
+}
+
+// Prazo de acesso da fazenda (spec 008, US3)
+export type SituacaoAcesso = 'SEM_PRAZO' | 'AGUARDANDO_IMPLANTACAO' | 'EM_DIA' | 'CARENCIA' | 'VENCIDO';
+
+export interface PrazoDaFazenda {
+  situacao: SituacaoAcesso;
+  acessoAte: string | null;
+  diasRestantes: number | null;
+  diasCarencia: number | null;
+  semPrazo: boolean;
+  modulosPlano: ModuloPago[];
+  telefoneContato: string | null;
+  valorCentavos: number;
+  registros: {
+    id: string;
+    tipo: 'TESTE' | 'PAGAMENTO' | 'EXTENSAO' | 'SEM_PRAZO';
+    de: string | null;
+    ate: string | null;
+    modulos: ModuloPago[];
+    valorCentavos: number | null;
+    administrador: string | null;
+    criadoEm: string;
+  }[];
+}
+
+export async function liberarTeste(fazendaId: string, modulos: ModuloPago[]) {
+  return (await adminClient.post<PrazoDaFazenda>(`/admin/fazendas/${fazendaId}/teste`, { modulos })).data;
+}
+
+export async function confirmarPagamento(fazendaId: string, valorCentavos?: number) {
+  return (await adminClient.post<PrazoDaFazenda>(`/admin/fazendas/${fazendaId}/pagamento`, { valorCentavos })).data;
+}
+
+export async function estenderPrazo(fazendaId: string, acessoAte: string) {
+  return (await adminClient.post<PrazoDaFazenda>(`/admin/fazendas/${fazendaId}/prazo`, { acessoAte })).data;
+}
+
+export async function tornarSemPrazo(fazendaId: string) {
+  return (await adminClient.post<PrazoDaFazenda>(`/admin/fazendas/${fazendaId}/sem-prazo`)).data;
+}
+
+export async function salvarTelefone(fazendaId: string, telefoneContato: string) {
+  return (await adminClient.patch(`/admin/fazendas/${fazendaId}`, { telefoneContato })).data;
+}
+
+export interface Vencimento {
+  fazendaId: string;
+  nome: string;
+  dono: { nome: string; email: string } | null;
+  telefoneContato: string | null;
+  acessoAte: string;
+  situacao: SituacaoAcesso;
+  diasRestantes: number;
+  valorCentavos: number;
+}
+
+export async function listarVencimentos() {
+  return (await adminClient.get<Vencimento[]>('/admin/vencimentos')).data;
+}
+
+export type ItemPlano = 'PACOTE_INICIAL' | 'LEITE' | 'FINANCEIRO' | 'NUTRICAO';
+
+export async function buscarPrecos() {
+  return (await adminClient.get<Record<ItemPlano, number>>('/admin/precos')).data;
+}
+
+export async function salvarPrecos(precos: Record<ItemPlano, number>) {
+  return (await adminClient.put<Record<ItemPlano, number>>('/admin/precos', precos)).data;
 }
 

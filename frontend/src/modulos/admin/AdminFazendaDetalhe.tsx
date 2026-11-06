@@ -19,6 +19,7 @@ import {
   type ModuloPago,
 } from './api';
 import { SeloModulo } from './SeloModulo';
+import { PrazoDaFazendaSecao } from './PrazoDaFazendaSecao';
 
 // Uma fazenda cliente: liberar e desativar módulos, suspender e reativar,
 // com o histórico de quem fez cada ação (FR-020, FR-023, FR-025).
@@ -134,6 +135,8 @@ export function AdminFazendaDetalhe() {
           ))}
         </div>
       </section>
+
+      <PrazoDaFazendaSecao key={JSON.stringify(fazenda.prazo)} fazendaId={id} prazo={fazenda.prazo} aoMudar={carregar} />
 
       <section>
         <h2>Liberar módulo</h2>

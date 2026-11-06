@@ -1,4 +1,4 @@
-import { Link, Navigate, Outlet, useNavigate } from 'react-router-dom';
+import { Link, NavLink, Navigate, Outlet, useNavigate } from 'react-router-dom';
 import { Logo } from '../../components/Logo';
 import { administradorLogado, sairDoPainel } from './api';
 
@@ -33,6 +33,13 @@ export function AdminLayout() {
       </header>
       <main className="conteudo">
         <p className="admin-usuario">Administrador: {administrador.nome}</p>
+        <nav className="grupo-botoes nav-admin" aria-label="Painel">
+          <NavLink to="/admin" end>
+            Fazendas
+          </NavLink>
+          <NavLink to="/admin/vencimentos">Próximos a vencer</NavLink>
+          <NavLink to="/admin/precos">Preços</NavLink>
+        </nav>
         <Outlet />
       </main>
     </div>

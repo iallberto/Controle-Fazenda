@@ -7,6 +7,7 @@ import { PapelUsuario } from '../usuario/entities/usuario.entity';
 import type { JwtPayload } from '../auth/auth.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AcessoModulosService } from '../modulos/acesso/acesso-modulos.service';
+import { AcessoFazendaService } from './acesso-fazenda.service';
 
 // A fazenda é sempre a do usuário logado: o id vem do token, nunca da URL,
 // para que um usuário não consiga ler ou alterar a fazenda de outro cliente.
@@ -18,7 +19,15 @@ export class FazendaController {
   constructor(
     private readonly fazendaService: FazendaService,
     private readonly acessoModulos: AcessoModulosService,
+    private readonly acessoFazenda: AcessoFazendaService,
   ) {}
+
+  // Prazo de acesso (spec 008): situação para todos; valor, chave Pix e módulos
+  // do plano só para o dono. Também traz o WhatsApp do suporte (Ajuda).
+  @Get('acesso')
+  acesso(@CurrentUser() user: JwtPayload) {
+    return this.acessoFazenda.paraUsuario(user.fazendaId, user.papel === PapelUsuario.DONO);
+  }
 
   @Get()
   findOne(@CurrentUser() user: JwtPayload) {

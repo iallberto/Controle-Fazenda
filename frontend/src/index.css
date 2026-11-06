@@ -1719,3 +1719,53 @@ tr.linha-descarte td {
   background: #5a4300;
   color: white;
 }
+
+/* Aviso do prazo de acesso (spec 008) */
+.aviso-prazo {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  background: rgba(46, 125, 50, 0.08);
+  border: 1px solid rgba(46, 125, 50, 0.35);
+}
+
+.aviso-prazo p {
+  margin: 0 0 8px;
+  color: var(--cor-texto);
+}
+
+.aviso-prazo-pagamento {
+  background: #fff4d6;
+  border-color: #e0b84a;
+}
+
+.aviso-prazo-vencido {
+  background: #fdecea;
+  border-color: #e0a19b;
+}
+
+.aviso-prazo-pix code {
+  word-break: break-all;
+}
+
+a.botao-whatsapp {
+  background: #1f8f4e;
+}
+
+.nav-admin a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--cor-borda);
+  border-radius: 999px;
+  background: var(--cor-card);
+  color: var(--cor-texto);
+  text-decoration: none;
+}
+
+.nav-admin a.active {
+  background: var(--cor-primaria);
+  border-color: var(--cor-primaria);
+  color: white;
+}

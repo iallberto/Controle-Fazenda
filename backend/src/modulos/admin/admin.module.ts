@@ -14,6 +14,7 @@ import { SessaoSuporte } from './entities/sessao-suporte.entity';
 import { RegistroAcesso } from './entities/registro-acesso.entity';
 import { PrecoPlano } from './entities/preco-plano.entity';
 import { SuporteService } from './suporte.service';
+import { PrazoFazendasService } from './prazo-fazendas.service';
 import { AdminAuthService } from './admin-auth.service';
 import { AdminFazendasService } from './admin-fazendas.service';
 import { AdminJwtStrategy } from './admin-jwt.strategy';
@@ -45,6 +46,6 @@ import { AdminAuthController, AdminController } from './admin.controller';
     }),
   ],
   controllers: [AdminAuthController, AdminController],
-  providers: [AdminAuthService, AdminFazendasService, AdminJwtStrategy, SuporteService],
+  providers: [AdminAuthService, AdminFazendasService, AdminJwtStrategy, SuporteService, PrazoFazendasService],
 })
 export class AdminModule {}

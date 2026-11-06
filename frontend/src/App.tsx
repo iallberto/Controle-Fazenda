@@ -1,6 +1,9 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Login } from './pages/Login';
 import { TrocarSenha } from './pages/TrocarSenha';
+import { Ajuda } from './pages/Ajuda';
+import { AdminVencimentos } from './modulos/admin/AdminVencimentos';
+import { AdminPrecos } from './modulos/admin/AdminPrecos';
 import { Dashboard } from './pages/Dashboard';
 import { Animais } from './pages/Animais';
 import { RotaProtegida } from './components/RotaProtegida';
@@ -46,6 +49,8 @@ function App() {
         <Route path="/admin" element={<AdminFazendas />} />
         <Route path="/admin/fazendas/:id" element={<AdminFazendaDetalhe />} />
         <Route path="/admin/trocar-senha" element={<AdminTrocarSenha />} />
+        <Route path="/admin/vencimentos" element={<AdminVencimentos />} />
+        <Route path="/admin/precos" element={<AdminPrecos />} />
       </Route>
       <Route element={<RotaProtegida />}>
         <Route path="/" element={<Dashboard />} />
@@ -58,6 +63,7 @@ function App() {
         <Route path="/qrcodes" element={<QrCodes />} />
         <Route path="/configuracao" element={<Configuracao />} />
         <Route path="/usuarios" element={<Usuarios />} />
+        <Route path="/ajuda" element={<Ajuda />} />
         <Route path="/relatorios" element={<Relatorios />} />
         <Route path="/animais/:id" element={<AnimalDetalhe />} />
         <Route path="/veterinarios/novo" element={<NovoVeterinario />} />

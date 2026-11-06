@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { FazendaController } from './fazenda.controller';
 import { FazendaService } from './fazenda.service';
 import { AcessoModulosService } from '../modulos/acesso/acesso-modulos.service';
+import { AcessoFazendaService } from './acesso-fazenda.service';
 
 describe('FazendaController', () => {
   let controller: FazendaController;
@@ -19,6 +20,7 @@ describe('FazendaController', () => {
       providers: [
         { provide: FazendaService, useValue: mockFazendaService },
         { provide: AcessoModulosService, useValue: mockAcessoModulos },
+        { provide: AcessoFazendaService, useValue: { paraUsuario: jest.fn() } },
       ],
     }).compile();
 

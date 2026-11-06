@@ -4,6 +4,7 @@ import { PermiteSenhaProvisoria } from './decorators/permite-senha-provisoria.de
 import { TrocarSenhaDto } from './dto/trocar-senha.dto';
 import type { JwtPayload } from './auth.service';
 import { NaoPermitidoAoSuporte } from './guards/suporte.guard';
+import { PermiteSemAcesso } from './guards/acesso-fazenda.guard';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { Public } from './decorators/public.decorator';
@@ -29,6 +30,7 @@ export class AuthController {
   // Troca da própria senha; aceita a senha provisória (spec 007, FR-001)
   @PermiteSenhaProvisoria()
   @NaoPermitidoAoSuporte()
+  @PermiteSemAcesso()
   @Post('trocar-senha')
   @HttpCode(HttpStatus.OK)
   trocarSenha(@CurrentUser() usuario: JwtPayload, @Body() dto: TrocarSenhaDto) {

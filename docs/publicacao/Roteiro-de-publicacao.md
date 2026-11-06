@@ -9,13 +9,48 @@ Tempo estimado na primeira vez: 1 hora, sem contar a espera do domínio propagar
 
 | Item | Sugestão | Custo |
 |---|---|---|
-| Servidor (VPS) | Ubuntu 24.04, 2 GB de RAM, 1 ou 2 vCPU, 40 GB de disco | a partir de ~R$ 30/mês |
+| Servidor | Oracle Cloud "Always Free" (Ampere A1, Ubuntu 24.04) ou outro VPS com 2 GB de RAM | grátis na Oracle; VPS a partir de ~R$ 30/mês |
 | Domínio | `.com.br` no Registro.br, ou outro | ~R$ 40/ano |
 | Bucket do backup | Backblaze B2 (empresa diferente do servidor) | grátis até 10 GB |
 | Alerta do site | UptimeRobot | grátis |
 | Alerta do backup | Healthchecks.io | grátis |
 
 ## 2. Preparar o servidor
+
+### 2.1 Na Oracle Cloud (Always Free)
+
+1. Crie a conta em cloud.oracle.com (pede cartão só para validar; o plano grátis não cobra).
+2. **Compute → Instances → Create instance**:
+   - imagem **Canonical Ubuntu 24.04**;
+   - forma **VM.Standard.A1.Flex** (Ampere, ARM) com 2 OCPU e 12 GB de memória, dentro do grátis;
+   - em *Add SSH keys*, envie a sua chave pública (ou baixe a chave gerada e guarde-a bem).
+
+   Se aparecer "out of capacity", tente outro horário ou outro *availability domain*.
+3. **Liberar as portas 80 e 443 na rede da Oracle**: na instância, abra a *Subnet* → *Security List*
+   padrão → *Add Ingress Rules*: origem `0.0.0.0/0`, protocolo TCP, porta `80`; repita para `443`.
+4. Entre com o usuário `ubuntu`: `ssh -i sua-chave ubuntu@IP_PUBLICO`.
+5. A imagem Ubuntu da Oracle já vem com regras de firewall próprias (iptables). Libere 80 e 443 nelas
+   também:
+
+```bash
+sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 80 -j ACCEPT
+sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 443 -j ACCEPT
+sudo netfilter-persistent save
+```
+
+6. Instale o Docker e siga do passo 3 em diante (no passo 2.2, pule a linha do `ufw` e a criação do
+   usuário: use o `ubuntu`).
+
+```bash
+sudo apt update && sudo apt upgrade -y
+curl -fsSL https://get.docker.com | sudo sh
+sudo usermod -aG docker ubuntu
+```
+
+Saia e entre de novo para o grupo `docker` valer. As imagens usadas (Node, PostgreSQL, Caddy) têm versão
+para ARM; se alguma der erro de arquitetura na subida, anote a mensagem.
+
+### 2.2 Em outro VPS
 
 Entre no servidor pelo terminal (`ssh root@IP_DO_SERVIDOR`) e rode:
 
@@ -77,7 +112,12 @@ Preencha no `.env`:
 - `BACKUP_REMOTO=nuvem:controle-fazenda-backup/controle-fazenda`;
 - `BACKUP_S3_ENDPOINT=https://` + o endpoint do bucket;
 - `BACKUP_S3_CHAVE` e `BACKUP_S3_SEGREDO`: o keyID e a applicationKey;
-- `BACKUP_AVISO_URL`: a URL de ping do Healthchecks.io.
+- `BACKUP_AVISO_URL`: a URL de ping do Healthchecks.io;
+- `PIX_CHAVE`: a chave Pix da empresa (aparece para o dono nos últimos dias do prazo);
+- `SUPORTE_WHATSAPP`: o WhatsApp do suporte, só números com 55 e DDD (já vem preenchido).
+
+O endereço das etiquetas (`URL_PUBLICA`) sai sozinho do `DOMINIO`. Ele fica gravado no QR para sempre:
+configure o domínio definitivo antes de gerar a primeira etiqueta.
 
 Guarde uma cópia do `.env` num lugar seguro fora do servidor (gerenciador de senhas): sem ele não
 dá para restaurar os logins depois de perder o servidor.
@@ -138,10 +178,18 @@ o backup roda sozinho às 03:00. Diários ficam 7 dias; o de domingo fica 4 sema
 
 O UptimeRobot avisa quando o site cai e quando volta.
 
-## 12. Primeiros clientes
+## 12. Preços e primeiros clientes
 
-No painel do administrador: **Nova fazenda** → nome da fazenda, nome e e-mail do dono. Entregue a
-senha provisória ao dono (ela aparece uma vez). Na fazenda, libere os módulos contratados.
+1. No painel, **Preços**: o valor a cada 30 dias do pacote inicial e de cada módulo.
+2. **Nova fazenda** → nome da fazenda, nome e e-mail do dono. Entregue a senha provisória ao dono (ela
+   aparece uma vez). A fazenda nasce **aguardando implantação**: o dono consulta, só o suporte lança.
+3. Na visita, **Entrar como suporte**: gere os códigos, baixe o PDF das etiquetas para a gráfica,
+   cadastre o rebanho e as pesagens.
+4. Com o rebanho cadastrado, **Liberar teste de 30 dias** marcando os módulos do plano.
+5. Nos últimos 5 dias o dono vê a chave Pix e manda o comprovante no WhatsApp; confira e toque em
+   **Confirmar pagamento**. **Próximos a vencer** mostra quem cobrar.
+
+Fazendas criadas antes da spec 008 ficam como **cliente sem prazo**.
 
 ## Rotina
 

@@ -85,12 +85,12 @@ medida.
 
 **Independent Test**: quickstart, cenário 3.
 
-- [ ] T018 [US3] backend/src/fazenda/acesso-fazenda.service.ts (+ spec): situação com cache curto (limpo ao mudar o prazo), valor do plano (pacote + módulos do plano, de `precos_plano`) e `GET /fazenda/acesso` (dono recebe valor, chave Pix e módulos; funcionário só a situação; todos recebem o WhatsApp)
-- [ ] T019 [US3] Guard global backend/src/auth/guards/acesso-fazenda.guard.ts (+ spec): 403 `FAZENDA_SO_CONSULTA` em não-GET quando AGUARDANDO_IMPLANTACAO ou VENCIDO, exceto suporte e rotas `@PermiteSemAcesso()` (troca de senha)
-- [ ] T020 [US3] backend/src/modulos/admin/prazo-fazendas.service.ts (+ spec): liberar teste (`acessoAte = hoje + 30`, módulos escolhidos com períodos até `acessoAte + 2`, 409 se já tem prazo ou é sem prazo), confirmar pagamento (`max(acessoAte, hoje) + 30`, estende ou recria os períodos dos módulos, valor do plano por padrão), estender prazo, cliente sem prazo (períodos sem término), cada ação em `registros_acesso` (R4, R5)
-- [ ] T021 [US3] Rotas do painel em backend/src/modulos/admin/admin.controller.ts: teste, pagamento, prazo, sem-prazo, `PATCH /admin/fazendas/:id` (telefone), `GET /admin/vencimentos` (até hoje + 7, carência e vencidos, ordenado), `GET/PUT /admin/precos`; `GET /admin/fazendas/:id` com o prazo e o histórico de acesso
-- [ ] T022 [P] [US3] Frontend frontend/src/components/AvisoPrazo.tsx na Layout: dono vê dias restantes, e nos últimos 5 dias, em carência ou vencido, valor, chave Pix (copiar) e "Enviar comprovante no WhatsApp" (`wa.me` com a mensagem e o nome da fazenda); funcionário vê só "Aguardando implantação" ou "Fazenda só para consulta"; o 403 `FAZENDA_SO_CONSULTA` mostra a mesma mensagem
-- [ ] T023 [P] [US3] Painel: no detalhe da fazenda, prazo e histórico, "Liberar teste de 30 dias" (escolha dos módulos), "Confirmar pagamento", "Estender prazo", "Cliente sem prazo" e telefone; páginas frontend/src/modulos/admin/AdminVencimentos.tsx e AdminPrecos.tsx, com links no AdminLayout
+- [X] T018 [US3] backend/src/fazenda/acesso-fazenda.service.ts (+ spec): situação com cache curto (limpo ao mudar o prazo), valor do plano (pacote + módulos do plano, de `precos_plano`) e `GET /fazenda/acesso` (dono recebe valor, chave Pix e módulos; funcionário só a situação; todos recebem o WhatsApp)
+- [X] T019 [US3] Guard global backend/src/auth/guards/acesso-fazenda.guard.ts (+ spec): 403 `FAZENDA_SO_CONSULTA` em não-GET quando AGUARDANDO_IMPLANTACAO ou VENCIDO, exceto suporte e rotas `@PermiteSemAcesso()` (troca de senha)
+- [X] T020 [US3] backend/src/modulos/admin/prazo-fazendas.service.ts (+ spec): liberar teste (`acessoAte = hoje + 30`, módulos escolhidos com períodos até `acessoAte + 2`, 409 se já tem prazo ou é sem prazo), confirmar pagamento (`max(acessoAte, hoje) + 30`, estende ou recria os períodos dos módulos, valor do plano por padrão), estender prazo, cliente sem prazo (períodos sem término), cada ação em `registros_acesso` (R4, R5)
+- [X] T021 [US3] Rotas do painel em backend/src/modulos/admin/admin.controller.ts: teste, pagamento, prazo, sem-prazo, `PATCH /admin/fazendas/:id` (telefone), `GET /admin/vencimentos` (até hoje + 7, carência e vencidos, ordenado), `GET/PUT /admin/precos`; `GET /admin/fazendas/:id` com o prazo e o histórico de acesso
+- [X] T022 [P] [US3] Frontend frontend/src/components/AvisoPrazo.tsx na Layout: dono vê dias restantes, e nos últimos 5 dias, em carência ou vencido, valor, chave Pix (copiar) e "Enviar comprovante no WhatsApp" (`wa.me` com a mensagem e o nome da fazenda); funcionário vê só "Aguardando implantação" ou "Fazenda só para consulta"; o 403 `FAZENDA_SO_CONSULTA` mostra a mesma mensagem
+- [X] T023 [P] [US3] Painel: no detalhe da fazenda, prazo e histórico, "Liberar teste de 30 dias" (escolha dos módulos), "Confirmar pagamento", "Estender prazo", "Cliente sem prazo" e telefone; páginas frontend/src/modulos/admin/AdminVencimentos.tsx e AdminPrecos.tsx, com links no AdminLayout
 
 **Checkpoint**: venda com teste e renovação funcionando.
 
@@ -102,14 +102,14 @@ medida.
 
 **Independent Test**: quickstart, cenário 4.
 
-- [ ] T024 [P] [US4] frontend/src/pages/Ajuda.tsx (rota `/ajuda`) e item "Ajuda" no menu para dono e funcionário: botão "Falar com o suporte no WhatsApp" com o número de `GET /fazenda/acesso` e a mensagem com o nome da fazenda
+- [X] T024 [P] [US4] frontend/src/pages/Ajuda.tsx (rota `/ajuda`) e item "Ajuda" no menu para dono e funcionário: botão "Falar com o suporte no WhatsApp" com o número de `GET /fazenda/acesso` e a mensagem com o nome da fazenda
 
 ---
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
-- [ ] T025 [P] `URL_PUBLICA`, `PIX_CHAVE`, `SUPORTE_WHATSAPP` em docker-compose.prod.yml (`URL_PUBLICA=https://${DOMINIO}`), .env.producao.example e docs/publicacao/Roteiro-de-publicacao.md (passos da Oracle: portas 80/443 também na rede da Oracle)
-- [ ] T026 [P] Atualizar docs/pos-v1/Etiqueta-e-consulta-publica.md (impressão concluída, formato da gráfica) e README
+- [X] T025 [P] `URL_PUBLICA`, `PIX_CHAVE`, `SUPORTE_WHATSAPP` em docker-compose.prod.yml (`URL_PUBLICA=https://${DOMINIO}`), .env.producao.example e docs/publicacao/Roteiro-de-publicacao.md (passos da Oracle: portas 80/443 também na rede da Oracle)
+- [X] T026 [P] Atualizar docs/pos-v1/Etiqueta-e-consulta-publica.md (impressão concluída, formato da gráfica) e README
 - [ ] T027 Migration no dev (`docker compose up -d --build`), conferir que as fazendas existentes seguem lançando, quickstart completo e registro neste arquivo
 
 ---
@@ -160,4 +160,21 @@ medida.
 - Tela a 375 px: seção "Acesso de suporte" no painel (entradas com data e hora), faixa amarela com "Sair" de volta ao
   painel, menu sem Usuários e sem "Trocar minha senha", botão "Etiquetas para a gráfica (PDF)" na tela de QR codes.
 - Pendente: T017 (imprimir uma folha com o domínio definitivo, medir e escanear) depende do domínio.
+
+## Registro do incremento 2 (T018–T026)
+
+- Backend: situação do prazo com cache curto e `GET /fazenda/acesso`; guard global que deixa só consultar a
+  fazenda aguardando implantação ou vencida (suporte e troca de senha liberados); teste de 30 dias com os módulos
+  do plano até o fim da carência, confirmação de pagamento (+30 dias a partir do fim ou de hoje), extensão, cliente
+  sem prazo, telefone, próximos a vencer e preços. 561 testes (94 suítes), lint zero. Sem migration nova.
+- Cópia: 30 verificações, nenhuma falha (fazenda antiga sem prazo; aguardando implantação só consulta e o suporte
+  lança; teste com o Leite; aviso do Pix nos últimos dias; vencida só consulta, inclusive o Leite; pagamento libera
+  na hora; estender; sem prazo; próximos a vencer com telefone). Regressão: roteiros das specs 006 e 008
+  (incremento 1) sem falhas; o ajudante dos roteiros cria as fazendas de teste já sem prazo.
+- Tela a 375 px: aviso do teste com valor do plano, chave Pix e "Enviar comprovante no WhatsApp"; Ajuda com o
+  botão do WhatsApp do suporte; no painel, prazo de acesso logo abaixo do resumo da fazenda, próximos a vencer e
+  preços.
+- Produção: `URL_PUBLICA` (do `DOMINIO`), `PIX_CHAVE` e `SUPORTE_WHATSAPP` no compose e no `.env` de exemplo;
+  roteiro com os passos da Oracle Cloud (instância Ampere, portas 80/443 na rede da Oracle e no iptables).
+- Pendentes: T017 (folha de teste com o domínio definitivo) e T027 (quickstart completo no servidor publicado).
 

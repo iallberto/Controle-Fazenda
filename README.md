@@ -61,8 +61,12 @@ Pré-requisitos: Docker Desktop instalado.
 
 O `docker-compose.prod.yml` sobe o sistema com HTTPS automático (Caddy), banco e backend fechados para
 a internet, backup diário na nuvem e reinício automático do que travar. Passo a passo em
-[docs/publicacao/Roteiro-de-publicacao.md](docs/publicacao/Roteiro-de-publicacao.md); variáveis em
-`.env.producao.example`.
+[docs/publicacao/Roteiro-de-publicacao.md](docs/publicacao/Roteiro-de-publicacao.md) (inclui a Oracle
+Cloud); variáveis em `.env.producao.example`.
+
+Venda com implantação assistida (spec 008): o administrador cria a fazenda, entra como suporte para
+cadastrar o rebanho e gerar as etiquetas, libera o teste de 30 dias e confirma os pagamentos por Pix no
+painel.
 
 ### Opção 2 - Desenvolvimento local (back-end e front-end separados)
 
