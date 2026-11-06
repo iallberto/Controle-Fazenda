@@ -65,8 +65,9 @@ export function posicaoNaFolha(indice: number) {
 }
 
 // PDF das etiquetas com QR para a gráfica (spec 008, US2): folha A4, 3 × 8
-// etiquetas de 57 × 32 mm com marcas de corte; QR de 28 mm à esquerda com o
-// link público do código e o número sem zeros à esquerda à direita.
+// etiquetas de 57 × 32 mm com marcas de corte; número sem zeros à esquerda do
+// lado esquerdo e QR de 28 mm do lado direito, com o link público do código
+// (pedido do dono do produto, 2026-11-06).
 @Injectable()
 export class EtiquetasService {
   constructor(
@@ -140,12 +141,13 @@ export class EtiquetasService {
       .roundedRect(mm(x), mm(y), mm(MEDIDAS.largura), mm(MEDIDAS.altura), mm(MEDIDAS.raio))
       .stroke();
 
-    // QR de 28 mm, centrado na altura, com 2 módulos de margem branca
+    // QR de 28 mm do lado direito, centrado na altura, com 2 módulos de margem branca
     const qr = QRCode.create(etiqueta.link, { errorCorrectionLevel: 'M' });
     const tamanho = qr.modules.size;
     const margemModulos = 2;
     const modulo = MEDIDAS.qr / (tamanho + 2 * margemModulos);
-    const qx = x + (MEDIDAS.altura - MEDIDAS.qr) / 2;
+    const borda = (MEDIDAS.altura - MEDIDAS.qr) / 2;
+    const qx = x + MEDIDAS.largura - borda - MEDIDAS.qr;
     const qy = y + (MEDIDAS.altura - MEDIDAS.qr) / 2;
     doc.fillColor('#000000');
     for (let linha = 0; linha < tamanho; linha++) {
@@ -167,10 +169,10 @@ export class EtiquetasService {
       }
     }
 
-    // Número sem zeros à esquerda, o maior que couber à direita do QR
+    // Número sem zeros à esquerda, o maior que couber do lado esquerdo do QR
     const texto = String(etiqueta.numero);
-    const areaX = qx + MEDIDAS.qr + 1;
-    const areaLargura = x + MEDIDAS.largura - 1.5 - areaX;
+    const areaX = x + 1.5;
+    const areaLargura = qx - 2.5 - areaX;
     doc.font('Helvetica-Bold').fontSize(100);
     const larguraPorPt = doc.widthOfString(texto) / 100;
     // Altura dos dígitos ≈ 0,72 do tamanho da fonte na Helvetica

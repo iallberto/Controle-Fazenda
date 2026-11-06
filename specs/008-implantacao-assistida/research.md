@@ -84,10 +84,10 @@ Decisões técnicas do plano. Cada uma tem a decisão, o porquê e o que foi des
 
 ## R6. Etiquetas em PDF no servidor
 
-- **Decision**: rota `GET /codigo/etiquetas.pdf` (dono e suporte) que gera o PDF com **pdfkit** e o QR
+- **Decision**: rota `POST /codigo/etiquetas` (dono e suporte; lista de códigos no corpo) que gera o PDF com **pdfkit** e o QR
   com **qrcode** (vetor). Folha A4 em retrato, grade de 3 colunas × 8 linhas (24 etiquetas por folha),
-  etiqueta 57 × 32 mm com 3 mm de espaço entre elas e marcas de corte nas margens; QR de 28 mm à
-  esquerda com `URL_PUBLICA/a/<código>`, número sem zeros à esquerda à direita (cerca de 16 mm de altura).
+  etiqueta 57 × 32 mm com 3 mm de espaço entre elas e marcas de corte nas margens; número sem zeros à
+  esquerda do lado esquerdo, QR de 28 mm à direita com `URL_PUBLICA/a/<código>`.
   `URL_PUBLICA` vem do servidor; se faltar, for `http` ou apontar para `localhost`/IP, a rota recusa com
   409 `DOMINIO_NAO_DEFINIDO`.
 - **Rationale**: o domínio nunca passa pelo navegador nem fica gravado num endereço provisório; o PDF sai

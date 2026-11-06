@@ -18,7 +18,7 @@
 | Tamanho da etiqueta | **57 × 32 mm**, com cantos arredondados. A folga de 1,5 mm em cada lado evita que a borda descole |
 | Material | Etiqueta adesiva feita por gráfica local, colada no brinco. O brinco é reaproveitado: quando o animal sai do rebanho, a etiqueta é trocada |
 | Fundo | Branco, para o QR ter contraste máximo |
-| Layout | QR de **28 mm** à esquerda, número à direita |
+| Layout | Número à esquerda, QR de **28 mm** à direita (invertido em 06/11/2026, a pedido do dono do produto) |
 | Número | **Sem zeros à esquerda** (`240`, não `0240`), dígitos com cerca de 16 mm. Passa a 4 dígitos só a partir do 1000. As telas do sistema continuam mostrando `#0240`, e a busca aceita as duas formas |
 | Conteúdo do QR | **Link da página pública**: `https://<domínio>/a/<código>`. Usa o código aleatório (ex.: `d9459e89`), não o número, para ninguém percorrer o rebanho trocando números |
 

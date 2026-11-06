@@ -92,8 +92,8 @@ animal, o registro de entrada no painel e a saída de volta ao painel.
 ### User Story 2 - Imprimir as etiquetas com QR (Priority: P1)
 
 Antes da visita, o suporte (ou o próprio dono, mais tarde) gera um lote de códigos e imprime as
-etiquetas no formato combinado: 57 × 32 mm, QR de 28 mm à esquerda com o endereço público do
-animal no domínio definitivo, número sem zeros à esquerda à direita.
+etiquetas no formato combinado: 57 × 32 mm, número sem zeros à esquerda do lado esquerdo e QR de
+28 mm do lado direito, com o endereço público do animal no domínio definitivo.
 
 O arquivo é um PDF em folha A4 com as etiquetas lado a lado e marcas de corte, para a gráfica
 imprimir no papel adesivo e cortar.

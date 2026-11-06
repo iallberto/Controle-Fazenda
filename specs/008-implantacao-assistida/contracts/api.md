@@ -34,7 +34,7 @@ aguardando implantação ou vencida (exceto suporte e troca de senha).
 
 | Rota | Quem | Resposta |
 |---|---|---|
-| `GET /codigo/etiquetas.pdf?ids=…` ou `?numeroDe=&numeroAte=` | DONO (inclui suporte) | `application/pdf`, A4, 24 etiquetas por folha; 409 `DOMINIO_NAO_DEFINIDO` sem `URL_PUBLICA` válida |
+| `POST /codigo/etiquetas` com `{ ids }` ou `{ numeroDe, numeroAte }` | DONO (inclui suporte) | `application/pdf`, A4, 24 etiquetas por folha; 409 `DOMINIO_NAO_DEFINIDO` sem `URL_PUBLICA` válida |
 
 ## Telas
 
