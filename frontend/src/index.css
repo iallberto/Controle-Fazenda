@@ -1698,3 +1698,24 @@ tr.linha-descarte td {
 .item-trato:last-of-type {
   border-bottom: none;
 }
+
+/* Faixa do acesso de suporte (spec 008): sempre visível dentro da fazenda */
+.faixa-suporte {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  background: #fff4d6;
+  border: 1px solid #e0b84a;
+  color: #5a4300;
+}
+
+.faixa-suporte button,
+.faixa-suporte button:hover {
+  min-height: 40px;
+  background: #5a4300;
+  color: white;
+}

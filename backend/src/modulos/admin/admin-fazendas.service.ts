@@ -69,7 +69,7 @@ export class AdminFazendasService {
   async redefinirSenhaDono(fazendaId: string) {
     await this.buscarFazenda(fazendaId);
     const dono = await this.usuarioRepository.findOne({
-      where: { fazendaId, papel: PapelUsuario.DONO, ativo: true },
+      where: { fazendaId, papel: PapelUsuario.DONO, ativo: true, suporte: false },
       order: { criadoEm: 'ASC' },
     });
     if (!dono) throw new NotFoundException('A fazenda não tem dono ativo');
@@ -90,6 +90,7 @@ export class AdminFazendasService {
         .select('usuario.fazendaId', 'fazendaId')
         .addSelect('COUNT(*)', 'total')
         .where('usuario.ativo = true')
+        .andWhere('usuario.suporte = false')
         .groupBy('usuario.fazendaId')
         .getRawMany<{ fazendaId: string; total: string }>(),
     ]);
@@ -126,7 +127,7 @@ export class AdminFazendasService {
         relations: { suspensaPor: true, reativadaPor: true },
         order: { suspensaEm: 'DESC' },
       }),
-      this.usuarioRepository.countBy({ fazendaId, ativo: true }),
+      this.usuarioRepository.countBy({ fazendaId, ativo: true, suporte: false }),
     ]);
 
     return {

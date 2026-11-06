@@ -10,6 +10,10 @@ interface Usuario {
   fazendaId: string;
   // Senha provisória: só a troca de senha fica liberada (spec 007)
   precisaTrocarSenha?: boolean;
+  // Acesso de suporte aberto pelo painel do administrador (spec 008)
+  suporte?: boolean;
+  fazendaNome?: string;
+  fazendaSuspensa?: boolean;
 }
 
 interface AuthContextType {
@@ -18,6 +22,7 @@ interface AuthContextType {
   login: (email: string, senha: string) => Promise<Usuario>;
   logout: () => void;
   atualizarSessao: (accessToken: string, usuario: Usuario) => void;
+  sairDoSuporte: () => Promise<void>;
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -45,6 +50,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUsuario(usuarioLogado);
   }
 
+  // "Sair" do acesso de suporte: grava a saída e volta ao painel (spec 008)
+  async function sairDoSuporte() {
+    try {
+      await apiClient.post('/auth/encerrar-suporte');
+    } catch {
+      // Sessão já vencida: só limpa e volta ao painel
+    }
+    localStorage.removeItem('token');
+    localStorage.removeItem('usuario');
+    window.location.assign('/admin');
+  }
+
   function logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('usuario');
@@ -53,7 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ usuario, token, login, logout, atualizarSessao }}>
+    <AuthContext.Provider value={{ usuario, token, login, logout, atualizarSessao, sairDoSuporte }}>
       {children}
     </AuthContext.Provider>
   );

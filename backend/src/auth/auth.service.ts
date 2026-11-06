@@ -8,13 +8,14 @@ import {
   Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { Usuario } from '../usuario/entities/usuario.entity';
 import { LoginDto } from './dto/login.dto';
 import { ACESSO_SUSPENSO } from './strategies/jwt.strategy';
 import { TrocarSenhaDto } from './dto/trocar-senha.dto';
+import { SessaoSuporte } from '../modulos/admin/entities/sessao-suporte.entity';
 
 export interface JwtPayload {
   sub: string;
@@ -22,6 +23,9 @@ export interface JwtPayload {
   papel: string;
   // Só no usuário validado da requisição (spec 007, FR-004)
   precisaTrocarSenha?: boolean;
+  // Acesso de suporte (spec 008): token aberto pelo painel do administrador
+  sessaoSuporteId?: string;
+  suporte?: boolean;
 }
 
 
@@ -39,6 +43,8 @@ export class AuthService {
     @InjectRepository(Usuario)
     private readonly usuarioRepository: Repository<Usuario>,
     private readonly jwtService: JwtService,
+    @InjectRepository(SessaoSuporte)
+    private readonly sessaoSuporteRepository: Repository<SessaoSuporte>,
   ) {}
 
   async login(dto: LoginDto) {
@@ -49,7 +55,8 @@ export class AuthService {
       relations: { fazenda: true },
     });
     const senhaConfere = usuario ? await bcrypt.compare(dto.senha, usuario.senhaHash) : false;
-    if (!usuario || !senhaConfere) {
+    // O usuário suporte só entra pelo painel do administrador (spec 008, R2)
+    if (!usuario || !senhaConfere || usuario.suporte) {
       this.registrarFalhaLogin(dto.email);
       throw new UnauthorizedException('E-mail ou senha inválidos');
     }
@@ -82,6 +89,17 @@ export class AuthService {
     usuario.precisaTrocarSenha = false;
     await this.usuarioRepository.save(usuario);
     return this.sessao(usuario);
+  }
+
+  // "Sair" do acesso de suporte: grava a saída; o token deixa de valer (spec 008)
+  async encerrarSuporte(sessaoSuporteId: string | undefined) {
+    if (sessaoSuporteId) {
+      await this.sessaoSuporteRepository.update(
+        { id: sessaoSuporteId, saidaEm: IsNull() },
+        { saidaEm: new Date() },
+      );
+    }
+    return { encerrada: true };
   }
 
   private sessao(usuario: Usuario) {

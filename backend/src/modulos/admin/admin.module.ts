@@ -10,6 +10,10 @@ import { ModuloFazenda } from '../acesso/entities/modulo-fazenda.entity';
 import { Administrador } from './entities/administrador.entity';
 import { TentativaLoginAdmin } from './entities/tentativa-login-admin.entity';
 import { SuspensaoFazenda } from './entities/suspensao-fazenda.entity';
+import { SessaoSuporte } from './entities/sessao-suporte.entity';
+import { RegistroAcesso } from './entities/registro-acesso.entity';
+import { PrecoPlano } from './entities/preco-plano.entity';
+import { SuporteService } from './suporte.service';
 import { AdminAuthService } from './admin-auth.service';
 import { AdminFazendasService } from './admin-fazendas.service';
 import { AdminJwtStrategy } from './admin-jwt.strategy';
@@ -26,6 +30,9 @@ import { AdminAuthController, AdminController } from './admin.controller';
       Fazenda,
       Usuario,
       ModuloFazenda,
+      SessaoSuporte,
+      RegistroAcesso,
+      PrecoPlano,
     ]),
     AcessoModule,
     PassportModule,
@@ -38,6 +45,6 @@ import { AdminAuthController, AdminController } from './admin.controller';
     }),
   ],
   controllers: [AdminAuthController, AdminController],
-  providers: [AdminAuthService, AdminFazendasService, AdminJwtStrategy],
+  providers: [AdminAuthService, AdminFazendasService, AdminJwtStrategy, SuporteService],
 })
 export class AdminModule {}

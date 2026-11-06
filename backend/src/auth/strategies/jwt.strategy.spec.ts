@@ -4,8 +4,13 @@ import { JwtStrategy } from './jwt.strategy';
 // Estratégia das fazendas: usuário e fazenda conferidos a cada requisição
 describe('JwtStrategy (spec 002, FR-018 e FR-026)', () => {
   const usuarioRepository = { findOne: jest.fn() };
+  const sessaoRepository = { findOne: jest.fn() };
   const config = { getOrThrow: () => 'segredo-de-teste' };
-  const strategy = new JwtStrategy(config as never, usuarioRepository as never);
+  const strategy = new JwtStrategy(
+    config as never,
+    usuarioRepository as never,
+    sessaoRepository as never,
+  );
   const payload = { sub: 'u1', fazendaId: 'f1', papel: 'DONO' };
 
   beforeEach(() => {
@@ -65,5 +70,39 @@ describe('JwtStrategy (spec 002, FR-018 e FR-026)', () => {
     await expect(strategy.validate({ ...payload, iat: antes })).rejects.toThrow(UnauthorizedException);
     const depois = Math.floor(trocaEm.getTime() / 1000);
     await expect(strategy.validate({ ...payload, iat: depois })).resolves.toMatchObject({ sub: 'u1', precisaTrocarSenha: false });
+  });
+
+  describe('acesso de suporte (spec 008)', () => {
+    const suporte = {
+      id: 'sup1', fazendaId: 'f1', papel: 'DONO', ativo: true, suporte: true,
+      fazenda: { suspensa: true }, senhaAlteradaEm: null,
+    };
+    const sessao = (extra: object = {}) => ({
+      id: 's1', usuarioId: 'sup1', entradaEm: new Date(), saidaEm: null,
+      administrador: { ativo: true }, ...extra,
+    });
+
+    beforeEach(() => usuarioRepository.findOne.mockResolvedValue(suporte));
+
+    it('sessão aberta: passa, marcado como suporte, mesmo com a fazenda suspensa', async () => {
+      sessaoRepository.findOne.mockResolvedValue(sessao());
+      await expect(
+        strategy.validate({ sub: 'sup1', fazendaId: 'f1', papel: 'DONO', sessaoSuporteId: 's1' }),
+      ).resolves.toMatchObject({ suporte: true, sessaoSuporteId: 's1' });
+    });
+
+    it('sem sessão, sessão encerrada, com mais de 8 h ou administrador desativado: 401', async () => {
+      const payload = { sub: 'sup1', fazendaId: 'f1', papel: 'DONO', sessaoSuporteId: 's1' };
+      await expect(strategy.validate({ ...payload, sessaoSuporteId: undefined })).rejects.toThrow(UnauthorizedException);
+      for (const extra of [
+        { saidaEm: new Date() },
+        { entradaEm: new Date(Date.now() - 9 * 60 * 60 * 1000) },
+        { administrador: { ativo: false } },
+        { usuarioId: 'outro' },
+      ]) {
+        sessaoRepository.findOne.mockResolvedValue(sessao(extra));
+        await expect(strategy.validate(payload)).rejects.toThrow(UnauthorizedException);
+      }
+    });
   });
 });

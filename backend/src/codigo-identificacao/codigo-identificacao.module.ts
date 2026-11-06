@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { EtiquetasService } from './etiquetas.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CodigoIdentificacaoService } from './codigo-identificacao.service';
 import { CodigoIdentificacaoController } from './codigo-identificacao.controller';
@@ -11,6 +12,6 @@ import { Animal } from '../animal/entities/animal.entity';
     TypeOrmModule.forFeature([CodigoIdentificacao, Animal, HistoricoNumero]),
   ],
   controllers: [CodigoIdentificacaoController],
-  providers: [CodigoIdentificacaoService],
+  providers: [CodigoIdentificacaoService, EtiquetasService],
 })
 export class CodigoIdentificacaoModule {}

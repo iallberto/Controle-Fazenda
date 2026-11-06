@@ -55,6 +55,11 @@ export class Usuario {
   @Column({ name: 'precisa_trocar_senha', default: false })
   precisaTrocarSenha: boolean;
 
+  // Usuário do acesso de suporte (spec 008, R1): um por administrador e fazenda,
+  // papel DONO, não entra por senha e fica fora das listas e contagens
+  @Column({ default: false })
+  suporte: boolean;
+
   // Tokens emitidos antes desta hora deixam de valer (spec 007, FR-005)
   @Column({ name: 'senha_alterada_em', type: 'timestamptz', nullable: true })
   senhaAlteradaEm: Date | null;

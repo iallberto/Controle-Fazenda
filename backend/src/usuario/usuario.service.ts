@@ -40,15 +40,16 @@ export class UsuarioService {
     return this.usuarioRepository.save(usuario);
   }
 
+  // O usuário do acesso de suporte (spec 008) não aparece para a fazenda
   findAll(fazendaId: string) {
-    return this.usuarioRepository.find({ where: { fazendaId } });
+    return this.usuarioRepository.find({ where: { fazendaId, suporte: false } });
   }
 
   // Lista enxuta para escolher "quem aplicou" um tratamento: qualquer usuário da
   // fazenda pode ver, então só vai id, nome e papel (sem e-mail), e só ativos.
   async listarAplicadores(fazendaId: string) {
     const usuarios = await this.usuarioRepository.find({
-      where: { fazendaId, ativo: true },
+      where: { fazendaId, ativo: true, suporte: false },
       order: { nome: 'ASC' },
     });
     return usuarios.map(({ id, nome, papel }) => ({ id, nome, papel }));
@@ -56,7 +57,7 @@ export class UsuarioService {
 
   async findOne(fazendaId: string, id: string) {
     const usuario = await this.usuarioRepository.findOneBy({ id });
-    if (!usuario || usuario.fazendaId !== fazendaId) {
+    if (!usuario || usuario.fazendaId !== fazendaId || usuario.suporte) {
       throw new NotFoundException(`Usuário ${id} não encontrado`);
     }
     return usuario;
@@ -122,7 +123,7 @@ export class UsuarioService {
   // A fazenda nunca pode ficar sem um dono ativo
   private async garantirOutroDonoAtivo(fazendaId: string, usuarioId: string) {
     const donos = await this.usuarioRepository.find({
-      where: { fazendaId, papel: PapelUsuario.DONO, ativo: true },
+      where: { fazendaId, papel: PapelUsuario.DONO, ativo: true, suporte: false },
     });
     if (!donos.some((dono) => dono.id !== usuarioId)) {
       throw new BadRequestException('A fazenda precisa ter ao menos um dono ativo');

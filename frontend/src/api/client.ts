@@ -33,12 +33,20 @@ apiClient.interceptors.response.use(
         return Promise.reject(erro);
       }
       if (erro.response?.status === 401 || suspensa) {
+        const eraSuporte = (() => {
+          try {
+            return Boolean(JSON.parse(localStorage.getItem('usuario') ?? '{}').suporte);
+          } catch {
+            return false;
+          }
+        })();
         localStorage.removeItem('token');
         localStorage.removeItem('usuario');
         if (suspensa) {
           sessionStorage.setItem(CHAVE_AVISO_LOGIN, erro.response?.data?.message);
         }
-        window.location.assign('/login');
+        // Sessão de suporte vencida volta ao painel do administrador (spec 008)
+        window.location.assign(eraSuporte ? '/admin' : '/login');
       }
     }
     return Promise.reject(erro);

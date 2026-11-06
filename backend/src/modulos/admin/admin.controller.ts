@@ -15,6 +15,7 @@ import { Public } from '../../auth/decorators/public.decorator';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { AdminAuthService } from './admin-auth.service';
 import { AdminFazendasService } from './admin-fazendas.service';
+import { SuporteService } from './suporte.service';
 import { AreaAdmin } from './area-admin.decorator';
 import type { AdminPayload } from './admin-jwt.strategy';
 import {
@@ -55,7 +56,16 @@ export class AdminAuthController {
 @AreaAdmin()
 @Controller('admin')
 export class AdminController {
-  constructor(private readonly adminFazendasService: AdminFazendasService) {}
+  constructor(
+    private readonly adminFazendasService: AdminFazendasService,
+    private readonly suporteService: SuporteService,
+  ) {}
+
+  // Entrar na fazenda do cliente como suporte (spec 008, US1)
+  @Post('fazendas/:id/suporte')
+  entrarComoSuporte(@CurrentUser() admin: AdminPayload, @Param('id', ParseUUIDPipe) id: string) {
+    return this.suporteService.entrar(admin.sub, id);
+  }
 
   // Fazenda nova com o dono, só pelo administrador (spec 007, FR-023)
   @Post('fazendas')
@@ -75,8 +85,12 @@ export class AdminController {
   }
 
   @Get('fazendas/:id')
-  detalhar(@Param('id', ParseUUIDPipe) id: string) {
-    return this.adminFazendasService.detalhar(id);
+  async detalhar(@Param('id', ParseUUIDPipe) id: string) {
+    const [fazenda, sessoesSuporte] = await Promise.all([
+      this.adminFazendasService.detalhar(id),
+      this.suporteService.sessoesDaFazenda(id),
+    ]);
+    return { ...fazenda, sessoesSuporte };
   }
 
   @Post('fazendas/:id/modulos')

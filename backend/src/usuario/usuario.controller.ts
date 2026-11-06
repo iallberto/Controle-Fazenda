@@ -7,6 +7,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { PapelUsuario } from './entities/usuario.entity';
 import type { JwtPayload } from '../auth/auth.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { NaoPermitidoAoSuporte } from '../auth/guards/suporte.guard';
 
 @Controller('usuario')
 @ApiTags('usuario')
@@ -14,12 +15,14 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 export class UsuarioController {
   constructor(private readonly usuarioService: UsuarioService) {}
 
+  @NaoPermitidoAoSuporte()
   @Roles(PapelUsuario.DONO)
   @Post()
   create(@CurrentUser() user: JwtPayload, @Body() dto: CreateUsuarioDto) {
     return this.usuarioService.create(user.fazendaId, user.sub, dto);
   }
 
+  @NaoPermitidoAoSuporte()
   @Roles(PapelUsuario.DONO)
   @Get()
   findAll(@CurrentUser() user: JwtPayload) {
@@ -32,11 +35,13 @@ export class UsuarioController {
     return this.usuarioService.listarAplicadores(user.fazendaId);
   }
 
+  @NaoPermitidoAoSuporte()
   @Get(':id')
   findOne(@CurrentUser() user: JwtPayload, @Param('id', ParseUUIDPipe) id: string) {
     return this.usuarioService.findOne(user.fazendaId, id);
   }
 
+  @NaoPermitidoAoSuporte()
   @Roles(PapelUsuario.DONO)
   @Patch(':id')
   update(
@@ -47,6 +52,7 @@ export class UsuarioController {
     return this.usuarioService.update(user.fazendaId, user.sub, id, dto);
   }
 
+  @NaoPermitidoAoSuporte()
   @Roles(PapelUsuario.DONO)
   @Patch(':id/desativar')
   desativar(@CurrentUser() user: JwtPayload, @Param('id', ParseUUIDPipe) id: string) {
@@ -54,12 +60,14 @@ export class UsuarioController {
   }
 
   // Senha provisória para o funcionário que esqueceu a senha (spec 007, FR-003)
+  @NaoPermitidoAoSuporte()
   @Roles(PapelUsuario.DONO)
   @Post(':id/redefinir-senha')
   redefinirSenha(@CurrentUser() user: JwtPayload, @Param('id', ParseUUIDPipe) id: string) {
     return this.usuarioService.redefinirSenha(user.fazendaId, user.sub, id);
   }
 
+  @NaoPermitidoAoSuporte()
   @Roles(PapelUsuario.DONO)
   @Patch(':id/reativar')
   reativar(@CurrentUser() user: JwtPayload, @Param('id', ParseUUIDPipe) id: string) {

@@ -36,6 +36,13 @@ export function formatarMomento(valor: string | null | undefined): string {
   return new Date(valor).toLocaleDateString('pt-BR');
 }
 
+// Data e hora local: "06/11/2026 07:15" (entradas de suporte, spec 008)
+export function formatarDataHora(valor: string | null | undefined): string {
+  if (!valor) return '';
+  const data = new Date(valor);
+  return `${data.toLocaleDateString('pt-BR')} ${data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+}
+
 // Idade a partir da data de nascimento (AAAA-MM-DD): "1 ano e 3 meses", "5 meses"
 export function formatarIdade(dataNascimento: string | null | undefined, hoje = new Date()): string {
   if (!dataNascimento) return '';

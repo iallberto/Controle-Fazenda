@@ -1,4 +1,8 @@
-import { Controller, Get, Post, Body, Param, ParseUUIDPipe, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, ParseUUIDPipe, Query, StreamableFile, HttpCode, HttpStatus } from '@nestjs/common';
+import { EtiquetasService } from './etiquetas.service';
+import { EtiquetasQueryDto } from './dto/etiquetas-query.dto';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { PapelUsuario } from '../usuario/entities/usuario.entity';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CodigoIdentificacaoService } from './codigo-identificacao.service';
 import { GerarLoteDto } from './dto/gerar-lote.dto';
@@ -12,7 +16,22 @@ import type { JwtPayload } from '../auth/auth.service';
 @ApiBearerAuth()
 @Controller('codigo')
 export class CodigoIdentificacaoController {
-  constructor(private readonly codigoService: CodigoIdentificacaoService) {}
+  constructor(
+    private readonly codigoService: CodigoIdentificacaoService,
+    private readonly etiquetasService: EtiquetasService,
+  ) {}
+
+  // PDF das etiquetas com QR para a gráfica (spec 008, US2). Antes de ':codigo'.
+  @Roles(PapelUsuario.DONO)
+  @Post('etiquetas')
+  @HttpCode(HttpStatus.OK)
+  async etiquetas(@CurrentUser() user: JwtPayload, @Body() filtro: EtiquetasQueryDto) {
+    const { arquivo } = await this.etiquetasService.gerarPdf(user.fazendaId, filtro);
+    return new StreamableFile(arquivo, {
+      type: 'application/pdf',
+      disposition: 'attachment; filename="etiquetas.pdf"',
+    });
+  }
 
   @Get()
   listar(@CurrentUser() user: JwtPayload, @Query() filtro: ListarCodigosQueryDto) {

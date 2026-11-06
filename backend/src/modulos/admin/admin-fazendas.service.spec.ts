@@ -49,6 +49,7 @@ describe('AdminFazendasService (FR-019 a FR-027)', () => {
       select: jest.fn().mockReturnThis(),
       addSelect: jest.fn().mockReturnThis(),
       where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
       groupBy: jest.fn().mockReturnThis(),
       getRawMany: jest
         .fn()
@@ -319,7 +320,7 @@ describe('AdminFazendasService (FR-019 a FR-027)', () => {
       expect(dono).toMatchObject({ precisaTrocarSenha: true });
       expect(dono.senhaAlteradaEm).toBeInstanceOf(Date);
       expect(usuarioRepo.findOne).toHaveBeenCalledWith(expect.objectContaining({
-        where: { fazendaId: 'f1', papel: 'DONO', ativo: true },
+        where: { fazendaId: 'f1', papel: 'DONO', ativo: true, suporte: false },
       }));
       usuarioRepo.findOne.mockResolvedValue(null);
       await expect(service.redefinirSenhaDono('f1')).rejects.toBeInstanceOf(NotFoundException);

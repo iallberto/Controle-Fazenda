@@ -3,6 +3,7 @@ import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-do
 import { useAuth } from '../contexts/useAuth';
 import { Aviso } from './Aviso';
 import { Logo } from './Logo';
+import { FaixaSuporte } from './FaixaSuporte';
 import { useModulos } from '../contexts/useModulos';
 import { ROTA_DO_MODULO, type ModuloPago } from '../api/modulos';
 import { ROTULOS_MODULO } from '../utils/formatadores';
@@ -136,7 +137,12 @@ export function Layout() {
   });
   const grupos = GRUPOS_MENU.map((grupo) => ({
     ...grupo,
-    itens: grupo.itens.filter((item) => !item.somenteDono || usuario?.papel === 'DONO'),
+    itens: grupo.itens.filter(
+      (item) =>
+        (!item.somenteDono || usuario?.papel === 'DONO') &&
+        // O acesso de suporte não mexe em usuários (spec 008, FR-005)
+        !(usuario?.suporte && item.destino === '/usuarios'),
+    ),
   }));
   // Grupo da tela atual: endereço exato primeiro ("/animais/novo" é de Registrar),
   // depois o começo do endereço ("/animais/123" é de Rebanho)
@@ -232,15 +238,18 @@ export function Layout() {
             </Fragment>
           );
         })}
-        <Link to="/trocar-senha" className="menu-trocar-senha" onClick={fecharMenu}>
-          Trocar minha senha
-        </Link>
+        {!usuario?.suporte && (
+          <Link to="/trocar-senha" className="menu-trocar-senha" onClick={fecharMenu}>
+            Trocar minha senha
+          </Link>
+        )}
         <button type="button" className="botao-sair" onClick={logout}>
           Sair
         </button>
       </nav>
 
       <main className="conteudo">
+        <FaixaSuporte />
         {avisoNavegacao && (
           <Aviso
             tipo="sucesso"

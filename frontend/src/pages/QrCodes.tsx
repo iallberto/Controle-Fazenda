@@ -2,13 +2,16 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import {
+  baixarEtiquetas,
   gerarLote,
   listarCodigos,
+  mensagemDeBlob,
   type Codigo,
   type FiltroCodigos,
 } from '../api/codigos';
 import { formatarBrinco, formatarStatusCodigo } from '../utils/formatadores';
 import { Aviso } from '../components/Aviso';
+import { useAuth } from '../contexts/useAuth';
 
 const POR_PAGINA = 30;
 
@@ -33,6 +36,11 @@ export function QrCodes() {
   const [gerando, setGerando] = useState(false);
   const [erro, setErro] = useState('');
   const [sucesso, setSucesso] = useState('');
+  // PDF das etiquetas com QR, só o dono (inclui o suporte) (spec 008, US2)
+  const { usuario } = useAuth();
+  const ehDono = usuario?.papel === 'DONO';
+  const [gerandoPdf, setGerandoPdf] = useState(false);
+  const [avisoPdf, setAvisoPdf] = useState<{ tipo: 'sucesso' | 'erro'; texto: string } | null>(null);
 
   /*function carregar(filtro: FiltroCodigos) {
     setCarregando(true);
@@ -125,6 +133,27 @@ export function QrCodes() {
     }
   }
 
+  async function handleEtiquetas() {
+    setAvisoPdf(null);
+    if (codigos.length > 500) {
+      setAvisoPdf({ tipo: 'erro', texto: 'No máximo 500 etiquetas por arquivo: filtre uma faixa menor.' });
+      return;
+    }
+    setGerandoPdf(true);
+    try {
+      await baixarEtiquetas(codigos.map((c) => c.id));
+      const folhas = Math.ceil(codigos.length / 24);
+      setAvisoPdf({
+        tipo: 'sucesso',
+        texto: `PDF com ${codigos.length} etiqueta(s) em ${folhas} folha(s) A4 baixado. Envie à gráfica.`,
+      });
+    } catch (e) {
+      setAvisoPdf({ tipo: 'erro', texto: await mensagemDeBlob(e, 'Não foi possível gerar as etiquetas.') });
+    } finally {
+      setGerandoPdf(false);
+    }
+  }
+
   const totalPaginas = Math.max(1, Math.ceil(codigos.length / POR_PAGINA));
   const inicio = (pagina - 1) * POR_PAGINA;
   const codigosDaPagina = codigos.slice(inicio, inicio + POR_PAGINA);
@@ -207,10 +236,28 @@ export function QrCodes() {
         <section>
           <div className="nao-imprimir" style={{ display: 'flex', justifyContent: 'space-between' }}>
             <h2>Códigos para conferência e impressão</h2>
-            <button type="button" onClick={() => window.print()}>
-              Imprimir todos ({codigos.length})
-            </button>
+            <span>
+              {ehDono && (
+                <button type="button" onClick={handleEtiquetas} disabled={gerandoPdf}>
+                  {gerandoPdf ? 'Gerando PDF…' : `Etiquetas para a gráfica (PDF, ${codigos.length})`}
+                </button>
+              )}{' '}
+              <button type="button" className="botao-secundario" onClick={() => window.print()}>
+                Imprimir lista
+              </button>
+            </span>
           </div>
+          {avisoPdf && (
+            <Aviso tipo={avisoPdf.tipo} aoFechar={() => setAvisoPdf(null)}>
+              {avisoPdf.texto}
+            </Aviso>
+          )}
+          {ehDono && (
+            <p className="dica nao-imprimir">
+              O PDF sai em folhas A4 com 24 etiquetas de 57 × 32 mm, QR e marcas de corte: a gráfica
+              imprime no adesivo e corta.
+            </p>
+          )}
 
           <p className="nao-imprimir">
             Mostrando {inicio + 1} a {inicio + codigosDaPagina.length} de{' '}

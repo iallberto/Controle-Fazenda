@@ -78,3 +78,31 @@ export async function listarHistoricoNumero(
   );
   return resposta.data;
 }
+
+// PDF das etiquetas com QR para a gráfica (spec 008, US2)
+export async function baixarEtiquetas(ids: string[]) {
+  const resposta = await apiClient.post<Blob>('/codigo/etiquetas', { ids }, { responseType: 'blob' });
+  const url = URL.createObjectURL(resposta.data);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'etiquetas.pdf';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10_000);
+}
+
+// Erros de rotas que devolvem arquivo chegam como Blob: lê a mensagem do JSON
+export async function mensagemDeBlob(erro: unknown, padrao: string) {
+  const dados = (erro as { response?: { data?: unknown } })?.response?.data;
+  if (dados instanceof Blob) {
+    try {
+      const json = JSON.parse(await dados.text()) as { message?: string | string[] };
+      if (json.message) return Array.isArray(json.message) ? json.message.join(', ') : json.message;
+    } catch {
+      return padrao;
+    }
+  }
+  return padrao;
+}
+

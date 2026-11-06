@@ -8,10 +8,11 @@ import { AuthController } from './auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { Usuario } from '../usuario/entities/usuario.entity';
 import { Fazenda } from '../fazenda/entities/fazenda.entity';
+import { SessaoSuporte } from '../modulos/admin/entities/sessao-suporte.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Usuario, Fazenda]),
+    TypeOrmModule.forFeature([Usuario, Fazenda, SessaoSuporte]),
     PassportModule,
     JwtModule.registerAsync({
       inject: [ConfigService],

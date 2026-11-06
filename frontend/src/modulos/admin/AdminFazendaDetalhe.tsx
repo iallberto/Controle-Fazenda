@@ -2,9 +2,10 @@ import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { mensagemDeErro } from '../../api/client';
 import { SenhaProvisoria } from '../../components/SenhaProvisoria';
+import { useAuth } from '../../contexts/useAuth';
 import { Aviso, type EstadoAviso } from '../../components/Aviso';
 import { hojeLocal } from '../../utils/datas';
-import { formatarData, formatarMomento } from '../../utils/formatadores';
+import { formatarData, formatarDataHora, formatarMomento } from '../../utils/formatadores';
 import {
   buscarFazendaCliente,
   desativarModulo,
@@ -13,6 +14,7 @@ import {
   reativarFazenda,
   suspenderFazenda,
   redefinirSenhaDono,
+  entrarComoSuporte,
   type FazendaClienteDetalhe,
   type ModuloPago,
 } from './api';
@@ -32,6 +34,22 @@ export function AdminFazendaDetalhe() {
   const [confirmarDesativar, setConfirmarDesativar] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
   const [provisoria, setProvisoria] = useState<{ para: string; senha: string } | null>(null);
+  const { atualizarSessao } = useAuth();
+
+  // Entrar na fazenda como suporte (spec 008, US1): a sessão da fazenda fica no
+  // navegador como a de um usuário comum, com a faixa de suporte
+  async function entrarSuporte() {
+    if (!fazenda) return;
+    if (!window.confirm(`Entrar na ${fazenda.nome} como suporte? Tudo o que você lançar fica registrado como suporte.`)) return;
+    setAviso(null);
+    try {
+      const r = await entrarComoSuporte(id);
+      atualizarSessao(r.accessToken, { ...r.usuario, fazendaNome: r.fazenda.nome, fazendaSuspensa: r.fazenda.suspensa });
+      window.location.assign('/');
+    } catch (erro) {
+      setAviso({ tipo: 'erro', texto: mensagemDeErro(erro) });
+    }
+  }
 
   const carregar = useCallback(() => {
     buscarFazendaCliente(id)
@@ -206,6 +224,27 @@ export function AdminFazendaDetalhe() {
             </li>
           ))}
         </ul>
+      </section>
+
+      <section>
+        <h2>Acesso de suporte</h2>
+        <p>
+          Abre a fazenda com as telas do dono, para a implantação (QR codes, cadastro de animais, pesagem).
+          Cada entrada fica registrada e vale por 8 horas.
+        </p>
+        <button type="button" onClick={entrarSuporte}>
+          Entrar como suporte
+        </button>
+        {fazenda.sessoesSuporte.length > 0 && (
+          <ul>
+            {fazenda.sessoesSuporte.map((s) => (
+              <li key={s.id}>
+                {s.administrador ?? '—'}: entrou em {formatarDataHora(s.entradaEm)}
+                {s.saidaEm ? ` · saiu em ${formatarDataHora(s.saidaEm)}` : s.expirada ? ' · expirou' : ' · aberta'}
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       <section>

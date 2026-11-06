@@ -125,7 +125,7 @@ describe('UsuarioService', () => {
       const resultado = await service.listarAplicadores('fazenda-1');
 
       expect(repository.find).toHaveBeenCalledWith({
-        where: { fazendaId: 'fazenda-1', ativo: true },
+        where: { fazendaId: 'fazenda-1', ativo: true, suporte: false },
         order: { nome: 'ASC' },
       });
       expect(resultado).toEqual([{ id: 'u1', nome: 'Ana', papel: PapelUsuario.DONO }]);

@@ -6,6 +6,7 @@ import { UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { AuthService } from './auth.service';
 import { Usuario } from '../usuario/entities/usuario.entity';
+import { SessaoSuporte } from '../modulos/admin/entities/sessao-suporte.entity';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -19,6 +20,8 @@ describe('AuthService', () => {
     sign: jest.fn(),
   };
 
+  const mockSessaoRepository = { update: jest.fn() };
+
   const mockDataSource = {
     transaction: jest.fn(),
   };
@@ -30,6 +33,7 @@ describe('AuthService', () => {
         { provide: getRepositoryToken(Usuario), useValue: mockUsuarioRepository },
         { provide: JwtService, useValue: mockJwtService },
         { provide: DataSource, useValue: mockDataSource },
+        { provide: getRepositoryToken(SessaoSuporte), useValue: mockSessaoRepository },
       ],
     }).compile();
 
@@ -116,4 +120,25 @@ describe('AuthService', () => {
       expect((mockUsuarioRepository as Record<string, jest.Mock>).save).not.toHaveBeenCalled();
     });
   });
+
+  describe('suporte (spec 008)', () => {
+    it('usuário suporte não entra por senha, mesmo com a senha certa', async () => {
+      const senhaHash = await bcrypt.hash('qualquer', 4);
+      mockUsuarioRepository.findOne.mockResolvedValue({
+        id: 'sup1', senhaHash, ativo: true, suporte: true, fazenda: { suspensa: false },
+      });
+      await expect(service.login({ email: 'sup@suporte.invalid', senha: 'qualquer' })).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
+
+    it('encerrar suporte grava a saída da sessão aberta', async () => {
+      await service.encerrarSuporte('s1');
+      expect(mockSessaoRepository.update).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 's1' }),
+        expect.objectContaining({ saidaEm: expect.any(Date) }),
+      );
+    });
+  });
 });
+

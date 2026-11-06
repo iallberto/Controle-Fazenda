@@ -47,7 +47,16 @@ export interface FazendaCliente {
   modulos: ModuloDaFazenda[];
 }
 
+export interface SessaoSuporte {
+  id: string;
+  administrador: string | null;
+  entradaEm: string;
+  saidaEm: string | null;
+  expirada: boolean;
+}
+
 export interface FazendaClienteDetalhe extends FazendaCliente {
+  sessoesSuporte: SessaoSuporte[];
   periodos: {
     id: string;
     modulo: ModuloPago;
@@ -163,3 +172,15 @@ export async function trocarSenhaDoPainel(senhaAtual: string, novaSenha: string)
   });
   localStorage.setItem(CHAVE_TOKEN_ADMIN, resposta.data.accessToken);
 }
+
+// Entrar na fazenda do cliente como suporte (spec 008, US1): devolve o token de
+// fazenda do usuário suporte, guardado como a sessão normal da fazenda
+export async function entrarComoSuporte(fazendaId: string) {
+  const resposta = await adminClient.post<{
+    accessToken: string;
+    usuario: { id: string; nome: string; email: string; papel: string; fazendaId: string; suporte: boolean };
+    fazenda: { id: string; nome: string; suspensa: boolean };
+  }>(`/admin/fazendas/${fazendaId}/suporte`);
+  return resposta.data;
+}
+
